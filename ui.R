@@ -5,12 +5,22 @@ library(bsicons)
 library(knitr)
 library(DT)
 library(tidyverse)
+library(shinylogs)
+library(shinyWidgets)
 
 options(knitr.kable.NA = '')
 
 source("accountspagebuilder.R")
-#source("testfiles.R")
-load("main_account.RData")
+source("testfiles.R")
+
+if (file.exists("main_account.RData")) {
+ # load("main_account.RData")
+} else {
+ # main_account <- MainAccount$new("Main")
+}
+
+
+#load("main_account.RData")
 
 myname<- "Festus"    #first name from log in info
 
@@ -67,7 +77,6 @@ ui <- page_navbar(
               class = 'card-body-div', 
               div(
                 class='card-body-value-div',
-                #HTML(paste(h1(format(main_account$compute_total_balance(), big.mark = ",", scientific = FALSE), class = "card-body-value")))  # Relative font size (5% of viewport width)
                 uiOutput("overall_bal")
               ),
               div(
@@ -223,18 +232,129 @@ ui <- page_navbar(
       width = "300px",
       tags$div(
         class = "custom-sidebar",
-        build_sidebar(main_account) 
+        #build_sidebar(main_account) 
+        uiOutput("build_sidebar")
       )
     ),
     
     # navbar content 
-    generate_nav_content(main_account, default_content_generator),
-    #uiOutput("accounts_page"),
-    selectedaccountInput("selected_tab",value=main_account$uuid) #this is a dump custom binding it actually dispays nothing
+    uiOutput("nav_content"),
+    uiOutput("dummy")
   )
   ),
 
-  nav_panel("Reports"),
+  nav_panel("Reports",
+            layout_sidebar(
+              sidebar=sidebar(
+                title = tags$div(
+                  class = "custom-sidebar-title",
+                  icon("filter"), 
+                  "Filters"
+                ),
+                width="300px",
+                class = "custom-sidebar",
+              pickerInput("selaccount", "Select Account", 
+                          choices = list("Main","Needs", "Goals", "Savings"),
+                          multiple = FALSE, options = list(`live-search` = TRUE)),
+              dateRangeInput("date", "Select Date Range", start = Sys.Date() - 366, end = Sys.Date()),
+              selectInput("transaction_type", "Transaction Type", 
+                          choices = c("All", "Income", "Spending", "Transfers")),
+              downloadButton("download_report", "Download Report")
+            ),
+            
+            layout_column_wrap(
+              width=1/4,
+              gap = "3px",
+              #fill = T,
+              card(
+                fill=T,
+                full_screen = T,
+                card_header("Total Income", class = 'custom-card-header'),
+                card_body(
+                  div(
+                    class = 'card-body-div', 
+                    div(
+                      class='card-body-value-div',
+                      uiOutput("total_income")
+                    ),
+                    div(
+                      class = 'icon-div',
+                      icon("coins",class= "icon-val11")
+                    )
+                  ),
+                  tags$hr(class = "tags-hr"),
+                  p("sum from all accounts", class = "text-muted"),
+                  class = "card-content"
+                )
+              ),
+              card(
+                fill=T,
+                full_screen = T,
+                card_header("Total spending", class = 'custom-card-header'),
+                card_body(
+                  div(
+                    class = 'card-body-div', 
+                    div(
+                      class='card-body-value-div',
+                      uiOutput("total_spending")
+                    ),
+                    div(
+                      class = 'icon-div',
+                      icon("credit-card",class= "icon-val1")
+                    )
+                  ),
+                  tags$hr(class = "tags-hr"),
+                  p("sum from all accounts", class = "text-muted"),
+                  class = "card-content"
+                )
+              ),
+              
+              card(
+                fill=T,
+                full_screen = T,
+                card_header("Money Utilization", class = 'custom-card-header'),
+                card_body(
+                  div(
+                    class = 'card-body-div', 
+                    div(
+                      class='card-body-value-div',
+                      #uiOutput("total_spending")
+                    ),
+                    div(
+                      class = 'icon-div',
+                      icon("credit-card",class= "icon-val1")
+                    )
+                  ),
+                  tags$hr(class = "tags-hr"),
+                  p("sum from all accounts", class = "text-muted"),
+                  class = "card-content"
+                )
+              ),
+              card(
+                fill=T,
+                full_screen = T,
+                card_header("Assets-to-Liabilities", class = 'custom-card-header'),
+                card_body(
+                  div(
+                    class = 'card-body-div', 
+                    div(
+                      class='card-body-value-div',
+                      uiOutput("total_spending")
+                    ),
+                    div(
+                      class = 'icon-div',
+                      icon("credit-card",class= "icon-val1")
+                    )
+                  ),
+                  tags$hr(class = "tags-hr"),
+                  p("sum from all accounts", class = "text-muted"),
+                  class = "card-content"
+                )
+              )
+            ),
+            card()
+            )
+            ),
   nav_spacer(),
   nav_item(
     input_dark_mode(id="dark_mode",mode="light"),

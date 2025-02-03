@@ -144,7 +144,7 @@ generate_child_accounts_section <- function(account) {
         class = "custom-card-header11"
       ),
       card_body(
-        p(strong("Balance:"), paste(child_account$balance)),
+        p(strong("Balance:"), paste(round(child_account$balance,2))),
         div(
           class = "status-line",
           tags$strong("Status: "),
@@ -186,240 +186,16 @@ default_content_generator <- function(account) {
       class = "section account-details card",
       tags$h3("Account Details", class = "card-title"),
       tags$hr(class = 'tags-hr'),
-      tags$div(
-        class = "details-grid",
-        tags$div(
-          class = "detail-item",
-          tags$strong("Account ID:"),
-          tags$span(account$uuid)
-        ),
-        tags$div(
-          class = "detail-item",
-          tags$strong("Name:"),
-          tags$span(account$name)
-        ),
-        tags$div(
-          class = "detail-item",
-          tags$strong("Type:"),
-          tags$span(class(account)[1])
-        ),
-        tags$div(
-          class = "detail-item",
-          tags$strong("Balance:"),
-          tags$span(class = "balance", paste(format(account$balance, big.mark = ",")))
-        ),
-        tags$div(
-          class = "detail-item",
-          tags$strong("Balance in Children:"),
-          tags$span(paste(format(account$compute_total_balance(), big.mark = ",")))
-        ),
-        if (!is.null(account$status)) {
-          tags$div(
-            class = "detail-item",
-            tags$strong("Status:"),
-            tags$span(class = if (tolower(account$status) == "active") "badge-success" else "badge-danger", account$status)
-          )
-        },
-        if (!is.null(account$allocation)) {
-          tags$div(
-            class = "detail-item",
-            tags$strong("Allocation:"),
-            tags$span(paste(scales::percent(account$allocation, accuracy = 0.01)))
-          )
-        },
-        if (!is.null(account$parent)) {
-          tags$div(
-            class = "detail-item",
-            tags$strong("Parent Account:"),
-            tags$a(href = paste0("/account/", account$parent$uuid), account$parent$name, class = "parent-link")
-          )
-        }
-      )
+      uiOutput(paste0("account_summary_section",account$uuid))
     ),
-    
+
     # Actions Section
     tags$div(
       class = "section actions",
       tags$h3("Actions"),
       tags$hr(class = 'tags-hr'),
-      layout_column_wrap(
-        width=1/4,
-        heights_equal = "row",
-        gap="10px",
-        fill = T,
-        card(
-          class = "hidden-cards",
-          card_body(
-            layout_column_wrap(
-              width=1,
-              fill=T,
-              heights_equal = "row",
-              gap="10px",
-              numericInput(paste0("deposit_amount_", account$uuid), "Deposit Amount:", value = NA, min = 0),
-              textInput(paste0("deposit_transaction_",account$uuid),"Transaction number",value="",placeholder="e.g TAP8I3JK2G"),
-              textInput(paste0("deposit_transaction_channel_",account$uuid),"Transaction Channel",value="",placeholder="e.g ABC BANK"),
-              actionButton(paste0("deposit_btn_", account$uuid), "Deposit",class = "btn-normal")
-            )
-          )
-        ),
-        card(
-          class = "hidden-cards",
-          card_body(
-            layout_column_wrap(
-              width=1,
-              fill=T,
-              heights_equal = "row",
-              gap="10px",
-              numericInput(paste0("withdraw_amount_", account$uuid), "Withdraw Amount:", value = NA, min = 0),
-              actionButton(paste0("withdraw_btn_", account$uuid), "Withdraw",class = "btn-normal")
-            )
-          )
-        ),
-        card(
-          class = "hidden-cards",
-          card_body(
-            layout_column_wrap(
-              width=1,
-              fill=T,
-              gap="10px",
-              heights_equal = "row",
-              numericInput(paste0("transfer_amount_", account$uuid), "Transfer Amount:", value = 0, min = 0),
-              selectInput(paste0("transfer_target_", account$uuid), "Transfer To:", choices = main_account$list_all_accounts()),
-              actionButton(paste0("transfer_btn_", account$uuid), "Transfer",, class = "btn-normal")
-            )
-          )
-        ),
-        card(
-          class = "hidden-cards",
-        card_body(
-          layout_column_wrap(
-            width=1,
-            fill=T,
-            gap="10px",
-            heights_equal = "row",
-            numericInput(paste0("pay_", account$uuid),
-                         tagList(paste("Pay",ifelse(grepl("main",account$name, ignore.case = TRUE),"all dues",account$name)),
-                                 tooltip(
-                                   bs_icon("info-circle"),
-                                   paste("Pay amount due in accounts below"),
-                                   placement = "right")),
-                         value =min(account$compute_total_balance(),account$compute_total_due()), min = 0),
-            actionButton(paste0("transfer_btn_", account$uuid), "Pay",class = "btn-normal")
-          )
-        )
-      )
-        ),
-      br(),
-      tags$hr(class = 'tags-hr'),
-      selectInput(paste0("more_actions_", account$uuid),"more actions",choices=c("Add account","Edit account","Close Account")),
-      conditionalPanel(
-        condition = sprintf("input['%s'] =='Add account'",paste0("more_actions_",account$uuid)),
-      layout_column_wrap(
-        width=1/3,
-        gap="6px",
-        textInput(paste0("account_name_add",account$uuid),"Account name",value=""),
-        numericInput(paste0("allocation_add",account$uuid),
-                     tagList("Allocation",
-                     tooltip(
-                       bs_icon("info-circle"),
-                       paste("what percentage of",main_account$find_account_by_uuid(account$uuid)$name,
-                       "do you wish to allocate this account, 
-                             this should be a value between 0-1.note total allocations for",
-                             main_account$find_account_by_uuid(account$uuid)$name,"should not exceed 1 "),
-                       placement = "right")),value = (1-account$total_allocation)),
-        numericInput(paste0("priority_add",account$uuid),
-                     tagList("Priority",
-                     tooltip(
-                       bs_icon("info-circle"),
-                       paste("A numeric value representing priority, high values gives this account high priority over other accounts from the same parent"),
-                       placement = "right")),value=0),
-                     )),
-      conditionalPanel(
-        condition = sprintf("input['%s'] =='Edit account'",paste0("more_actions_",account$uuid)),
-        
-        if(class(account)[1]== "MainAccount"){
-
-        }
-        else if(class(account)[1]== "ChildAccount"){
-          layout_column_wrap(
-            width=1/4,
-            gap="6px",
-            textInput(paste0("account_name_edit_child",account$uuid),"Account name",value=account$name),
-            numericInput(paste0("allocation_edit_child",account$uuid),
-                         tagList("Allocation",
-                                 tooltip(
-                                   bs_icon("info-circle"),
-                                   paste("what percentage of",main_account$find_account_by_uuid(account$uuid)$name,
-                                         "do you wish to allocate this account, 
-                             this should be a value between 0-1.note total allocations for",
-                                         main_account$find_account_by_uuid(account$uuid)$name,"should not exceed 1 "),
-                                   placement = "right")),value =account$allocation),
-            textInput(paste0("account_status_edit_child",account$uuid),"Status",value=account$get_account_status()),
-            numericInput(paste0("priority_edit_child",account$uuid),
-                         tagList("Priority",
-                                 tooltip(
-                                   bs_icon("info-circle"),
-                                   paste("A numeric value representing priority, high values gives this account high priority over other accounts from the same parent"),
-                                   placement = "right")),value=account$get_priority())
-          )
-          
-        }
-        else if(class(account)[1]== "GrandchildAccount"){
-          layout_column_wrap(
-            width=1/4,
-            gap="6px",
-            textInput(paste0("account_name_edit_grandchild",account$uuid),"Account name",value=account$name),
-            numericInput(paste0("allocation_edit_grandchild",account$uuid),
-                         tagList("Allocation",
-                                 tooltip(
-                                   bs_icon("info-circle"),
-                                   paste("what percentage of",main_account$find_account_by_uuid(account$uuid)$name,
-                                         "do you wish to allocate this account, 
-                             this should be a value between 0-1.note total allocations for",
-                                         main_account$find_account_by_uuid(account$uuid)$name,"should not exceed 1 "),
-                                   placement = "right")),value =account$allocation),
-            textInput(paste0("account_status_edit_grandchild",account$uuid),"Status",value=account$get_account_status()),
-            numericInput(paste0("priority_edit_grandchild",account$uuid),
-                         tagList("Priority",
-                                 tooltip(
-                                   bs_icon("info-circle"),
-                                   paste("A numeric value representing priority, high values gives this account high priority over other accounts from the same parent"),
-                                   placement = "right")),value=account$get_priority()),
-            dateInput(paste0("due_date_edit_grandchild",account$uuid),
-                      "Due date",
-                       value =account$get_due_date(),
-                      min=account$get_due_date()-100,
-                      max=account$get_due_date()+1000000
-                      ),
-            numericInput(paste0("fixed_amount_edit_grandchild",account$uuid),
-                         tagList("Fixed amount",
-                                 tooltip(
-                                   bs_icon("info-circle"),
-                                   paste("The fixed amount for the account eg monthly bills have a monthly payment amount"),
-                                   placement = "right")),value=account$get_fixed_amount()),
-            selectInput(paste0("account_type_edit_grandchild",account$uuid),"Account type",
-                        choice=c("Bill", "Debt", "Expense", "FixedSaving", "NonFixedSaving"),
-                        selected=account$get_account_type()),
-            numericInput(paste0("period_edit_grandchild",account$uuid),
-                         tagList("Period",
-                                 tooltip(
-                                   bs_icon("info-circle"),
-                                   paste("how frequent do you pay this account monthly(30),Quarterly(90) etc,this only applies for fixed payments like bills,loans and fixed savings"),
-                                   placement = "right")),
-                         value=account$get_account_periods())
-          )
-        } 
-        else {
-          
-        },
-      ),
-      conditionalPanel(
-        condition = sprintf("input['%s'] =='Close Account'",paste0("more_actions_",account$uuid)),
-        # some modals if the account has money you need to move it.
-      ),
-      br(),
-      actionButton(paste0("save", account$uuid), "Save", class = "btn-danger",width="200px")
-      ),
+    uiOutput(paste0("actions_section",account$uuid))
+    ),
     
     # Transactions Section
     tags$div(
@@ -430,7 +206,7 @@ default_content_generator <- function(account) {
     ),
     
     # Child Accounts Section
-    generate_child_accounts_section(account),
+    uiOutput(paste0("children_section_",account$uuid)),
     
     # Visualizations Section
     tags$div(
@@ -447,3 +223,5 @@ default_content_generator <- function(account) {
   )
   )
 }
+
+

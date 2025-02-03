@@ -27,7 +27,9 @@ MainAccount <- R6Class("MainAccount",
                              Channel = character(),
                              Amount = numeric(),
                              Balance=numeric(),
-                             Date = as.Date(character()),
+                             amount_due=numeric(),
+                             overall_balance=numeric(),
+                             Date = POSIXct(),
                              stringsAsFactors = FALSE
                            )
                          },
@@ -45,7 +47,7 @@ MainAccount <- R6Class("MainAccount",
                          },
                          
                          # Deposit Method
-                         deposit = function(amount, transaction_number = NULL,By="User", channel = NULL, date = Sys.Date()) {
+                         deposit = function(amount, transaction_number = NULL,By="User", channel = NULL, date = Sys.time()) {
                            if (amount <= 0) stop("Deposit amount must be greater than zero!")
                            if (is.null(channel)) stop("Channel is required for deposits!")
                            
@@ -60,6 +62,7 @@ MainAccount <- R6Class("MainAccount",
                            }
                            
                            self$balance <- self$balance + amount
+                           
                            self$transactions <- rbind(self$transactions, data.frame(
                              Type = "Deposit",
                              By=By,
@@ -67,7 +70,9 @@ MainAccount <- R6Class("MainAccount",
                              Channel = channel,
                              Amount = amount,
                              Balance=self$balance,
-                             Date = as.Date(date),
+                             amount_due=self$compute_total_due(),
+                             overall_balance=self$compute_total_balance(),
+                             Date = as.POSIXct((date)),
                              stringsAsFactors = FALSE
                            ))
                            
@@ -151,7 +156,7 @@ MainAccount <- R6Class("MainAccount",
                          },
                          
                          # Withdraw Method
-                         withdraw = function(amount, transaction_number = NULL,By="User", channel = NULL, date = Sys.Date()) {
+                         withdraw = function(amount, transaction_number = NULL,By="User", channel = NULL, date = Sys.time()) {
                            if (amount > 0) {
                            if (self$balance < amount) {
                              stop("Insufficient balance! Your current balance is:", self$balance)
@@ -172,7 +177,9 @@ MainAccount <- R6Class("MainAccount",
                              Channel = channel,
                              Amount = amount,
                              Balance=self$balance,
-                             Date = as.Date(date),
+                             amount_due=self$compute_total_due(),
+                             overall_balance=self$compute_total_balance(),
+                             Date = as.POSIXct(date),
                              stringsAsFactors = FALSE
                            ))
                            cat("Withdrew:", amount, "via", channel, "- Transaction ID:", transaction_number, "\n")
@@ -361,7 +368,7 @@ MainAccount <- R6Class("MainAccount",
                            if (!is.null(self$amount_due)) {
                              if (!is.null(self$due_date)) {
                                # Calculate the difference between the current date and the due_date
-                               days_until_due <- as.numeric(difftime(self$due_date, Sys.Date(), units = "days"))
+                               days_until_due <- as.numeric(difftime(self$due_date, Sys.time(), units = "days"))
                                
                                # Add to the total due only if the due_date is within the next 'n' days
                                if (days_until_due >= 0 && days_until_due <= n) {
@@ -379,8 +386,76 @@ MainAccount <- R6Class("MainAccount",
                            }
                            
                            return(total_due)
+                         },
+                         spending = function(daterange=c(Sys.time()-as.difftime(36500, units = "days"),Sys.time())){
+                           # Sum of deposits made by the user in the main account
+                           transactions <- self$transactions %>%
+                                                 filter(Type == "Withdrawal" & By == "User",between(Date,daterange[1],daterange[2])) %>%
+                                                 pull(Amount)%>%sum(na.rm = TRUE)
+                           
+                           # If there are child accounts, recursively accumulate their spending
+                           if (length(self$child_accounts) > 0) {
+                             for (child in self$child_accounts) {
+                               transactions <- transactions + child$spending()
+                             }
+                           }
+                           
+                           return(transactions)
+                         },
+                         total_income = function(daterange=c(Sys.time()-as.difftime(36500, units = "days"),Sys.time())){
+                           # Sum of deposits made by the user in the main account
+                           transactions <- self$transactions %>%
+                             filter(Type == "Deposit" & By == "User",between(Date,daterange[1],daterange[2])) %>%
+                             pull(Amount)%>%sum(na.rm = TRUE)
+                           
+                           # If there are child accounts, recursively accumulate their income
+                           if (length(self$child_accounts) > 0) {
+                             for (child in self$child_accounts) {
+                               transactions <- transactions + child$total_income ()
+                             }
+                           }
+                           
+                           return(transactions)
+                         },
+                         allocated_amount = function(daterange = c(Sys.time() - as.difftime(36500, units = "days"), Sys.time())) {
+                           
+                           # Step 1: Sum all deposits (User + System) for this account
+                           transactions <- if (!is.null(self$transactions)) {
+                             self$transactions %>%
+                               filter(Type == "Deposit", Date >= daterange[1] & Date <= daterange[2]) %>%
+                               pull(Amount) %>%
+                               sum(na.rm = TRUE)
+                           } else {
+                             0
+                           }
+                           
+                           # Step 2: Inner function to recursively sum user deposits in child accounts
+                           user_deposits_sum <- function(account, daterange) {
+                             if (length(account$child_accounts) == 0) return(0) # Base case
+                             
+                             child_user_deposits <- sum(sapply(account$child_accounts, function(child) {
+                               child_deposits <- if (!is.null(child$transactions)) {
+                                 child$transactions %>%
+                                   filter(Type == "Deposit", By == "User", Date >= daterange[1] & Date <= daterange[2]) %>%
+                                   pull(Amount) %>%
+                                   sum(na.rm = TRUE)
+                               } else {
+                                 0
+                               }
+                               return(child_deposits + user_deposits_sum(child, daterange)) # Recursively sum for deeper children
+                             }))
+                             
+                             return(child_user_deposits)
+                           }
+                           
+                           # Step 3: Add user deposits from children (using the recursive function)
+                           transactions <- transactions + user_deposits_sum(self, daterange)
+                           
+                           return(transactions)
+                         },
+                         income_utilization=function(daterange = c(Sys.time() - as.difftime(36500, units = "days"), Sys.time())){
+                           self$spending(daterange)/self$allocated_amount(daterange)
                          }
-                         
                          
                        )
 )
@@ -404,7 +479,7 @@ ChildAccount <- R6Class("ChildAccount",
                           },
                           
                           # Override Deposit Method (Transfer funds to child account)
-                          deposit = function(amount, transaction_number = NULL,By="User", channel = NULL, date = Sys.Date()) {
+                          deposit = function(amount, transaction_number = NULL,By="User", channel = NULL, date = Sys.time()) {
                             if (self$status == "active") {
                               if (is.null(transaction_number)) {
                                 transaction_number <- self$generate_transaction_id()
@@ -420,7 +495,9 @@ ChildAccount <- R6Class("ChildAccount",
                                 Channel = channel,
                                 Amount = amount,
                                 Balance=self$balance,
-                                Date = as.Date(date),
+                                amount_due=self$compute_total_due(),
+                                overall_balance=self$compute_total_balance(),
+                                Date = as.POSIXct(date),
                                 stringsAsFactors = FALSE
                               ))
                               
@@ -525,12 +602,12 @@ GrandchildAccount <- R6Class(
     },
     
     # Deposit method with period handling
-    deposit = function(amount, transaction_number = NULL,By="User", channel = NULL, date = Sys.Date()) {
+    deposit = function(amount, transaction_number = NULL,By="User", channel = NULL, date = Sys.time()) {
       # Check if bill is overdue and update periods
       if (self$account_type == "Bill" & !is.null(self$due_date)) {
         if(date > self$due_date){
         # Extend due date by frequency and increment periods
-        self$due_date <- self$due_date + self$freq
+        self$due_date <- self$due_date + lubridate::days(self$freq)
         self$num_periods <- self$num_periods + 1
         cat("Due date extended. Number of periods unpaid:", self$num_periods, "\n")
         self$status <- "active"
@@ -567,7 +644,7 @@ GrandchildAccount <- R6Class(
     },
     
     # Withdrawal method with borrowing logic
-    withdraw = function(amount,transaction_number = NULL,By="User", channel = NULL, date = Sys.Date()) {
+    withdraw = function(amount,transaction_number = NULL,By="User", channel = NULL, date = Sys.time()) {
       if(amount>0){
       if (amount > self$balance) {
         cat("Insufficient balance in", self$name, "to withdraw", amount, "\n")

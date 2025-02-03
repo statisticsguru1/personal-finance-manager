@@ -79,3 +79,6 @@ function notifyServerselected_tab(tabid) {
 }
 
 
+Shiny.addCustomMessageHandler('reload', function(message) {
+    location.reload();
+  });

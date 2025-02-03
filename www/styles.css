@@ -179,6 +179,10 @@ font-size: 3vw;
   font-size: 4vw; 
   color: #99FF99;
 }
+.icon-val11{
+  font-size: 4vw; 
+  color: #278ECF;
+}
 
 .icon-val2{
   font-size: 4vw; 
@@ -189,6 +193,8 @@ font-size: 3vw;
   font-size: 4vw; 
   color: #99FF99;
 }
+
+
 
 .tags-hr{
   border: 1px solid #87CEEB;  /* Light blue for the separator */
