@@ -85,7 +85,7 @@ selectedaccountInput <- function(id, value = NULL) {
 build_sidebar <- function(account) {
   children <- account$child_accounts
   account_id <- account$uuid
-  account_label <- span(bs_icon("database"), span(account$name))
+  account_label <- span(icon("wallet", class = "black-wallet"), span(account$name))
   is_parent<-ifelse(length(children)>0,T,F)
   
   sidebar_item <- nav_tab_nested(account_label, 
@@ -162,11 +162,16 @@ generate_child_accounts_section <- function(account) {
   names(child_account_cards) <- NULL
   
   # Return the complete section
-  return(tags$div(
-    class = "section child-accounts-section",
-    tags$h3("Child Accounts"),
-    tags$hr(class = 'tags-hr'),
-    tagList(
+  return(
+    card(
+      class = "section child-accounts-section",
+      fill=T,
+      card_header(
+        tags$h3("Child Accounts"),
+        tags$hr(class = 'tags-hr'),
+        class = "card-title",
+      ),
+      tagList(
       layout_column_wrap(
         heights_equal = "row",
         width = ifelse(length(account$child_accounts)<=2,1/2,ifelse(length(account$child_accounts)<4,1/3,1/4)),#control how cards span(2 columns for 1 or children, 3 for 3 children and 4 for 4 or more)
@@ -174,45 +179,61 @@ generate_child_accounts_section <- function(account) {
         !!!child_account_cards
       )
     )
-  ))
+    )
+    )
 }
 
 default_content_generator <- function(account) {
-  tags$div(
-    class="custom-main-panel",
   tagList(
     # Account Details Section
-    tags$div(
+    card(
       class = "section account-details card",
-      tags$h3("Account Details", class = "card-title"),
-      tags$hr(class = 'tags-hr'),
+      fill=T,
+      card_header(tags$h3("Account Details"),
+                  tags$hr(class = 'tags-hr'),
+                  class = "card-title"),
       uiOutput(paste0("account_summary_section",account$uuid))
     ),
 
     # Actions Section
-    tags$div(
+    card(
       class = "section actions",
-      tags$h3("Actions"),
-      tags$hr(class = 'tags-hr'),
+      fill=T,
+      card_header(tags$h3("Actions"),
+                  tags$hr(class = 'tags-hr'),
+                  class = "card-title"
+                  ),
     uiOutput(paste0("actions_section",account$uuid))
     ),
     
     # Transactions Section
-    tags$div(
+    card(
       class = "section",
-      tags$h3("Transactions"),
-      tags$hr(class = 'tags-hr'),
-      DT::dataTableOutput(paste0("transaction_table_", account$uuid))  # Unique ID
+      fill = TRUE,
+      card_header(
+        tags$h3("Transactions"),
+        tags$hr(class = 'tags-hr'),
+        class = "card-title"
+      ),
+      card_body(
+        layout_column_wrap(
+          fill = TRUE,
+          heights_equal = "row",
+          DT::dataTableOutput(paste0("transaction_table_", account$uuid))
+        )
+      )
     ),
     
     # Child Accounts Section
     uiOutput(paste0("children_section_",account$uuid)),
     
     # Visualizations Section
-    tags$div(
+    card(
       class = "section visualizations",
-      tags$h3("Visualizations"),
-      tags$hr(class = 'tags-hr'),
+      card_header(tags$h3("Visualizations"),
+                  tags$hr(class = 'tags-hr'),
+                  class = "card-title"
+      ),
       layout_column_wrap(
        fill = T,
        width = 1/2,
@@ -220,7 +241,6 @@ default_content_generator <- function(account) {
       highchartOutput(paste0("transaction_trend_chart_", account$uuid))   # Unique ID
     )
     )
-  )
   )
 }
 

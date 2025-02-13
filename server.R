@@ -7,10 +7,10 @@ server <- function(input, output,session) {
   })
   
   #logging
-  track_usage(
+  #track_usage(
     #storage_mode = store_json()
-    storage_mode = store_rds(".")
-  )
+    #storage_mode = store_rds(".")
+  #)
   
   main_account <- reactiveVal(main_account)
 
@@ -107,12 +107,17 @@ server <- function(input, output,session) {
     
     # Transactions
     
-    output$transtable<-renderDataTable({
+    output$transtable<-renderUI({
       main_account()$transactions%>%
         filter(By=="User")%>%
         select(-c(By,amount_due,overall_balance))%>%
         tail(3)%>%
-        mutate(across(where(is.numeric),round,2))
+        mutate(
+          Amount=sprintf('<span class="amount-%s">%s</span>',tolower(Type), Amount),
+          Type =sprintf('<span class="transaction-type type-%s">%s</span>', 
+                        tolower(Type), Amount),
+        )%>%knitr::kable(align = 'l', row.names = F,format="html" ,escape = F, table.attr = 'class="custom-table2"')%>%
+        HTML()
     })
     
     # popover 
@@ -440,8 +445,11 @@ server <- function(input, output,session) {
     
     output$alerts_reminders <- renderUI({
       alerts <- list()
+      reminders <- list()  # Placeholder for future reminder logic
+      
       for (acc in main_account()$list_all_accounts()) {
         account <- main_account()$find_account(acc)  # Find the account
+        
         if (!is.null(account$due_date)) {
           due_date <- as.Date(account$due_date)
           current_date <- Sys.Date() 
@@ -461,16 +469,21 @@ server <- function(input, output,session) {
         }
       }
       
-      # Return the list of dynamically generated alerts
-      tagList(alerts)
+      # If both alerts and reminders are empty, show "No alerts at the moment"
+      if (length(alerts) == 0 && length(reminders) == 0) {
+        return(div(class = "no-alerts", "No alerts or reminders at the moment"))
+      }
+      
+      tagList(alerts, reminders)
     })
+    
     
   })
   
   
 
   
-   ### Accounts page
+   ### Accounts page===========================================================================================================
   
   output$build_sidebar<-renderUI({
     build_sidebar(main_account())
@@ -481,9 +494,7 @@ server <- function(input, output,session) {
   })
   
   output$nav_content<-renderUI({
- 
     generate_nav_content(main_account(), default_content_generator)
- 
   })
   
   
@@ -552,7 +563,7 @@ server <- function(input, output,session) {
         layout_column_wrap(
           width=1/4,
           heights_equal = "row",
-          gap="10px",
+          gap="3px",
           fill = T,
           card(
             class = "hidden-cards",
@@ -730,11 +741,19 @@ server <- function(input, output,session) {
    })
     
     # transaction table
-    output[[paste0("transaction_table_",input$selected_tab)]]<-DT::renderDataTable({
-      main_account()$find_account_by_uuid(input$selected_tab)$transactions%>%
-        select(-c(amount_due,overall_balance))%>%
-        mutate(across(where(is.numeric),round,2))
+    output[[paste0("transaction_table_", input$selected_tab)]] <- DT::renderDataTable({
+      datatable(
+        main_account()$find_account_by_uuid(input$selected_tab)$transactions %>%
+          select(-c(amount_due, overall_balance)) %>%
+          mutate(across(where(is.numeric), round, 2)),
+        options = list(
+          scrollY = "auto",  # Allows the table height to adjust dynamically
+          scrollX = TRUE, # Optional: ensures horizontal scrolling if needed
+          pageLength = 6
+        )
+      )
     })
+    
     
     # children
      output[[paste0("children_section_",input$selected_tab)]]<-renderUI({

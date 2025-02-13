@@ -1,31 +1,115 @@
-/* Navbar styling */
-.navbar-custom {
-  display: flex;
-  justify-content: space-between;
-  background-color: #2c3e50;
-  padding: 10px 20px;
-  color: white;
-  align-items: center;
-}
-
-.navbar-title {
-  font-size: 24px;
+.custom-card-header112 {
+  color: black;
+  font-size:16px;
   font-weight: bold;
 }
 
-.navbar-menu {
-  display: flex;
-  gap: 20px;
+.navbar-brand span {
+    font-weight: bold;
+    font-size: 20px;
 }
 
-.nav-item {
-  position: relative;
+.custom-tab {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  padding: 10px 15px;
+  transition: color 0.3s ease-in-out;
+}
+.custom-tab:hover {
+  color: #99FF99;
   cursor: pointer;
-  color: white;
 }
 
-.nav-item:hover .dropdown-content {
-  display: block;
+
+
+
+/* Rename classes to avoid Bootstrap conflicts */
+.custom-nav-item .custom-nav-link {
+  font-size: 16px;
+}
+
+/* Ensure active tab styling is unique */
+.custom-nav-item .custom-nav-link.active {
+  font-weight: bold;
+  background-color: #f8f9fa; /* Use background instead of border-bottom */
+  border-radius: 5px;
+  padding: 8px 12px;
+}
+
+/* Hover effect for better UX */
+.custom-nav-item .custom-nav-link:hover {
+  background-color: #e9ecef;
+  border-radius: 5px;
+}
+
+
+
+
+
+#notifications {
+    font-size: 20px; /* Increase icon size */
+    padding: 10px;
+    transition: color 0.3s ease-in-out;
+}
+
+#notifications:hover {
+    color: #99FF99;
+    cursor: pointer;
+}
+
+/* Style the notification bell */
+.custom-bell {
+  font-size: 24px; /* Increase size */
+  color: black;  /* Customize color */
+  cursor: pointer;  /* Make it clickable */
+}
+
+/* Optional: Add hover effect */
+.custom-bell:hover {
+  color: #99FF99;
+}
+
+
+/* ---- User Profile Name ---- */
+.nav-menu-title {
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+    font
+}
+
+.nav-menu-title:hover {
+    color: #99FF99;
+    cursor: pointer;
+}
+
+/* ---- Profile Dropdown Links ---- */
+.nav-menus a {
+    display: block;
+    padding: 8px 12px;
+    font-size: 14px;
+    text-decoration: none;
+    color: #333;
+    transition: background 0.3s ease-in-out;
+}
+
+.nav-menus a:hover {
+    background: #f5f5f5;
+    color: #99FF99;
+}
+
+/* ---- Search Box Styling ---- */
+.search-box {
+    width: 250px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    outline: none;
+}
+
+.search-box:focus {
+    border-color: #99FF99;
 }
 
 .counter-superscript {
@@ -54,48 +138,36 @@
   border-radius: 5px;
 }
 
-.dropdown-content h6 {
-  margin-top: 0;
-}
-
-.dropdown-content a {
-  text-decoration: none;
-  color: #2c3e50;
-  display: block;
-  padding: 5px 0;
-}
-
-.dropdown-content a:hover {
-  background-color: #f1f1f1;
-}
-
-.dropdown-divider {
-  height: 1px;
-  background-color: #ddd;
-  margin: 10px 0;
-}
-
-/* Profile dropdown styling */
-.dropdown-profile-card {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.profile-pic {
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-}
-
 .page-content {
   padding: 20px;
 }
 
+.full-sidebar {
+    background-color: white !important;
+    height: 100%;
+    min-height: 100vh;  /* Ensures it fills full height */
+}
+
+/* Apply background to the sidebar, including empty space */
+.sidebar {
+    background-color: white !important;
+    height: 100%; /* Ensure it covers full height */
+    min-height: 100vh; /* Extend to full viewport height */
+    padding: 10px; /* Optional: Adjust padding */
+}
+
+/* Ensure sidebar content isn't affected */
+/* Make the wallet icon black */
+.black-wallet {
+    color: black !important;  /* Ensures the wallet icon is black */
+}
+
+
 /* Sidebar Styling */
 .custom-sidebar {
-  padding: 15px;                /* Space inside the sidebar */
-  border-right: 1px solid #ccc; /* Subtle border to separate it from content */
+  padding: 0px;                /* Space inside the sidebar */
   height: 100%;                 /* Ensure the sidebar fills the vertical space */
+  background-color: white;
   box-sizing: border-box;       /* Include padding in the total width/height calculation */
 }
 
@@ -130,14 +202,11 @@
   font-weight: bold;            /* Bold text for emphasis */
   color: #333;                  /* Darker text color for readability */
   padding: 10px 15px;           /* Add space inside the title area */
-  border-bottom: 1px solid #ccc; /* Optional border for separation */
-  border-radius: 5px 5px 0 0;   /* Rounded corners for the top */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 /* Icon Styling (if needed) */
 .custom-sidebar-title .fa-briefcase {
-  color: #ff6600;               /* Custom color for the icon */
+  color: #278ECF;               /* Custom color for the icon */
   font-size: 22px;              /* Slightly larger icon size */
 }
 
@@ -145,7 +214,7 @@
 
 /* Main Panel Styling */
 .custom-main-panel {
-  padding: 20px;  
+  padding: 2px; 
 }
 
 
@@ -240,11 +309,77 @@ font-size: 3vw;
     color: #87CEEB;
 }
 
+/*styled table 1*/
+
+.custom-table2 {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  
+}
+
+/* Table Header */
+.custom-table2 thead {
+  background: #87CEEB; /* Light blue background */
+  font-weight: bold;
+  color: #43464B;
+}
+/* Table Cells */
+.custom-table2 th, 
+.custom-table2 td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Last Row Border Removal */
+.custom-table2 tbody tr:last-child td {
+  border-bottom: none;
+  
+}
+/* Amount Colors */
+.amount-deposit {
+  color: #28a745; /* Green for deposits */
+  font-weight: bold;
+}
+.amount-withdrawal {
+  color: #dc3545; /* Red for withdrawals */
+  font-weight: bold;
+  
+}
+/* Transaction Type Badge */
+.transaction-type {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  
+}
+.type-deposit {
+  background: #d4edda;
+  color: #155724;
+  
+}
+.type-withdrawal {
+  background: #f8d7da;
+  color: #721c24;
+  
+}
+/* Hover Effect */
+.custom-table2 tbody tr:hover {
+  background: #f1f1f1;
+  
+}
+
 
 
 /* General body background color */
 body {
-    background-color: #f9f9f9 /* Light background to complement your theme */
+    background-color: white /* Light background to complement your theme */
 }
 
 /* Navbar styling */
@@ -314,6 +449,14 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Adds slight shadow for depth */
     margin-bottom: 20px;
 }
+
+.card-title{
+  background-color:white;
+  border-bottom:white;
+  font-size:16;
+  font-weight: bold;
+}
+
 
 /* Transaction table styling */
 table.dataTable {
@@ -448,10 +591,6 @@ table.dataTable tr:nth-child(even) {
 
 /*accounts page */
 .section {
-  padding: 20px;
-  margin: 20px auto; 
-  border: 1px solid #ccc;
-  border-radius: 5px;
   background-color: white;
 }
 
@@ -510,19 +649,36 @@ table.dataTable tr:nth-child(even) {
 
 .details-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Two-column layout */
-  gap: 15px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-.detail-item {
+/*.detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 5px 0;
+  
+}*/
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  align-items: left;
 }
 
+
 .detail-item strong {
-  color: #333;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.detail-item span {
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: left;
 }
 
 .detail-item .balance {
@@ -530,20 +686,23 @@ table.dataTable tr:nth-child(even) {
   font-weight: bold;
 }
 
+
 .badge-success {
   background-color: #28a745; /* Green for active status */
   color: white;
   padding: 5px 10px;
-  border-radius: 5px;
+  border-radius: 25px;
   font-size: 0.9rem;
+  font-weight: bold;
 }
 
 .badge-danger {
   background-color: #dc3545; /* Red for inactive status */
   color: white;
   padding: 5px 10px;
-  border-radius: 5px;
+  border-radius: 25px;
   font-size: 0.9rem;
+  font-weight: bold;
 }
 
 .parent-link {
@@ -559,11 +718,12 @@ table.dataTable tr:nth-child(even) {
 //*hero section 
 
 /* Hero Section Styling */
+
 .hero-section {
   background: linear-gradient(135deg, #f39c12, #e74c3c);
   color: white;
   padding: 30px 20px;
-  border-radius: 10px;
+  border-radius: 0px;
   margin-bottom: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -575,11 +735,11 @@ table.dataTable tr:nth-child(even) {
 }
 
 .hero-section .quick-actions {
-  margin-top: 20px;
+  margin-top: 2px;
 }
 
 .hero-section .btn-toolbar .btn {
-  border-radius: 25px;
+  border-radius: 5px;
   padding: 10px 20px;
   font-size: 14px;
   margin-right: 10px;
@@ -654,4 +814,88 @@ table.dataTable tr:nth-child(even) {
   border: none;
   font-weight: bold;
 }
+
+
+
+.value-box {
+  background-color: #89CFF0 !important;  /* Light blue */
+  color: black;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.value-box-header {
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.value-box-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: grey;  /* Grey Title */
+}
+
+.value-box-content {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.value-box-footer {
+  font-size: 12px;
+  color: grey;  /* Grey Footer Text */
+  margin-top: 5px;
+}
+
+.value-box-icon {
+  font-size: 22px;  /* Increased Icon Size */
+  color: black;
+}
+
+@media (max-width: 768px) {
+  .value-box {
+    width: 100%;
+  }
+}
+
+/* Alerts & Reminders Card */
+.alerts-card {
+  background-color: #f8f9fa;  /* Light grey background */
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  border-color:#f8f9fa;
+}
+
+/* Header */
+.alerts-header {
+  font-size: 16px;
+  font-weight: bold;
+  color: black;
+  background-color: #f8f9fa;
+  border-bottom-color:#f8f9fa ;
+}
+
+
+/* Body */
+.alerts-body {
+  font-size: 14px;
+  color: grey;
+  text-align: center;
+  padding: 20px;
+}
+
+.no-alerts {
+  color: grey;
+  text-align: center;
+  font-size: 14px;
+  padding: 15px;
+}
+
+
+
 

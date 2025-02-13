@@ -7,6 +7,7 @@ library(DT)
 library(tidyverse)
 library(shinylogs)
 library(shinyWidgets)
+library(shinySearchbar)
 
 options(knitr.kable.NA = '')
 
@@ -22,133 +23,116 @@ if (file.exists("main_account.RData")) {
 
 #load("main_account.RData")
 
+Name<-"Festus Nzuma"
 myname<- "Festus"    #first name from log in info
-
 ui <- page_navbar(
-  title = "Finman",
-  theme = bs_theme(version = 5,"bslib_spacer" = "0rem",preset="bootstrap"),
+  #navbar_options(underline = F),
+  id="appId",
+  title = span(
+    tags$img(src = "Image 13.png", 
+             style = "width: 30px; height: 30px; margin-right: 8px;"), 
+    span("Finman",class = "navbar-brand")
+  ),
+  theme = bs_theme(version = 5,bg="white",fg="black",preset = "bootstrap"),
+  #padding="25px",
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
     tags$script(src = 'jsfuns.js')
   ),
-  bg="#87CEEB",
   gap="4px",
-  
-  # Dashboard Tab
-  
+  bg="white",
+
+## Dashboard page =======================================================================
   nav_panel(
-    "Dashboard",
+    span(icon("home"), "Dashboard",class = "custom-tab"),
+    style = "padding: 25px;",
     div(
       style = "display: flex; flex-direction: column; row-gap: 3px;",
       
       # Top Section: Hero Area
-      card(
-        class = "hero-section",
-        card_body(
+      layout_column_wrap(
+        width=1,
+        gap="0px",
+        class="hero-section",
+        div(
+          class = "profile",
+          #img(src = "https://avatar.iran.liara.run/public/5", alt = "User Avatar"),
+          img(src = "IMG_20180523_160151.jpg", alt = "User Avatar"),
           div(
-            class = "profile",
-            img(src = "https://avatar.iran.liara.run/public/5", alt = "User Avatar"),
-            div(
-              generate_greeting(myname),
-              div("Plan Your Finances, Secure Your Future.", class = "tagline")
-            )
-          ),
-          uiOutput("savings_progress"),
-          div(
-            class = "btn-toolbar quick-actions",
-            actionButton("add_account", "Add Account", class = "btn-success"),
-            actionButton("transfer_money", "Transfer Money", class = "btn-primary"),
-            actionButton("view_reports", "View Reports", class = "btn-warning")
+            generate_greeting(myname),
+            div("Plan Your Finances, Secure Your Future.", class = "tagline")
           )
-        )
+        ),
+        uiOutput("savings_progress"),
+        div(
+          class = "btn-toolbar quick-actions",
+          actionButton("add_account", "Add Account", class = "btn-success"),
+          actionButton("transfer_money", "Transfer Money", class = "btn-primary"),
+          actionButton("view_reports", "View Reports", class = "btn-warning")
+        )  
       )
       ,
       # Total Financial Overview
       layout_column_wrap(
-        width=1/4,
-        fill = T,
-        gap = "3px",
+        width = 1/4,
+        fill = TRUE,
+        gap = "10px",  # Adjust spacing
+        
+        # First Box - Balance Amount
         card(
-          fill=T,
-          full_screen = T,
-          card_header("Balance amount", class = 'custom-card-header'),
+          fill = TRUE,
+          class = "value-box",
           card_body(
-            div(
-              class = 'card-body-div', 
-              div(
-                class='card-body-value-div',
-                uiOutput("overall_bal")
-              ),
-              div(
-                class = 'icon-div',
-                icon("coins",class= "icon-val1")
-              )
+            div(class = "value-box-header d-flex justify-content-between align-items-center",
+                span("Balance amount", class = "value-box-title"),
+                icon("coins", class = "value-box-icon")
             ),
-            tags$hr(class = "tags-hr"),
-            p("sum from all accounts", class = "text-muted"),
-            class = "card-content"
+            div(class = "value-box-content", uiOutput("overall_bal")),
+            p("Sum from all accounts", class = "value-box-footer")
           )
         ),
+        
+        # Second Box - Amount Due
         card(
-          full_screen = T,
-          card_header("Amount Due", class = 'custom-card-header'),
+          fill = TRUE,
+          class = "value-box",
           card_body(
-            div(
-              class = 'card-body-div',
-              div(
-                class='card-body-value-div',
-                uiOutput("amount_due")
-                ),
-              div(
-                class = 'icon-div',  # Fixed size for the icon area
-                icon("clock", class= "icon-val1")  # Relative font size for responsiveness
-              )
+            div(class = "value-box-header d-flex justify-content-between align-items-center",
+                span("Amount Due", class = "value-box-title"),
+                icon("clock", class = "value-box-icon")
             ),
-            tags$hr(class = "tags-hr"),
-            p("Pending payments", class = "text-muted"),
-            class = "card-content"
+            div(class = "value-box-content", uiOutput("amount_due")),
+            p("Pending payments", class = "value-box-footer")
           )
         ),
+        
+        # Third Box - Due in 30 days
         card(
-          full_screen = T,
-          card_header("Due in 30 days", class = 'custom-card-header'),
+          fill = TRUE,
+          class = "value-box",
           card_body(
-            div(
-              class = 'card-body-div',
-              div(
-                class='card-body-value-div',
-                uiOutput("due_in_n_days")
-              ),
-              div(
-                class = 'icon-div',  # Fixed size for the icon area
-                icon("money-bill", class= "icon-val1")  # Relative font size for responsiveness
-              )
+            div(class = "value-box-header d-flex justify-content-between align-items-center",
+                span("Due in 30 days", class = "value-box-title"),
+                icon("money-bill", class = "value-box-icon")
             ),
-            tags$hr(class = "tags-hr"),
-            p("Short-term obligations", class = "text-muted"),
-            class = "card-content"
+            div(class = "value-box-content", uiOutput("due_in_n_days")),
+            p("Short-term obligations", class = "value-box-footer")
           )
         ),
+        
+        # Fourth Box - Number of Accounts
         card(
-          full_screen = T,
-          card_header("Number of accounts", class = 'custom-card-header'),
+          fill = TRUE,
+          class = "value-box",
           card_body(
-            div(
-              class = 'card-body-div',
-              div(
-                class='card-body-value-div',
-                uiOutput("number_of_accounts")
-              ),
-              div(
-                class = 'icon-div',  # Fixed size for the icon area
-                icon("briefcase", class= "icon-val1")  # Relative font size for responsiveness
-              )
+            div(class = "value-box-header d-flex justify-content-between align-items-center",
+                span("Number of accounts", class = "value-box-title"),
+                icon("briefcase", class = "value-box-icon")
             ),
-            tags$hr(class = "tags-hr"),  # Adjust the spacing around <hr>
-            class = "card-content"
+            div(class = "value-box-content", uiOutput("number_of_accounts")),
+            p("Number of accounts", class = "value-box-footer")
           )
         )
-        
       ),
       
       # Distribution of amnt due and balance
@@ -157,6 +141,7 @@ ui <- page_navbar(
             heights_equal = "row",
             fill = TRUE,
             gap = "3px",
+            
             card(
               fill=T,
               full_screen = T,
@@ -170,20 +155,27 @@ ui <- page_navbar(
                           class = "custom-card-header1"),
               card_body(
                 layout_column_wrap(
+                  width = 1,
+                  heights_equal = "row",
+                  fill = TRUE,
+                  gap = "1px",
+                
+                layout_column_wrap(
                   width = 1/2,
                   heights_equal = "row",
                   fill = TRUE,
-                  gap = "3px",
+                  gap = "2px",
                   highchartOutput("overall_pie_chart"),   
                   highchartOutput("overall_alloc")
                 ),
-                
                 tags$hr(class="tags-hr"),
-                p("Recent Transactions"),
-                DT::dataTableOutput("transtable"),
-                actionLink("view_all", "View All Transactions")
+                p("Recent Transactions",class="custom-card-header112"),
+                uiOutput("transtable")
+              )
               )
             ),
+            
+            
             card(
               card_header(
                 div(),
@@ -197,20 +189,29 @@ ui <- page_navbar(
               ),
               card_body(
                 layout_column_wrap(
+                  width = 1,
+                  heights_equal = "row",
+                  fill = TRUE,
+                  gap = "1px",
+                layout_column_wrap(
                   width = 1/2,
                   heights_equal = "row",
                   fill = TRUE,
-                  gap = "3px",
+                  gap = "2px",
                   highchartOutput("tier2_allocation_chart"),  
                   highchartOutput("tier2_allocation_chart2")),
                   tags$hr(class="tags-hr"),
                 card(
-                  fill=T,
-                  card_header("Alerts & Reminders",
-                              class="custom-card-header1"),
-                  card_body(uiOutput("alerts_reminders"))
+                  fill = TRUE,
+                  class = "alerts-card",
+                  card_header("Alerts & Reminders", class = "alerts-header"),
+                  card_body(
+                    div(class = "alerts-body", uiOutput("alerts_reminders"))
+                  )
                 )
+                
               )
+            )
             )
           ),
       
@@ -219,8 +220,10 @@ ui <- page_navbar(
     )
   ),
   
-  # Accounts navbar
-  nav_panel("Accounts", 
+## Accounts page=======================================================================
+
+  nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"), 
+  style = "background-color: #F6F6F6;",
    # sidebar         
   layout_sidebar(
     sidebar=sidebar(
@@ -229,12 +232,13 @@ ui <- page_navbar(
         icon("briefcase"), 
         "Accounts"
       ),
-      width = "300px",
+      width = "310px",
       tags$div(
         class = "custom-sidebar",
         #build_sidebar(main_account) 
         uiOutput("build_sidebar")
       )
+      
     ),
     
     # navbar content 
@@ -243,7 +247,7 @@ ui <- page_navbar(
   )
   ),
 
-  nav_panel("Reports",
+  nav_panel(span(icon("chart-column"), "Reports",class = "custom-tab"),
             layout_sidebar(
               sidebar=sidebar(
                 title = tags$div(
@@ -355,7 +359,44 @@ ui <- page_navbar(
             card()
             )
             ),
+  nav_panel(span(icon("user"), "Profile",class = "custom-tab"), h1("profile Content")),
+  nav_panel(span(icon("users"), "About us",class = "custom-tab"), h1("about Content")),
   nav_spacer(),
+  #nav_item(
+  #  shinySearchbar::searchbar("buscador", contextId = "appId",cycler=F, width = "200px",counter = F,placeholder = "search")
+  #),
+  nav_item(
+    actionLink("notifications", "", icon("bell",class="custom-bell"),class = "notification-icon")
+  ),
+  nav_menu(
+    title = span(tags$img(src = "IMG_20180523_160151.jpg", 
+                          style = "width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;"),
+                 span(paste(Name), class = "nav-menu-title"
+                 )
+    ),
+    align = "right",
+    nav_item(
+      tags$a(
+        icon("user"), "Profile",
+        href = "https://github.com/rstudio/shiny",
+        target = "_blank"
+      )
+    ),
+    nav_item(
+      tags$a(
+        icon("cog"), "Settings",
+        href = "https://github.com/rstudio/shiny",
+        target = "_blank"
+      )
+    ),
+    nav_item(
+      tags$a(
+        icon("sign-out"), "Logout",
+        href = "https://posit.co",
+        target = "_blank"
+      )
+    )
+  ),
   nav_item(
     input_dark_mode(id="dark_mode",mode="light"),
   )
