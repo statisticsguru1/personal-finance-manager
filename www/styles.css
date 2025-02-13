@@ -899,3 +899,72 @@ table.dataTable tr:nth-child(even) {
 
 
 
+.child-account-custom-card {
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  background: white;
+}
+
+.child-account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  border-bottom-color: white;
+  background-color: white;
+}
+
+.child-account-status-badge {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+
+.child-account-balance {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.child-account-progress-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.child-account-progress-bar {
+  background: #e0e0e0; 
+  height: 8px;
+  border-radius: 5px;
+  width: 100%;
+  overflow: hidden; 
+}
+
+.child-account-progress-fill {
+  height: 100%;
+  border-radius: 5px;
+}
+
+.child-account-more-details {
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-decoration: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.child-account-more-details svg {
+  margin-left: 5px;
+}
+
+
+

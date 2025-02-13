@@ -8,6 +8,7 @@ library(tidyverse)
 library(shinylogs)
 library(shinyWidgets)
 library(shinySearchbar)
+library(colorspace)
 
 options(knitr.kable.NA = '')
 

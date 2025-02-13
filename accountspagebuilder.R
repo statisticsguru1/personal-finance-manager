@@ -129,36 +129,90 @@ generate_nav_content <- function(main_account, content_generator) {
   do.call(nav_content_nested, content_divs)
 }
 
+
 generate_child_accounts_section <- function(account) {
   # Ensure account$child_accounts is not NULL or empty
   if (is.null(account$child_accounts) || length(account$child_accounts) == 0) {
     return(NULL) # Return nothing if there are no child accounts
   }
   
+  
+  # theme colors generator
+  generate_random_color_pair <- function() {
+    repeat {
+      # Generate a random color
+      random_hue <- runif(1, 0, 360)
+      random_sat <- runif(1, 0.7, 1)
+      random_light <- runif(1, 0.3, 0.5) 
+      
+      random_color <- hex(HLS(random_hue, random_light, random_sat))
+      faded_color <- generate_fade_color(random_color)
+      
+      # function for computing color distance
+      
+      color_distance <- function(color1, color2) {
+        rgb1 <- hex2RGB(color1)@coords
+        rgb2 <- hex2RGB(color2)@coords
+        sqrt(sum((rgb1 - rgb2)^2)) * 255
+      }
+      
+      # Ensure the random color is not white and is distinct from its faded version
+      if (random_color != "#FFFFFF") {
+        return(list(color = random_color, faded = faded_color))
+      }
+    }
+  }
+  
+  
+  
+  
+  
+  # Define theme colors and icons for dynamic selection
+  
+  icon_names <- c("dollar-sign", "chart-line", "money-bill", "piggy-bank", "wallet")
+  
   # Dynamically generate the child account cards
   child_account_cards <- lapply(account$child_accounts, function(child_account) {
+
+    # Randomly select a theme color and an icon
+    theme_colors<-generate_random_color_pair()
+    selected_color <- theme_colors$color
+    background<-theme_colors$faded
+    selected_icon <- sample(icon_names, 1)
+    
     card(
-      class = "child-account-card",
+      class = "child-account-custom-card",
       card_header(
-        tags$h4(child_account$name),
-        class = "custom-card-header11"
-      ),
+        class = "child-account-header",
+        span(icon(selected_icon, class = "child-account-icon", style = paste("color:", selected_color, ";")),span(child_account$name, class = "child-account-title")),
+        span(paste(child_account$status), class = "child-account-status-badge",style=sprintf("color:%s;background-color:%s",
+                                                                                             ifelse(tolower(child_account$status)=="active","#28a745","#dc3545"),
+                                                                                             ifelse(tolower(child_account$status)=="active","#d4edda","#f8d7da")))
+        ),
       card_body(
-        p(strong("Balance:"), paste(round(child_account$balance,2))),
+        span("Balance:", style = "color: gray; font-size: 0.9rem;"),
+        div(paste0("", format(round(child_account$balance, 2), nsmall = 2)), class = "child-account-balance"),
+        div(class = "child-account-progress-container",
+            span(paste0(100*child_account$allocation, "%"), style = paste("color:", selected_color, ";")),
+            span("Allocation", style = "color: gray; font-size: 0.85rem;")
+        ),
         div(
-          class = "status-line",
-          tags$strong("Status: "),
-          tags$span(
-            class = if (tolower(child_account$status) == "active") "badge-success" else "badge-danger",
-            child_account$status
+          class = "child-account-progress-bar",  
+          div(
+            class = "child-account-progress-fill",
+            style = sprintf("background:%s; width:%s%%;", selected_color, 100 * child_account$allocation)
           )
         ),
-        actionLink(paste("navigate_",child_account$uuid),"more details",icon=icon("external-link-alt"))
+        
+        a("more details", href = "#", class = "child-account-more-details",style=sprintf("color:%s",selected_color),
+          HTML(sprintf("<svg width='12' height='12'><path d='M0 6h8M6 4l4 2-4 2' stroke='%s' stroke-width='2' fill='none'/></svg>", selected_color)
+          )
+        )
       )
     )
   })
   
-  # Remove names from the list to avoid layout issues(!!! refused to work with a named list)
+  # Remove names from the list to avoid layout issues
   names(child_account_cards) <- NULL
   
   # Return the complete section
@@ -169,19 +223,21 @@ generate_child_accounts_section <- function(account) {
       card_header(
         tags$h3("Child Accounts"),
         tags$hr(class = 'tags-hr'),
-        class = "card-title",
+        class = "card-title"
       ),
       tagList(
-      layout_column_wrap(
-        heights_equal = "row",
-        width = ifelse(length(account$child_accounts)<=2,1/2,ifelse(length(account$child_accounts)<4,1/3,1/4)),#control how cards span(2 columns for 1 or children, 3 for 3 children and 4 for 4 or more)
-        gap = "15px",            # Space between the cards
-        !!!child_account_cards
+        layout_column_wrap(
+          heights_equal = "row",
+          width = ifelse(length(account$child_accounts) <= 2, 1/2, ifelse(length(account$child_accounts) < 4, 1/3, 1/4)), # Dynamic layout based on number of accounts
+          gap = "15px",
+          !!!child_account_cards
+        )
       )
     )
-    )
-    )
+  )
 }
+
+
 
 default_content_generator <- function(account) {
   tagList(

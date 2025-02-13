@@ -13,7 +13,8 @@ server <- function(input, output,session) {
   #)
   
   main_account <- reactiveVal(main_account)
-
+  
+  #### Dashboard content ===================================================================================================
   savings_goal <- reactive({
       main_account()$compute_total_balance()/(main_account()$compute_total_balance()+main_account()$compute_total_due())
     })
@@ -561,7 +562,7 @@ server <- function(input, output,session) {
       account<-main_account()$find_account_by_uuid(input$selected_tab)
       tagList(
         layout_column_wrap(
-          width=1/4,
+          width=1/3,
           heights_equal = "row",
           gap="3px",
           fill = T,
@@ -588,7 +589,7 @@ server <- function(input, output,session) {
                 fill=T,
                 heights_equal = "row",
                 gap="10px",
-                numericInput(paste0("withdraw_amount_", account$uuid), "Withdraw Amount:", value = NA, min = 0),
+                numericInput(paste0("withdraw_amount_", account$uuid),sprintf("Withdraw Amount/Pay %s",ifelse(grepl("main",account$name, ignore.case = TRUE),"dues",account$name)), value = NA, min = 0),
                 actionButton(paste0("withdraw_btn_", account$uuid), "Withdraw",class = "btn-normal")
               )
             )
@@ -603,26 +604,7 @@ server <- function(input, output,session) {
                 heights_equal = "row",
                 numericInput(paste0("transfer_amount_", account$uuid), "Transfer Amount:", value = 0, min = 0),
                 selectInput(paste0("transfer_target_", account$uuid), "Transfer To:", choices = main_account()$list_all_accounts()),
-                actionButton(paste0("transfer_btn_", account$uuid), "Transfer",, class = "btn-normal")
-              )
-            )
-          ),
-          card(
-            class = "hidden-cards",
-            card_body(
-              layout_column_wrap(
-                width=1,
-                fill=T,
-                gap="10px",
-                heights_equal = "row",
-                numericInput(paste0("pay_", account$uuid),
-                             tagList(paste("Pay",ifelse(grepl("main",account$name, ignore.case = TRUE),"all dues",account$name)),
-                                     tooltip(
-                                       bs_icon("info-circle"),
-                                       paste("Pay amount due in accounts below"),
-                                       placement = "right")),
-                             value =round(min(account$compute_total_balance(),account$compute_total_due()),2), min = 0),
-                actionButton(paste0("transfer_btn_", account$uuid), "Pay",class = "btn-normal")
+                actionButton(paste0("transfer_btn_", account$uuid), "Transfer", class = "btn-normal")
               )
             )
           )
