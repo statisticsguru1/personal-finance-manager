@@ -224,7 +224,7 @@ ui <- page_navbar(
 ## Accounts page=======================================================================
 
   nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"), 
-  style = "background-color: #F6F6F6;",
+  style = "background-color:#F6F6F6;",
    # sidebar         
   layout_sidebar(
     sidebar=sidebar(

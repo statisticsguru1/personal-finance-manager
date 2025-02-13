@@ -567,7 +567,8 @@ server <- function(input, output,session) {
           gap="3px",
           fill = T,
           card(
-            class = "hidden-cards",
+            class = "action-card",
+            card_header(span(icon("check-circle", class = "action-icon text-success"), "Deposit"), class = "action-title"),
             card_body(
               layout_column_wrap(
                 width=1,
@@ -582,25 +583,27 @@ server <- function(input, output,session) {
             )
           ),
           card(
-            class = "hidden-cards",
+            class = "action-card",
+            card_header(span(icon("times-circle", class = "action-icon text-danger"), "Withdraw"), class = "action-title"),
             card_body(
               layout_column_wrap(
                 width=1,
                 fill=T,
                 heights_equal = "row",
-                gap="10px",
+                gap="1px",
                 numericInput(paste0("withdraw_amount_", account$uuid),sprintf("Withdraw Amount/Pay %s",ifelse(grepl("main",account$name, ignore.case = TRUE),"dues",account$name)), value = NA, min = 0),
                 actionButton(paste0("withdraw_btn_", account$uuid), "Withdraw",class = "btn-normal")
               )
             )
           ),
           card(
-            class = "hidden-cards",
+            class = "action-card",
+            card_header(span(icon("paper-plane", class = "action-icon text-primary"), "Transfer"), class = "action-title"),
             card_body(
               layout_column_wrap(
                 width=1,
                 fill=T,
-                gap="10px",
+                gap="3px",
                 heights_equal = "row",
                 numericInput(paste0("transfer_amount_", account$uuid), "Transfer Amount:", value = 0, min = 0),
                 selectInput(paste0("transfer_target_", account$uuid), "Transfer To:", choices = main_account()$list_all_accounts()),
@@ -610,13 +613,17 @@ server <- function(input, output,session) {
           )
         ),
         br(),
-        tags$hr(class = 'tags-hr'),
+        #tags$hr(class = 'tags-hr'),
+        card(
+          fill=T,
+          class = "more-actions-card",
+          card_header(tags$strong("More Actions"),class = "action-title"),
         selectInput(paste0("more_actions_", account$uuid),"more actions",choices=c("Add account","Edit account","Close Account")),
         conditionalPanel(
           condition = sprintf("input['%s'] =='Add account'",paste0("more_actions_",account$uuid)),
           layout_column_wrap(
             width=1/3,
-            gap="6px",
+            gap="25px",
             textInput(paste0("account_name_add",account$uuid),"Account name",value=""),
             numericInput(paste0("allocation_add",account$uuid),
                          tagList("Allocation",
@@ -643,7 +650,7 @@ server <- function(input, output,session) {
           else if(class(account)[1]== "ChildAccount"){
             layout_column_wrap(
               width=1/4,
-              gap="6px",
+              gap="25px",
               textInput(paste0("account_name_edit_child",account$uuid),"Account name",value=account$name),
               numericInput(paste0("allocation_edit_child",account$uuid),
                            tagList("Allocation",
@@ -667,7 +674,7 @@ server <- function(input, output,session) {
           else if(class(account)[1]== "GrandchildAccount"){
             layout_column_wrap(
               width=1/4,
-              gap="6px",
+              gap="25px",
               textInput(paste0("account_name_edit_grandchild",account$uuid),"Account name",value=account$name),
               numericInput(paste0("allocation_edit_grandchild",account$uuid),
                            tagList("Allocation",
@@ -718,8 +725,9 @@ server <- function(input, output,session) {
           # some modals if the account has money you need to move it.
         ),
         br(),
-        actionButton(paste0("save", account$uuid), "Save", class = "btn-danger",width="200px")
+        actionButton(paste0("save", account$uuid), "Save", class = "btn-danger",width="100px")
       )
+    )
    })
     
     # transaction table

@@ -22,8 +22,28 @@
   cursor: pointer;
 }
 
-
-
+.action-card {
+  background-color: #F6F6F6;
+  padding: 15px;
+  border-radius: 10px;
+  
+}
+.action-title {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: white;
+  border-bottom-color:white;
+}
+.action-icon {
+  font-size: 1.2rem;
+}
+.more-actions-card {
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #F6F6F6;
+}
 
 /* Rename classes to avoid Bootstrap conflicts */
 .custom-nav-item .custom-nav-link {

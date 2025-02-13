@@ -146,6 +146,14 @@ generate_child_accounts_section <- function(account) {
       random_light <- runif(1, 0.3, 0.5) 
       
       random_color <- hex(HLS(random_hue, random_light, random_sat))
+      
+      generate_fade_color <- function(hex_color, fade_factor = 0.7) {
+        rgb_color <- hex2RGB(hex_color)
+        hls_color <- as(rgb_color, "HLS")
+        hls_color@coords[, "L"] <- pmin(1, hls_color@coords[, "L"] + fade_factor * (1 - hls_color@coords[, "L"]))
+        faded_hex <- hex(as(hls_color, "RGB"))
+        return(faded_hex)
+      }
       faded_color <- generate_fade_color(random_color)
       
       # function for computing color distance
