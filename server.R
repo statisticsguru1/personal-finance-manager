@@ -568,7 +568,18 @@ server <- function(input, output,session) {
           fill = T,
           card(
             class = "action-card",
-            card_header(span(icon("check-circle", class = "action-icon text-success"), "Deposit"), class = "action-title"),
+            bg=NULL,
+            card_header(
+              span(
+                span(
+                  icon("arrow-circle-down", class = "action-icon"),
+                  class = "action-icon-container",
+                  style = "background-color: #F1FFF1; color: #99FF9;" # Green example
+                ),
+                "Deposit"
+              ),
+              class = "action-title"
+            ),
             card_body(
               layout_column_wrap(
                 width=1,
@@ -584,7 +595,17 @@ server <- function(input, output,session) {
           ),
           card(
             class = "action-card",
-            card_header(span(icon("times-circle", class = "action-icon text-danger"), "Withdraw"), class = "action-title"),
+            card_header(
+              span(
+                span(
+                  icon("arrow-circle-up", class = "action-icon"),
+                  class = "action-icon-container",
+                  style = "background-color:#FFFCF3; color: #ffeaa7;"
+                ),
+                "Withdrawal"
+              ),
+              class = "action-title"
+            ),
             card_body(
               layout_column_wrap(
                 width=1,
@@ -598,7 +619,17 @@ server <- function(input, output,session) {
           ),
           card(
             class = "action-card",
-            card_header(span(icon("paper-plane", class = "action-icon text-primary"), "Transfer"), class = "action-title"),
+            card_header(
+              span(
+                span(
+                  icon("paper-plane", class = "action-icon"),
+                  class = "action-icon-container",
+                  style = "background-color:#EEF8FC; color: #87CEEB;"
+                ),
+                "Transfer"
+              ),
+              class = "action-title"
+            ),
             card_body(
               layout_column_wrap(
                 width=1,
@@ -612,12 +643,21 @@ server <- function(input, output,session) {
             )
           )
         ),
-        br(),
         #tags$hr(class = 'tags-hr'),
         card(
           fill=T,
           class = "more-actions-card",
-          card_header(tags$strong("More Actions"),class = "action-title"),
+          card_header(
+            span(
+              span(
+                icon("bars", class = "action-icon"),
+                class = "action-icon-container",
+                style = "background-color: rgba(108, 117, 255, 0.15); color: #6c75ff;" # Blue (Transfer)
+              ),
+              tags$strong("More Actions")
+            ),
+            class = "action-title"
+          ),
         selectInput(paste0("more_actions_", account$uuid),"more actions",choices=c("Add account","Edit account","Close Account")),
         conditionalPanel(
           condition = sprintf("input['%s'] =='Add account'",paste0("more_actions_",account$uuid)),

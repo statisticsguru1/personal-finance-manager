@@ -23,9 +23,11 @@
 }
 
 .action-card {
-  background-color: #F6F6F6;
+  background-color: #F9FAFB !important;
   padding: 15px;
   border-radius: 10px;
+  border-color:#F3F4F6 !important;
+  box-shadow: none !important;
   
 }
 .action-title {
@@ -33,16 +35,28 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background-color: white;
-  border-bottom-color:white;
+  background-color: #F9FAFB;
+  border-bottom-color: #F9FAFB;
+}
+.action-icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; /* Adjust size */
+  height: 36px;
+  border-radius: 50%; /* Circular shape */
+  
 }
 .action-icon {
-  font-size: 1.2rem;
+  font-size: 18px;
 }
+
 .more-actions-card {
   padding: 20px;
   border-radius: 10px;
-  background-color: #F6F6F6;
+  background-color:  #F9FAFB !important;
+  border-color:#F3F4F6 !important;
+  box-shadow: none !important;
 }
 
 /* Rename classes to avoid Bootstrap conflicts */
@@ -96,7 +110,6 @@
 .nav-menu-title {
     font-weight: bold;
     transition: color 0.3s ease-in-out;
-    font
 }
 
 .nav-menu-title:hover {

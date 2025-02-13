@@ -177,7 +177,9 @@ generate_child_accounts_section <- function(account) {
   
   # Define theme colors and icons for dynamic selection
   
-  icon_names <- c("dollar-sign", "chart-line", "money-bill", "piggy-bank", "wallet")
+  icon_names <- c("dollar-sign", "chart-line", "money-bill","money-bill",
+                  "credit-card","piggy-bank", "wallet","briefcase","coins",
+                  "money-check","hand-holding-dollar","sack-dollar","chart-pie","circle-dollar-to-slot")
   
   # Dynamically generate the child account cards
   child_account_cards <- lapply(account$child_accounts, function(child_account) {
