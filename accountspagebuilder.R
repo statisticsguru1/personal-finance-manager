@@ -130,7 +130,7 @@ generate_nav_content <- function(main_account, content_generator) {
 }
 
 
-generate_child_accounts_section <- function(account) {
+generate_child_accounts_section <- function(account,currency="$") {
   # Ensure account$child_accounts is not NULL or empty
   if (is.null(account$child_accounts) || length(account$child_accounts) == 0) {
     return(NULL) # Return nothing if there are no child accounts
@@ -172,9 +172,6 @@ generate_child_accounts_section <- function(account) {
   }
   
   
-  
-  
-  
   # Define theme colors and icons for dynamic selection
   
   icon_names <- c("dollar-sign", "chart-line", "money-bill","money-bill",
@@ -201,7 +198,7 @@ generate_child_accounts_section <- function(account) {
         ),
       card_body(
         span("Balance:", style = "color: gray; font-size: 0.9rem;"),
-        div(paste0("", format(round(child_account$balance, 2), nsmall = 2)), class = "child-account-balance"),
+        div(paste0(currency, format(round(child_account$balance, 2), nsmall = 2)), class = "child-account-balance"),
         div(class = "child-account-progress-container",
             span(paste0(100*child_account$allocation, "%"), style = paste("color:", selected_color, ";")),
             span("Allocation", style = "color: gray; font-size: 0.85rem;")

@@ -1,3 +1,4 @@
+currency<-"$"
 server <- function(input, output,session) {
   
   observeEvent(input$dark_mode,{
@@ -13,6 +14,7 @@ server <- function(input, output,session) {
   #)
   
   main_account <- reactiveVal(main_account)
+  currency<-reactiveVal(currency)
   
   #### Dashboard content ===================================================================================================
   savings_goal <- reactive({
@@ -36,15 +38,15 @@ server <- function(input, output,session) {
     })
     
     output$overall_bal<-renderUI({
-      HTML(paste(h1(format(main_account()$compute_total_balance(), big.mark = ",", scientific = FALSE), class = "card-body-value")))  # Relative font size (5% of viewport width)
+      HTML(paste(h1(paste0(currency(),format(main_account()$compute_total_balance(), big.mark = ",", scientific = FALSE)), class = "card-body-value")))  # Relative font size (5% of viewport width)
     })
     
     output$amount_due<-renderUI({
-      HTML(paste(h1(format(main_account()$compute_total_due(), big.mark = ",", scientific = FALSE), class = "card-body-value")))  # Relative font size (5% of viewport width)
+      HTML(paste(h1(paste0(currency(),format(main_account()$compute_total_due(), big.mark = ",", scientific = FALSE)), class = "card-body-value")))  # Relative font size (5% of viewport width)
     })
     
     output$due_in_n_days<-renderUI({
-      HTML(paste(h1(format(main_account()$compute_total_due_within_n_days(30), big.mark = ",", scientific = FALSE), class = "card-body-value")))  # Relative font size (5% of viewport width)
+      HTML(paste(h1(paste0(currency(),format(main_account()$compute_total_due_within_n_days(30), big.mark = ",", scientific = FALSE)), class = "card-body-value")))  # Relative font size (5% of viewport width)
     })
     
     output$number_of_accounts<-renderUI({
@@ -82,10 +84,11 @@ server <- function(input, output,session) {
     
     # Total Balance vs Amount Due
     output$overall_pie_chart <- renderHighchart({
+      currency_symbol <- currency()
       highchart() %>%
         hc_chart(type = "pie") %>%
         hc_title(text = "Income vs. Obligations") %>%
-        hc_size(width = 100, height = 80)%>%
+        hc_size(width = 100, height = 80) %>%
         hc_add_series(
           data = list(
             list(name = "Balance", y = main_account()$compute_total_balance()),
@@ -95,16 +98,20 @@ server <- function(input, output,session) {
         hc_plotOptions(
           pie = list(
             dataLabels = list(
-              enabled = TRUE,  # Enable data labels
-              format = '{point.name}: {point.y}',  # Format: name and value
+              enabled = TRUE,  
+              format = sprintf('{point.name}: %s{point.y:.2f}', currency_symbol), 
               style = list(
-                color = 'contrast',  # Contrast with the background color
-                fontSize = '10px'  # Set font size for better visibility
+                color = 'contrast',
+                fontSize = '10px'
               )
             )
           )
+        ) %>%
+        hc_tooltip(
+          pointFormat = sprintf('<b>{point.name}</b>: %s{point.y:.2f}', currency_symbol) 
         )
     })
+    
     
     # Transactions
     
@@ -114,9 +121,10 @@ server <- function(input, output,session) {
         select(-c(By,amount_due,overall_balance))%>%
         tail(3)%>%
         mutate(
-          Amount=sprintf('<span class="amount-%s">%s</span>',tolower(Type), Amount),
+          Amount=sprintf('<span class="amount-%s">%s</span>',tolower(Type),format(Amount, big.mark = ",", scientific = FALSE)),
           Type =sprintf('<span class="transaction-type type-%s">%s</span>', 
-                        tolower(Type), Amount),
+                        tolower(Type), Type),
+          Balance=format(Balance, big.mark = ",", scientific = FALSE)
         )%>%knitr::kable(align = 'l', row.names = F,format="html" ,escape = F, table.attr = 'class="custom-table2"')%>%
         HTML()
     })
@@ -135,12 +143,12 @@ server <- function(input, output,session) {
         h1("Income vs. Obligations:"),
         p(HTML(paste(
           "Your total account balance is:", 
-          strong(format(main_account()$compute_total_balance(), big.mark = ",", scientific = FALSE)), 
+          strong(paste0(currency(),format(main_account()$compute_total_balance(), big.mark = ",", scientific = FALSE))), 
           ". This is the aggregated account balances from all accounts."
         ))),
         p(HTML(paste(
           "The total amount due is:", 
-          strong(format(main_account()$compute_total_due(), big.mark = ",", scientific = FALSE)), 
+          strong(paste0(currency(),format(main_account()$compute_total_due(), big.mark = ",", scientific = FALSE))), 
           ". This amount is the aggregated arrears from all accounts, with fixed target amounts such as bills, fixed saving goals, debts such as loans, loan arrears, etc. Accounts with no fixed targets, such as non-fixed savings, don't contribute towards this.
         It is the Debt you would remain with if you used your account balance to pay your liabilities"
         ))),
@@ -169,15 +177,18 @@ server <- function(input, output,session) {
     
     # Distribution of amount due
     
-    output$tier2_allocation_chart2<-renderHighchart({
-      accounts<-list()
-      for (child in main_account()$child_accounts){
-        accounts[[length(accounts)+1]]<-list(name = child$name, y = child$compute_total_due())
+    output$tier2_allocation_chart2 <- renderHighchart({
+      # Retrieve the currency symbol dynamically
+      currency_symbol <- currency()
+      
+      accounts <- list()
+      for (child in main_account()$child_accounts) {
+        accounts[[length(accounts) + 1]] <- list(name = child$name, y = child$compute_total_due())
       }
       
       highchart() %>%
         hc_chart(type = "bar") %>%
-        hc_title(text = "Distribution of liabilities(Amount due)") %>%
+        hc_title(text = "Distribution of Liabilities (Amount Due)") %>%
         hc_xAxis(categories = accounts %>% map(~ .x$name) %>% unlist()) %>%
         hc_add_series(
           name = "Amt. Due", 
@@ -187,65 +198,68 @@ server <- function(input, output,session) {
         hc_plotOptions(
           bar = list(
             dataLabels = list(
-              enabled = TRUE
+              enabled = TRUE,
+              format = sprintf('%s{point.y:.2f}', currency_symbol)  # Display currency in value labels
             )
           )
         ) %>%
         hc_tooltip(
-          #pointFormat = '{point.y:.1f} %'  # Display percentage in tooltip
+          pointFormat = sprintf('<b>{point.name}</b>: %s{point.y:.2f}', currency_symbol)  # Display currency in tooltip
         )
-      
-      
     })
+    
     
     # Distribution of account balance
     output$tier2_allocation_chart <- renderHighchart({
-      accounts<-list()
-      for (child in main_account()$child_accounts){
-        accounts[[length(accounts)+1]]<-list(name = child$name, y = child$compute_total_balance())
+      # Retrieve the currency symbol dynamically
+      currency_symbol <- currency()
+      total_balance <- main_account()$compute_total_balance()
+      
+      accounts <- list()
+      for (child in main_account()$child_accounts) {
+        accounts[[length(accounts) + 1]] <- list(name = child$name, y = child$compute_total_balance())
       }
+      
       highchart() %>%
         hc_chart(
           type = "pie",
           events = list(
             render = JS(sprintf("
-        function() {
-          var chart = this,
-              series = chart.series[0];
+          function() {
+            var chart = this,
+                series = chart.series[0];
 
-          var totalBalance = '%s';  // Embed the total balance directly from R
-          var customLabel = chart.options.chart.customLabel;// Embed the total balance directly from R
+            var totalBalance = '%s%s';  // Embed the currency and total balance
+            var customLabel = chart.options.chart.customLabel;
 
-          if (!customLabel) {
-            customLabel = chart.options.chart.customLabel = chart.renderer.label(
-              'Total<br/><strong>' + totalBalance + '</strong>'
-            )
-            .css({
-              color: 'black',
-              textAnchor: 'middle'
-            })
-            .add();
+            if (!customLabel) {
+              customLabel = chart.options.chart.customLabel = chart.renderer.label(
+                'Total<br/><strong>' + totalBalance + '</strong>'
+              )
+              .css({
+                color: 'black',
+                textAnchor: 'middle'
+              })
+              .add();
+            }
+
+            var x = series.center[0] + chart.plotLeft,
+                y = series.center[1] + chart.plotTop - (customLabel.attr('height') / 2);
+
+            customLabel.attr({ x: x, y: y });
+
+            // Adjust font size based on chart diameter
+            customLabel.css({ fontSize: (series.center[2] / 10) + 'px' });
           }
-
-          var x = series.center[0] + chart.plotLeft,
-              y = series.center[1] + chart.plotTop - (customLabel.attr('height') / 2);
-
-          customLabel.attr({ x: x, y: y });
-
-          // Adjust font size based on chart diameter
-          customLabel.css({ fontSize: (series.center[2] / 10) + 'px' });
-        }
-      ", main_account()$compute_total_balance()))  # Inject balance directly into the JS code
+        ", currency_symbol, total_balance))  # Inject currency symbol + balance into JS
           )
         ) %>%
-        hc_title(
-          text = "Distribution of Account Balance"  # Title handled in the JS render function
-        ) %>%
+        hc_title(text = "Distribution of Account Balance") %>%
         hc_plotOptions(
           pie = list(
             innerSize = '60%',
             dataLabels = list(
-              enabled = F,
+              enabled = FALSE,
               format = '{point.name}: {point.percentage:.1f} %'
             )
           )
@@ -253,31 +267,35 @@ server <- function(input, output,session) {
         hc_add_series(
           name = "Balance Distribution",
           data = accounts
-        )%>%
+        ) %>%
         hc_tooltip(
-          pointFormat = '{point.y:.f}'  # Display percentage in tooltip
+          pointFormat = sprintf('{point.name}: %s{point.y:.2f}', currency_symbol)  # Add currency in tooltip
         )
-      
     })
+    
     
     #popopper message for the card
     output$info_message1 <- renderUI({
-      # Extracting account balance distribution (account balance across child accounts)
+      currency_symbol <- currency()  # Retrieve the currency symbol dynamically
+      
+      # Extracting account balance distribution
       balance_distribution <- purrr::map(main_account()$child_accounts, ~ .x$compute_total_balance())
       total_balance <- sum(unlist(balance_distribution))  # Total balance across all child accounts
-      balance_distribution_text <- purrr::map2(names(balance_distribution), balance_distribution, 
-                                               ~paste0("- <strong>", .x, ":</strong>", format(.y, big.mark = ",", scientific = FALSE), 
-                                                       " (", round(.y / total_balance * 100, 2), "%)")
+      
+      balance_distribution_text <- purrr::map2(
+        names(balance_distribution), balance_distribution, 
+        ~paste0("- <strong>", .x, ":</strong> ", currency_symbol, format(.y, big.mark = ",", scientific = FALSE), 
+                " (", round(.y / total_balance * 100, 2), "%)")
       )
       
-      # Extracting liabilities distribution (distribution of liabilities across child accounts)
+      # Extracting liabilities distribution
       liabilities_distribution <- purrr::map(main_account()$child_accounts, ~ .x$compute_total_due())
       total_liabilities <- sum(unlist(liabilities_distribution))  # Total liabilities across all child accounts
       
-      # Formatting liabilities distribution into a list of amounts and percentages
-      liabilities_distribution_text <- purrr::map2(names(liabilities_distribution), liabilities_distribution, 
-                                                   ~paste0("- <strong>", .x, ":</strong>", format(.y, big.mark = ",", scientific = FALSE), 
-                                                           " (", round(.y / total_liabilities * 100, 2), "%)")
+      liabilities_distribution_text <- purrr::map2(
+        names(liabilities_distribution), liabilities_distribution, 
+        ~paste0("- <strong>", .x, ":</strong> ", currency_symbol, format(.y, big.mark = ",", scientific = FALSE), 
+                " (", round(.y / total_liabilities * 100, 2), "%)")
       )
       
       # Render UI with the relevant sections and data
@@ -311,6 +329,7 @@ server <- function(input, output,session) {
         class = "popover-content info-message"  # Apply popover-content class here
       )
     })
+    
     
     
   })
@@ -373,43 +392,74 @@ server <- function(input, output,session) {
       
       # Pie chart for Balance vs Amount Due
       output[[paste0(gsub(" ", "_", account_name), "_chart")]] <- renderHighchart({
+        currency_symbol <- currency()  # Get the dynamic currency symbol
+        
         highchart() %>%
           hc_chart(type = "pie") %>%
           hc_title(text = paste(account_name, "Account Balance")) %>%
-          hc_add_series(data = accounts()$accounts_data[[account_name]])
-        
-        
+          hc_add_series(
+            data = lapply(accounts()$accounts_data[[account_name]], function(account) {
+              list(name = account$name, y = account$y)
+            })
+          ) %>%
+          hc_plotOptions(
+            pie = list(
+              dataLabels = list(
+                enabled = TRUE,
+                format = paste0("{point.name}: ", currency_symbol, "{point.y:,.2f}")  # Format with currency
+              )
+            )
+          ) %>%
+          hc_tooltip(
+            pointFormat = paste0("{point.name}: <b>", currency_symbol, "{point.y:,.2f}</b>")  # Tooltip formatting
+          )
       })
+      
       
       # Bar chart for distribution across grandchild accounts
       output[[paste0(gsub(" ", "_", account_name), "_distribution_chart")]] <- renderHighchart({
+        currency_symbol <- currency()  # Get the dynamic currency symbol
+        
         highchart() %>%
           hc_chart(type = "bar") %>%
           hc_title(text = paste(account_name, "Account Balance Distribution")) %>%
           hc_xAxis(categories = accounts()$acc_child[[account_name]]$categories) %>%
-          hc_add_series(name = "Balance", data = as.numeric(accounts()$acc_child[[account_name]]$balance)) %>%
-          hc_add_series(name = "Amount Due", data = as.numeric(accounts()$acc_child[[account_name]]$due))
+          hc_add_series(
+            name = "Balance",
+            data = as.numeric(accounts()$acc_child[[account_name]]$balance),
+            dataLabels = list(enabled = TRUE, format = paste0(currency_symbol, " {point.y:,.2f}"))
+          ) %>%
+          hc_add_series(
+            name = "Amount Due",
+            data = as.numeric(accounts()$acc_child[[account_name]]$due),
+            dataLabels = list(enabled = TRUE, format = paste0(currency_symbol, " {point.y:,.2f}"))
+          ) %>%
+          hc_tooltip(
+            pointFormat = paste0("{series.name}: <b>", currency_symbol, "{point.y:,.2f}</b>")
+          )
       })
       
+      
       output[[paste0(gsub(" ", "_", account_name), "_poppover")]] <- renderUI({
+        currency_symbol <- currency()  # Get the dynamic currency symbol
         
         total_balance_distribution <- accounts()$accounts_data[[account_name]]  # Data for this account
         child_liabilities_distribution <- accounts()$acc_child[[account_name]]$due  # Liabilities data
-        child_balance_distribution<- accounts()$acc_child[[account_name]]$balance
+        child_balance_distribution <- accounts()$acc_child[[account_name]]$balance
         
         div(
           h1(paste(account_name, "Detailed Account Information:")),
-          p(paste("Your",account_name, "account has:")),
+          p(paste("Your", account_name, "account has:")),
           tags$ul(
             lapply(seq_along(total_balance_distribution), function(i) {
               tags$li(HTML(paste0(
-                "<strong>", total_balance_distribution[[i]]$name, ":</strong>",
-                format(balance_distribution[[i]]$y, big.mark = ",", scientific = FALSE)
+                "<strong>", total_balance_distribution[[i]]$name, ":</strong> ",
+                currency_symbol, format(total_balance_distribution[[i]]$y, big.mark = ",", scientific = FALSE)
               )))
             })
           ),
           tags$hr(),
-          h1("Distribution of child acc Bal. & Liabilities:"),
+          h1("Distribution of Child Acc Bal. & Liabilities:"),
           p("The total amount due and balance are distributed across the following child accounts:"),
           tags$table(
             class = "styled-table",
@@ -424,15 +474,13 @@ server <- function(input, output,session) {
               lapply(seq_along(child_liabilities_distribution), function(i) {
                 tags$tr(
                   tags$td(names(child_liabilities_distribution[i])),  # Account Name
-                  tags$td(format(child_balance_distribution[i], big.mark = ",", scientific = FALSE)),  # Balance
-                  tags$td(format(child_liabilities_distribution[i], big.mark = ",", scientific = FALSE))  # Amount Due
+                  tags$td(paste0(currency_symbol, format(child_balance_distribution[i], big.mark = ",", scientific = FALSE))),  # Balance
+                  tags$td(paste0(currency_symbol, format(child_liabilities_distribution[i], big.mark = ",", scientific = FALSE)))  # Amount Due
                 )
               })
             )
-          )
-          ,
+          ),
           tags$hr(),
-          # More information link
           p(
             "More information is available on the ",
             tags$a(href = "#accounts-page", "accounts page."),  # Link to the accounts page
@@ -440,8 +488,8 @@ server <- function(input, output,session) {
           ),
           class = "popover-content info-message"  # Apply popover-content class here
         )
-        
       })
+      
     })
     
     output$alerts_reminders <- renderUI({
@@ -504,58 +552,73 @@ server <- function(input, output,session) {
     req(input$selected_tab)
     
     # details section
-    output[[paste0("account_summary_section",input$selected_tab)]]<-renderUI({
-      account<-main_account()$find_account_by_uuid(input$selected_tab)
+    output[[paste0("account_summary_section", input$selected_tab)]] <- renderUI({
+      currency_symbol <- currency()  # Get dynamic currency symbol
+      account <- main_account()$find_account_by_uuid(input$selected_tab)
+      
+      tags$div(
+        class = "details-grid",
         tags$div(
-          class = "details-grid",
+          class = "detail-item",
+          tags$strong("Account ID:"),
+          tags$span(account$uuid)
+        ),
+        tags$div(
+          class = "detail-item",
+          tags$strong("Name:"),
+          tags$span(account$name)
+        ),
+        tags$div(
+          class = "detail-item",
+          tags$strong("Type:"),
+          tags$span(class(account)[1])
+        ),
+        tags$div(
+          class = "detail-item",
+          tags$strong("Balance:"),
+          tags$span(
+            class = "balance",
+            paste0(currency_symbol, format(round(account$balance, 2), big.mark = ","))
+          )
+        ),
+        tags$div(
+          class = "detail-item",
+          tags$strong("Balance in Children:"),
+          tags$span(
+            paste0(currency_symbol, format(round(account$compute_total_balance(), 2), big.mark = ","))
+          )
+        ),
+        if (!is.null(account$status)) {
           tags$div(
             class = "detail-item",
-            tags$strong("Account ID:"),
-            tags$span(account$uuid)
-          ),
-          tags$div(
-            class = "detail-item",
-            tags$strong("Name:"),
-            tags$span(account$name)
-          ),
-          tags$div(
-            class = "detail-item",
-            tags$strong("Type:"),
-            tags$span(class(account)[1])
-          ),
-          tags$div(
-            class = "detail-item",
-            tags$strong("Balance:"),
-            tags$span(class = "balance", paste(format(round(account$balance,2), big.mark = ",")))
-          ),
-          tags$div(
-            class = "detail-item",
-            tags$strong("Balance in Children:"),
-            tags$span(paste(format(round(account$compute_total_balance(),2), big.mark = ",")))
-          ),
-          if (!is.null(account$status)) {
-            tags$div(
-              class = "detail-item",
-              tags$strong("Status:"),
-              tags$span(class = if (tolower(account$status) == "active") "badge-success" else "badge-danger", account$status)
+            tags$strong("Status:"),
+            tags$span(
+              class = if (tolower(account$status) == "active") "badge-success" else "badge-danger",
+              account$status
             )
-          },
-          if (!is.null(account$allocation)) {
-            tags$div(
-              class = "detail-item",
-              tags$strong("Allocation:"),
-              tags$span(paste(scales::percent(account$allocation, accuracy = 0.01)))
+          )
+        },
+        if (!is.null(account$allocation)) {
+          tags$div(
+            class = "detail-item",
+            tags$strong("Allocation:"),
+            tags$span(paste(scales::percent(account$allocation, accuracy = 0.01)))
+          )
+        },
+        if (!is.null(account$parent)) {
+          tags$div(
+            class = "detail-item",
+            tags$strong("Parent Account:"),
+            tags$a(
+              href = paste0("/account/", account$parent$uuid),
+              account$parent$name,
+              class = "parent-link"
             )
-          },
-          if (!is.null(account$parent)) {
-            tags$div(
-              class = "detail-item",
-              tags$strong("Parent Account:"),
-              tags$a(href = paste0("/account/", account$parent$uuid), account$parent$name, class = "parent-link")
-            )
-          }
-        )
+          )
+        }
+      )
     })
+    
     
     # actions section
     output[[paste0("actions_section",input$selected_tab)]]<-renderUI({
@@ -775,7 +838,9 @@ server <- function(input, output,session) {
       datatable(
         main_account()$find_account_by_uuid(input$selected_tab)$transactions %>%
           select(-c(amount_due, overall_balance)) %>%
-          mutate(across(where(is.numeric), round, 2)),
+          mutate(across(where(is.numeric), round, 2))%>%
+          mutate(Amount=format(Amount, big.mark = ",", scientific = FALSE),
+                 Balance=format(Balance, big.mark = ",", scientific = FALSE)),
         options = list(
           scrollY = "auto",  # Allows the table height to adjust dynamically
           scrollX = TRUE, # Optional: ensures horizontal scrolling if needed
@@ -789,67 +854,89 @@ server <- function(input, output,session) {
      output[[paste0("children_section_",input$selected_tab)]]<-renderUI({
        # Child Accounts Section
        account<-main_account()$find_account_by_uuid(input$selected_tab)
-       generate_child_accounts_section(account)
+       generate_child_accounts_section(account,currency())
     })
-    
-
     
     # Pie chart for Balance vs Amount Due
     output[[paste0("balance_to_debt_", input$selected_tab)]] <- renderHighchart({
-      highchart() %>%
-        hc_chart(type = "pie") %>%
-        hc_title(text = "Income vs. Obligations") %>%
-        hc_add_series(
-          data = list(
-            list(name = "Balance", y = main_account()$find_account_by_uuid(input$selected_tab)$compute_total_balance()),
-            list(name = "Liabilities", y = main_account()$find_account_by_uuid(input$selected_tab)$compute_total_due())
-          )
-        ) %>%
-        hc_plotOptions(
-          pie = list(
-            dataLabels = list(
-              enabled = TRUE,  # Enable data labels
-              format = '{point.name}: {point.y:.2f}',  # Format: name and value
-              style = list(
-                color = 'contrast',  # Contrast with the background color
-                fontSize = '10px'  # Set font size for better visibility
-              )
-            )
+  currency_symbol <- currency()  # Get dynamic currency symbol
+  account <- main_account()$find_account_by_uuid(input$selected_tab)
+
+  highchart() %>%
+    hc_chart(type = "pie") %>%
+    hc_title(text = "Income vs. Obligations") %>%
+    hc_add_series(
+      data = list(
+        list(
+          name = "Balance",
+          y = account$compute_total_balance(),
+          formatted = paste0(currency_symbol, format(round(account$compute_total_balance(), 2), big.mark = ","))
+        ),
+        list(
+          name = "Liabilities",
+          y = account$compute_total_due(),
+          formatted = paste0(currency_symbol, format(round(account$compute_total_due(), 2), big.mark = ","))
+        )
+      )
+    ) %>%
+    hc_plotOptions(
+      pie = list(
+        dataLabels = list(
+          enabled = TRUE,  # Enable data labels
+          format = '{point.name}: {point.formatted}',  # Show formatted value with currency
+          style = list(
+            color = 'contrast',  # Contrast with the background color
+            fontSize = '10px'  # Set font size for better visibility
           )
         )
-    })
+      )
+    )
+})
+
     
-    output[[paste0("transaction_trend_chart_",input$selected_tab)]] <- renderHighchart({
+    output[[paste0("transaction_trend_chart_", input$selected_tab)]] <- renderHighchart({
+      currency_symbol <- currency()  # Get dynamic currency symbol
+      
       plot_data <- main_account()$find_account_by_uuid(input$selected_tab)$transactions %>%
         group_by(Date) %>%
         summarise(
           Total_Balance = max(overall_balance), 
           Total_Amount = sum(amount_due) 
-        )
+        ) %>%
+        ungroup() %>%
+        mutate(Date = as.character(Date))  # Ensure proper date handling
       
-      # Create line chart
       highchart() %>%
         hc_chart(type = "line") %>%
         hc_title(text = "Transaction Trends Over Time") %>%
-        hc_xAxis(categories = as.character(plot_data$Date), title = list(text = "Date")) %>%
-        hc_yAxis(title = list(text = "Amount/Balances")) %>%
-        hc_add_series(name = "Total Balance", data = plot_data$Total_Balance) %>%
-        hc_add_series(name = "Total Amount due", data = plot_data$Total_Amount) %>%
-        hc_tooltip(
-          shared = TRUE,
-          pointFormat = '<b>{series.name}</b>: {point.y:.2f}<br/>'
+        hc_xAxis(categories = plot_data$Date, title = list(text = "Date")) %>%
+        hc_yAxis(title = list(text = paste0("Amount (", currency_symbol, ")"))) %>%
+        hc_add_series(
+          name = "Total Balance",
+          data = plot_data$Total_Balance,
+          tooltip = list(
+            pointFormat = paste0("<b>Total Balance</b>: ", currency_symbol, "{point.y:,.2f}<br/>")
+          )
         ) %>%
+        hc_add_series(
+          name = "Total Amount Due",
+          data = plot_data$Total_Amount,
+          tooltip = list(
+            pointFormat = paste0("<b>Total Amount Due</b>: ", currency_symbol, "{point.y:,.2f}<br/>")
+          )
+        ) %>%
+        hc_tooltip(shared = TRUE) %>%
         hc_plotOptions(
           line = list(
             dataLabels = list(
               enabled = TRUE,
-              format = '{y:.2f}'  # Round the data label values to 2 decimal places
+              format = paste0(currency_symbol, "{y:,.2f}")  # Show formatted currency values
             ),
             enableMouseTracking = TRUE
           )
         )
-      
     })
+    
 
   })
   

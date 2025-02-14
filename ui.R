@@ -26,6 +26,7 @@ if (file.exists("main_account.RData")) {
 
 Name<-"Festus Nzuma"
 myname<- "Festus"    #first name from log in info
+
 ui <- page_navbar(
   #navbar_options(underline = F),
   id="appId",
@@ -223,31 +224,28 @@ ui <- page_navbar(
   
 ## Accounts page=======================================================================
 
-  nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"), 
-  style = "background-color:#F6F6F6;",
-   # sidebar         
+  nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"),
+  
   layout_sidebar(
+    style = "background-color:#F6F6F6;",
     sidebar=sidebar(
+      width = "310px",
       title = tags$div(
         class = "custom-sidebar-title",
         icon("briefcase"), 
         "Accounts"
       ),
-      width = "310px",
-      tags$div(
-        class = "custom-sidebar",
-        #build_sidebar(main_account) 
-        uiOutput("build_sidebar")
-      )
+      uiOutput("build_sidebar"),
+      uiOutput("dummy")
       
     ),
     
     # navbar content 
-    uiOutput("nav_content"),
-    uiOutput("dummy")
+    uiOutput("nav_content")
   )
   ),
 
+## Reports page=======================================================================
   nav_panel(span(icon("chart-column"), "Reports",class = "custom-tab"),
             layout_sidebar(
               sidebar=sidebar(
