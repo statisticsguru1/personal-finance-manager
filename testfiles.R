@@ -48,70 +48,70 @@ main_account$child_accounts$`Needs`$add_child_account(
   
 )
 
-main_account$child_accounts$`Needs`$add_child_account(
-  GrandchildAccount$new("Hope",
-                        allocation = .05,
-                        fixed_amount=3500,
-                        account_type="Bill",
-                        freq=70,
-                        due_date = dmy("06-2-2025")
-  )
-  
-)
-
-main_account$child_accounts$`Needs`$add_child_account(
-  GrandchildAccount$new("Shamba boy",
-                        allocation = .1,
-                        fixed_amount=3000,
-                        account_type="Bill",
-                        freq=30,
-                        due_date = dmy("28-1-2025")
-  )
-  
-)
-
-
-main_account$child_accounts$`Needs`$add_child_account(
-  GrandchildAccount$new("Internet",
-                        allocation = .15,
-                        fixed_amount=3000,
-                        account_type="Bill",
-                        freq=30,
-                        due_date = dmy("10-2-2025")
-  )
-  
-)
-
-main_account$child_accounts$`Needs`$add_child_account(
-  GrandchildAccount$new("miscellaneous",
-                        allocation = .15,
-                        fixed_amount=3500,
-                        account_type="Bill",
-                        freq=30,
-                        due_date = dmy("10-2-2025")
-  )
-  
-)
-
-main_account$child_accounts$`Needs`$add_child_account(
-  GrandchildAccount$new("Farm inputs",
-                        allocation = .05,
-                        fixed_amount=1500,
-                        account_type="Bill",
-                        freq=30,
-                        due_date = dmy("16-2-2025")
-  )
-)
-
-main_account$child_accounts$`Needs`$add_child_account(
-  GrandchildAccount$new("Insurance",
-                        allocation = .0,
-                        fixed_amount=1500,
-                        account_type="Bill",
-                        freq=30,
-                        due_date = dmy("16-2-2025")
-  )
-)
+# main_account$child_accounts$`Needs`$add_child_account(
+#   GrandchildAccount$new("Hope",
+#                         allocation = .05,
+#                         fixed_amount=3500,
+#                         account_type="Bill",
+#                         freq=70,
+#                         due_date = dmy("06-2-2025")
+#   )
+#   
+# )
+# 
+# main_account$child_accounts$`Needs`$add_child_account(
+#   GrandchildAccount$new("Shamba boy",
+#                         allocation = .1,
+#                         fixed_amount=3000,
+#                         account_type="Bill",
+#                         freq=30,
+#                         due_date = dmy("28-1-2025")
+#   )
+#   
+# )
+# 
+# 
+# main_account$child_accounts$`Needs`$add_child_account(
+#   GrandchildAccount$new("Internet",
+#                         allocation = .15,
+#                         fixed_amount=3000,
+#                         account_type="Bill",
+#                         freq=30,
+#                         due_date = dmy("10-2-2025")
+#   )
+#   
+# )
+# 
+# main_account$child_accounts$`Needs`$add_child_account(
+#   GrandchildAccount$new("miscellaneous",
+#                         allocation = .15,
+#                         fixed_amount=3500,
+#                         account_type="Bill",
+#                         freq=30,
+#                         due_date = dmy("10-2-2025")
+#   )
+#   
+# )
+# 
+# main_account$child_accounts$`Needs`$add_child_account(
+#   GrandchildAccount$new("Farm inputs",
+#                         allocation = .05,
+#                         fixed_amount=1500,
+#                         account_type="Bill",
+#                         freq=30,
+#                         due_date = dmy("16-2-2025")
+#   )
+# )
+# 
+# main_account$child_accounts$`Needs`$add_child_account(
+#   GrandchildAccount$new("Insurance",
+#                         allocation = .0,
+#                         fixed_amount=1500,
+#                         account_type="Bill",
+#                         freq=30,
+#                         due_date = dmy("16-2-2025")
+#   )
+# )
 # Debts
 
 main_account$child_accounts$`Debt Repayment`$add_child_account(
@@ -158,7 +158,7 @@ main_account$child_accounts$`Goals`$add_child_account(
 main_account$deposit(10000, transaction_number = "TXN001", channel = "Mpesa")
 main_account$deposit(10000, transaction_number = "TXN002", channel = "EQuity")
 main_account$deposit(10000, transaction_number = "TXN003", channel = "EQuity")
-#main_account$deposit(10000, transaction_number = "TXN004", channel = "EQuity")
-
+main_account$find_account("Rent")$deposit(10000, transaction_number = "TXN004", channel = "EQuity")
+main_account$find_account("Rent")$withdraw(200, transaction_number = "TXN005", channel = "Cash")
 #main_account$deposit(40000, transaction_number = "TXN005", channel = "EQuity")
 

@@ -62,6 +62,10 @@ MainAccount <- R6Class("MainAccount",
                            }
                            
                            self$balance <- self$balance + amount
+                           Balance <-self$balance
+                           amount_due <-self$compute_total_due()
+                           overall_balance <-self$compute_total_balance()
+                           Date <- as.POSIXct(date)
                            
                            self$transactions <- rbind(self$transactions, data.frame(
                              Type = "Deposit",
@@ -69,9 +73,9 @@ MainAccount <- R6Class("MainAccount",
                              TransactionID = transaction_number,
                              Channel = channel,
                              Amount = amount,
-                             Balance=self$balance,
-                             amount_due=self$compute_total_due(),
-                             overall_balance=self$compute_total_balance(),
+                             Balance=Balance,
+                             amount_due=amount_due,
+                             overall_balance=overall_balance,
                              Date = as.POSIXct((date)),
                              stringsAsFactors = FALSE
                            ))
@@ -170,16 +174,21 @@ MainAccount <- R6Class("MainAccount",
                            }
                            
                            self$balance <- self$balance - amount
+                           Balance <-self$balance
+                           amount_due <-self$compute_total_due()
+                           overall_balance <-self$compute_total_balance()
+                           Date <- as.POSIXct(date)
+                           
                            self$transactions <- rbind(self$transactions, data.frame(
                              Type = "Withdrawal",
                              By=By,
                              TransactionID = transaction_number,
                              Channel = channel,
                              Amount = amount,
-                             Balance=self$balance,
-                             amount_due=self$compute_total_due(),
-                             overall_balance=self$compute_total_balance(),
-                             Date = as.POSIXct(date),
+                             Balance=Balance,
+                             amount_due=amount_due,
+                             overall_balance=overall_balance,
+                             Date = Date,
                              stringsAsFactors = FALSE
                            ))
                            cat("Withdrew:", amount, "via", channel, "- Transaction ID:", transaction_number, "\n")
@@ -387,42 +396,44 @@ MainAccount <- R6Class("MainAccount",
                            
                            return(total_due)
                          },
-                         spending = function(daterange=c(Sys.time()-as.difftime(36500, units = "days"),Sys.time())){
+                         spending = function(daterange=c(Sys.Date()-365000,Sys.Date())){
+                           daterange<-as.POSIXct(daterange)
                            # Sum of deposits made by the user in the main account
                            transactions <- self$transactions %>%
-                                                 filter(Type == "Withdrawal" & By == "User",between(Date,daterange[1],daterange[2])) %>%
-                                                 pull(Amount)%>%sum(na.rm = TRUE)
+                             filter(Type == "Withdrawal" & By == "User"& between(Date,daterange[1],(daterange[2]+hours(23)+minutes(59)+seconds(59)))) %>%
+                             pull(Amount)%>%sum(na.rm = TRUE)
                            
                            # If there are child accounts, recursively accumulate their spending
                            if (length(self$child_accounts) > 0) {
                              for (child in self$child_accounts) {
-                               transactions <- transactions + child$spending()
+                               transactions <- transactions + child$spending(daterange)
                              }
                            }
                            
                            return(transactions)
                          },
-                         total_income = function(daterange=c(Sys.time()-as.difftime(36500, units = "days"),Sys.time())){
+                         total_income = function(daterange=c(Sys.Date()-365000,Sys.Date())){
+                           daterange<-as.POSIXct(daterange)
                            # Sum of deposits made by the user in the main account
                            transactions <- self$transactions %>%
-                             filter(Type == "Deposit" & By == "User",between(Date,daterange[1],daterange[2])) %>%
+                             filter(Type == "Deposit" & By == "User",between(Date,daterange[1],(daterange[2]+hours(23)+minutes(59)+seconds(59)))) %>%
                              pull(Amount)%>%sum(na.rm = TRUE)
                            
                            # If there are child accounts, recursively accumulate their income
                            if (length(self$child_accounts) > 0) {
                              for (child in self$child_accounts) {
-                               transactions <- transactions + child$total_income ()
+                               transactions <- transactions + child$total_income (daterange)
                              }
                            }
                            
                            return(transactions)
                          },
-                         allocated_amount = function(daterange = c(Sys.time() - as.difftime(36500, units = "days"), Sys.time())) {
-                           
+                         allocated_amount = function(daterange=c(Sys.Date()-365000,Sys.Date())) {
+                           daterange<-as.POSIXct(daterange)
                            # Step 1: Sum all deposits (User + System) for this account
                            transactions <- if (!is.null(self$transactions)) {
                              self$transactions %>%
-                               filter(Type == "Deposit", Date >= daterange[1] & Date <= daterange[2]) %>%
+                               filter(Type == "Deposit" &between(Date,daterange[1],(daterange[2]+hours(23)+minutes(59)+seconds(59)))) %>%
                                pull(Amount) %>%
                                sum(na.rm = TRUE)
                            } else {
@@ -453,8 +464,57 @@ MainAccount <- R6Class("MainAccount",
                            
                            return(transactions)
                          },
-                         income_utilization=function(daterange = c(Sys.time() - as.difftime(36500, units = "days"), Sys.time())){
-                           self$spending(daterange)/self$allocated_amount(daterange)
+                         income_utilization=function(daterange=c(Sys.Date()-365000,Sys.Date())){
+                           daterange<-as.POSIXct(daterange)
+                           self$spending(daterange)/ifelse(self$allocated_amount(daterange)==0,
+                                                           self$allocated_amount(daterange)+.Machine$double.eps,
+                                                           self$allocated_amount(daterange))
+                         },
+                         walking_amount=function(amt_type="amount_due",daterange=c(Sys.Date()-365000,Sys.Date())){
+                           daterange<-as.POSIXct(daterange)
+                           if(amt_type=="amount_due"){
+                             if(!is.null(self$Track_dues_and_balance)){
+                              amt<-self$Track_dues_and_balance%>%
+                               filter(between(Date,daterange[1],(daterange[2]+hours(23)+minutes(59)+seconds(59)))) %>%
+                               tail(1)%>%
+                               pull(Amount_due)
+                              
+                              if(length(amt)==0){amt<- 0}
+                              transactions <-amt
+                              }else{
+                                transactions <- 0
+                             }
+                             
+                             if (length(self$child_accounts) > 0) {
+                               for (child in self$child_accounts) {
+                                 transactions <- transactions + child$walking_amount(daterange=daterange)
+                               }
+                             }
+                             
+                             return(transactions) 
+                           }else{
+                            if(!is.null(self$Track_dues_and_balance)){
+                               
+                               amt<-self$Track_dues_and_balance%>%
+                                 filter(between(Date,daterange[1],(daterange[2]+hours(23)+minutes(59)+seconds(59)))) %>%
+                                 tail(1)%>%
+                                 pull(Balance)
+                               if(length(amt)==0){amt<-0}
+                               transactions <-  amt
+                             }else{
+                               transactions<-0
+                             }
+                             
+                             if (length(self$child_accounts) > 0) {
+                               for (child in self$child_accounts) {
+                                 transactions <- transactions + child$walking_amount(amt_type=="Balance",daterange=daterange)
+                               }
+                             }
+                             
+                             return(transactions) 
+                             
+                           }
+                           
                          }
                          
                        )
@@ -488,15 +548,20 @@ ChildAccount <- R6Class("ChildAccount",
                               }
                               
                               self$balance <- self$balance + amount
+                              Balance <-self$balance
+                              amount_due <-self$compute_total_due()
+                              overall_balance <-self$compute_total_balance()
+                              Date <- as.POSIXct(date)
+                              
                               self$transactions <- rbind(self$transactions, data.frame(
                                 Type = "Deposit",
                                 By=By,
                                 TransactionID = transaction_number,
                                 Channel = channel,
                                 Amount = amount,
-                                Balance=self$balance,
-                                amount_due=self$compute_total_due(),
-                                overall_balance=self$compute_total_balance(),
+                                Balance=Balance,
+                                amount_due=amount_due,
+                                overall_balance=overall_balance,
                                 Date = as.POSIXct(date),
                                 stringsAsFactors = FALSE
                               ))
@@ -555,6 +620,7 @@ GrandchildAccount <- R6Class(
     account_type = NULL,    # Type of account (Bill, Debt, Expense, FixedSaving, NonFixedSaving)
     freq = NULL,            # Frequency of bill recurrence (days, monthly, etc.)
     num_periods = 1,        # Number of periods for unpaid bills
+    Track_dues_and_balance = NULL,
     
     # Constructor
     initialize = function(name, allocation = 0, priority = 0, fixed_amount = 0, due_date = NULL, account_type = "Expense", freq = NULL) {
@@ -565,6 +631,12 @@ GrandchildAccount <- R6Class(
       self$account_type <- account_type
       self$freq <- freq
       self$num_periods <- 1
+      self$Track_dues_and_balance <- data.frame(
+        Date = POSIXct(),
+        Amount_due = numeric(),
+        Balance = numeric(),
+        stringsAsFactors = FALSE
+      )
     },
     
     # Getter for due_date
@@ -630,6 +702,12 @@ GrandchildAccount <- R6Class(
             cat("Extra amount of", extra_amount, "moved to", self$parent$name, "\n")
           }
           self$amount_due <- 0  # No amount due
+          self$Track_dues_and_balance <- rbind(self$Track_dues_and_balance, data.frame(
+            Date = Sys.time(),
+            Amount_due = self$amount_due,
+            Balance = self$balance,
+            stringsAsFactors = FALSE
+          ))
           cat(self$name, "fully funded for", self$num_periods, "period(s)\n")
           return()
         }
@@ -638,8 +716,22 @@ GrandchildAccount <- R6Class(
       # Regular deposit if no overflow
       # you might think this double deposits but its not 
       super$deposit(amount=amount, transaction_number=transaction_number,By=By, channel=channel, date=date)
+      
       if(self$fixed_amount>0){
       self$amount_due <- self$num_periods * self$fixed_amount - self$balance
+      self$Track_dues_and_balance <- rbind(self$Track_dues_and_balance, data.frame(
+        Date = Sys.time(),
+        Amount_due = self$amount_due,
+        Balance = self$balance,
+        stringsAsFactors = FALSE
+      ))
+      }else{
+        self$Track_dues_and_balance <- rbind(self$Track_dues_and_balance, data.frame(
+          Date = Sys.time(),
+          Amount_due = self$amount_due,
+          Balance = self$balance,
+          stringsAsFactors = FALSE
+        ))
       }
     },
     
@@ -650,8 +742,14 @@ GrandchildAccount <- R6Class(
         cat("Insufficient balance in", self$name, "to withdraw", amount, "\n")
         return(NULL)
       }
-      super$withdraw(amount=amount,By=By,channel = "Internal Transfers")
+      super$withdraw(amount=amount,By=By,channel = channel)
       
+      self$Track_dues_and_balance <- rbind(self$Track_dues_and_balance, data.frame(
+        Date = Sys.time(),
+        Amount_due = self$amount_due,
+        Balance = self$balance,
+        stringsAsFactors = FALSE
+      ))
       # for bills and fixed savings withdrawal reduce balance we need to compensate
       # for istance with a monthly rent of $75000 if you withdraw 35000 the rent remains 40000
       #but fixed amount reads 75000, instead of changing fixed amount we can adjust the period 

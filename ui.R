@@ -9,6 +9,9 @@ library(shinylogs)
 library(shinyWidgets)
 library(shinySearchbar)
 library(colorspace)
+library(future)
+library(furrr)
+library(promises)
 
 options(knitr.kable.NA = '')
 
@@ -16,9 +19,9 @@ source("accountspagebuilder.R")
 source("testfiles.R")
 
 if (file.exists("main_account.RData")) {
- # load("main_account.RData")
+  load("main_account.RData")
 } else {
- # main_account <- MainAccount$new("Main")
+  main_account <- MainAccount$new("Main")
 }
 
 
@@ -75,6 +78,7 @@ ui <- page_navbar(
       )
       ,
       # Total Financial Overview
+      
       layout_column_wrap(
         width = 1/4,
         fill = TRUE,
@@ -256,106 +260,93 @@ ui <- page_navbar(
                 ),
                 width="300px",
                 class = "custom-sidebar",
-              pickerInput("selaccount", "Select Account", 
-                          choices = list("Main","Needs", "Goals", "Savings"),
-                          multiple = FALSE, options = list(`live-search` = TRUE)),
               dateRangeInput("date", "Select Date Range", start = Sys.Date() - 366, end = Sys.Date()),
-              selectInput("transaction_type", "Transaction Type", 
-                          choices = c("All", "Income", "Spending", "Transfers")),
               downloadButton("download_report", "Download Report")
             ),
             
             layout_column_wrap(
-              width=1/4,
-              gap = "3px",
-              #fill = T,
+              width = 1,
+              fill = TRUE,
+              heights_equal = "row",
+            layout_column_wrap(
+              width = 1/4,
+              fill = TRUE,
+              heights_equal = "row",
+              # Value Boxes
               card(
                 fill=T,
-                full_screen = T,
-                card_header("Total Income", class = 'custom-card-header'),
-                card_body(
-                  div(
-                    class = 'card-body-div', 
-                    div(
-                      class='card-body-value-div',
-                      uiOutput("total_income")
-                    ),
-                    div(
-                      class = 'icon-div',
-                      icon("coins",class= "icon-val11")
-                    )
-                  ),
-                  tags$hr(class = "tags-hr"),
-                  p("sum from all accounts", class = "text-muted"),
-                  class = "card-content"
-                )
+                class = "vb-value-box",
+                div(class = "vb-value-box-header",
+                    span(class = "vb-icon-container vb-icon-blue",
+                         icon("wallet")),
+                    "Total Income"),
+                div(textOutput("total_income"), class = "vb-value-box-value"),
+                div(uiOutput("income_change"), class = "vb-value-box-change")
               ),
-              card(
-                fill=T,
-                full_screen = T,
-                card_header("Total spending", class = 'custom-card-header'),
-                card_body(
-                  div(
-                    class = 'card-body-div', 
-                    div(
-                      class='card-body-value-div',
-                      uiOutput("total_spending")
-                    ),
-                    div(
-                      class = 'icon-div',
-                      icon("credit-card",class= "icon-val1")
-                    )
-                  ),
-                  tags$hr(class = "tags-hr"),
-                  p("sum from all accounts", class = "text-muted"),
-                  class = "card-content"
-                )
+              
+              card(fill=T,
+                class = "vb-value-box",
+                div(class = "vb-value-box-header",
+                    span(class = "vb-icon-container vb-icon-red",
+                         icon("credit-card")),
+                    "Total Spending"),
+                div(textOutput("total_spending"), class = "vb-value-box-value"),
+                div(uiOutput("spending_change"), class = "vb-value-box-change")
               ),
               
               card(
                 fill=T,
-                full_screen = T,
-                card_header("Money Utilization", class = 'custom-card-header'),
-                card_body(
-                  div(
-                    class = 'card-body-div', 
-                    div(
-                      class='card-body-value-div',
-                      #uiOutput("total_spending")
-                    ),
-                    div(
-                      class = 'icon-div',
-                      icon("credit-card",class= "icon-val1")
-                    )
-                  ),
-                  tags$hr(class = "tags-hr"),
-                  p("sum from all accounts", class = "text-muted"),
-                  class = "card-content"
-                )
+                class = "vb-value-box",
+                div(class = "vb-value-box-header",
+                    span(class = "vb-icon-container vb-icon-green",
+                         icon("chart-simple")),
+                    "% Utilization"),
+                div(textOutput("utilization"), class = "vb-value-box-value"),
+                div(uiOutput("utilization_change"), class = "vb-value-box-change")
+              ),
+              
+              card(
+                fill=T,
+                class = "vb-value-box",
+                div(class = "vb-value-box-header",
+                    span(class = "vb-icon-container vb-icon-purple",
+                         icon("chart-line")),
+                    "Debt Ratio"),
+                div(textOutput("debt_ratio"), class = "vb-value-box-value"),
+                div(uiOutput("debt_change"), class = "vb-value-box-change")
+              )
+            ),
+            layout_column_wrap(
+              fill=TRUE,
+              width=1/2,
+              heights_equal = "row",
+              card(
+                fill=T,
+                card_header("Income vs. Spending Trend"),
+                highchartOutput("income_vs_spending")
               ),
               card(
                 fill=T,
-                full_screen = T,
-                card_header("Assets-to-Liabilities", class = 'custom-card-header'),
-                card_body(
-                  div(
-                    class = 'card-body-div', 
-                    div(
-                      class='card-body-value-div',
-                      uiOutput("total_spending")
-                    ),
-                    div(
-                      class = 'icon-div',
-                      icon("credit-card",class= "icon-val1")
-                    )
-                  ),
-                  tags$hr(class = "tags-hr"),
-                  p("sum from all accounts", class = "text-muted"),
-                  class = "card-content"
-                )
+                card_header("Money Utilization"),
+                highchartOutput("utilized")
+              )),
+            
+            layout_column_wrap(
+              fill=TRUE,
+              width=1/2,
+              heights_equal = "row",
+              card(
+                fill=T,
+                card_header("Distribution of spending"),
+                highchartOutput("spending_drill")
+              ),
+              card(
+                fill=T,
+                card_header("Trend in Debt reduction"),
+                highchartOutput("debt")
               )
-            ),
-            card()
+            )
+            )
             )
             ),
   nav_panel(span(icon("user"), "Profile",class = "custom-tab"), h1("profile Content")),

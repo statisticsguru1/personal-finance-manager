@@ -1,4 +1,7 @@
 currency<-"$"
+
+
+
 server <- function(input, output,session) {
   
   observeEvent(input$dark_mode,{
@@ -1016,27 +1019,356 @@ server <- function(input, output,session) {
   })
   
   
-  # Reports 
+  # Reports ===========================================================================
   
-  observe({
-    if(!is.null(main_account())){
-    updatePickerInput(session = session, inputId = "selaccount",
-                      choices = main_account()$list_all_accounts())
+  
+  output$total_income <- renderText({
+    paste0(currency(),format(main_account()$total_income(as.POSIXct(input$date)),
+           big.mark = ",",
+           scientific = FALSE))
+    })
+  
+  output$income_change <- renderUI({
+    current_income<-main_account()$total_income(as.POSIXct(input$date))
+    previous_income<-main_account()$total_income(as.POSIXct(input$date)-days(30))
+    
+    if (previous_income == 0) {
+      change <- if (current_income > 0) 100 else 0  
+    } else {
+      change <- ((current_income - previous_income) / previous_income) * 100
     }
+    
+    color_class <- ifelse(change >= 0, "vb-text-green", "vb-text-red")
+    arrow_icon <- ifelse(change >= 0, "arrow-up", "arrow-down")
+    span(icon(arrow_icon), paste0(abs(change), "% vs last month"), class = color_class)
   })
   
-  output$total_income <- renderUI({
-    ss<<-input$date
-    HTML(paste(h1(format(main_account()$total_income(as.POSIXct(input$date)),
-                         big.mark = ",",
-                         scientific = FALSE), class = "card-body-value")))
-    })
-  output$total_spending <- renderUI({
-    main_account()$spending()
-    })
-  output$utilization <- renderUI({ paste0(round(sum(financial_data$Amount[financial_data$Type == "Spending"]) / sum(financial_data$Amount[financial_data$Type == "Income"]) * 100, 1), "%") })
-  output$debt_ratio <- renderUI({ paste0(round(tail(debt_data$Debt, 1) / tail(savings_data$Savings, 1) * 100, 1), "%") })
+  output$total_spending <- renderText({
+    paste0(currency(),format(main_account()$spending(input$date),
+           big.mark = ",",
+           scientific = FALSE))
+  })
+  output$spending_change <- renderUI({
+    current_spending<-main_account()$spending(input$date)
+    previous_spending<-main_account()$spending(input$date-30)
+    
+    if (previous_spending == 0) {
+      change <- if (current_spending > 0) 100 else 0  
+    } else {
+      change <- ((current_spending - previous_spending) / previous_spending) * 100
+    }
+    color_class <- ifelse(change >= 0, "vb-text-green", "vb-text-red")
+    arrow_icon <- ifelse(change >= 0, "arrow-up", "arrow-down")
+    span(icon(arrow_icon), paste0(abs(change), "% vs last month"), class = color_class)
+  })
   
+  output$utilization <- renderText({
+    paste0(round(100*main_account()$income_utilization(input$date),2),"%")
+  })
+  
+  output$utilization_change <- renderUI({
+    current_utilization <- main_account()$income_utilization(input$date)
+    previous_utilization <- main_account()$income_utilization(input$date - 30)
+    
+    if (previous_utilization == 0) {
+      change <- if (current_utilization > 0) 100 else 0  
+    } else {
+      change <- ((current_utilization - previous_utilization) / previous_utilization) * 100
+    }
+    
+    # Determine color and icon based on your rules
+    if (previous_utilization > 1.3) {
+      # Previous was overutilization
+      if (change > 0) {
+        color_class <- "vb-text-red"  # Increase, bad (overutilization getting worse)
+        arrow_icon <- "arrow-up"
+      } else {
+        color_class <- "vb-text-green"  # Decrease, good (overutilization improving)
+        arrow_icon <- "arrow-down"
+      }
+    } else if (previous_utilization < 0.7) {
+      # Previous was underutilization
+      if (change > 0) {
+        color_class <- "vb-text-green"  # Increase, good (underutilization improving)
+        arrow_icon <- "arrow-up"
+      } else {
+        color_class <- "vb-text-red"  # Decrease, bad (underutilization getting worse)
+        arrow_icon <- "arrow-down"
+      }
+    } else {
+      # Utilization is within the acceptable range (around 1)
+      color_class <- ifelse(change > 0, "vb-text-red", "vb-text-green")
+      arrow_icon <- ifelse(change > 0, "arrow-up", "arrow-down")
+    }
+    
+    span(icon(arrow_icon), paste0(abs(round(change, 2)), "% vs last month"), class = color_class)
+  })
+  
+  output$debt_ratio <- renderText({ 
+    debt_amount<-main_account()$walking_amount(daterange = input$date)
+    balance_amount<-main_account()$walking_amount(amt_type = "Balance",daterange = input$date)
+    paste0(round(100*debt_amount/((debt_amount+balance_amount)+.Machine$double.eps),2),"%")
+    })
+  
+  
+  output$debt_change <- renderUI({
+    current_debt_amount<-main_account()$walking_amount(daterange = input$date)
+    current_balance_amount<-main_account()$walking_amount(amt_type = "Balance",daterange = input$date)
+    current_debt_ratio<-current_debt_amount/((current_debt_amount+current_balance_amount)+.Machine$double.eps)
+  
+    previous_debt_amount<-main_account()$walking_amount(daterange = input$date-30)
+    previous_balance_amount<-main_account()$walking_amount(amt_type = "Balance",daterange = input$date-30)
+    previous_debt_ratio<-current_debt_amount/((current_debt_amount+current_balance_amount)+.Machine$double.eps)
+    
+    if (previous_debt_ratio== 0) {
+      change <- if (current_debt_ratio > 0) 100 else 0  
+    } else {
+      change <- ((current_debt_ratio- previous_debt_ratio) / previous_debt_ratio) * 100
+    }
+    
+    color_class <- ifelse(change >= 0, "vb-text-red", "vb-text-green")
+    arrow_icon <- ifelse(change >= 0, "arrow-up", "arrow-down")
+    span(icon(arrow_icon), paste0(abs(change), "% vs last month"), class = color_class)
+  })
+  
+  income_spending<-reactive({
+    date<-input$date[1]
+    df<-data.frame(
+      Date=as.Date(POSIXct()),
+      Income=numeric(),
+      Spending=numeric(),
+      stringsAsFactors = F
+    )
+    
+    while(date<=input$date[2]){
+      df<-rbind(
+        df,
+        data.frame(
+          Date=date,
+          Income=main_account()$total_income(c(date,date)),
+          Spending= main_account()$spending(c(date,date)),
+          stringsAsFactors = F
+        )
+      )
+      date<-date+1
+    }
+    
+    first_nonzero_row <- which(df$Income != 0 | df$Spending != 0)
+    
+    if (length(first_nonzero_row) > 0) {
+      df <- df %>% slice(min(first_nonzero_row):n())
+    } else {
+      df <- df %>% slice(n())
+    }
+    df
+  })
+  
+  output$income_vs_spending <- renderHighchart({
+    df<-income_spending()
+    ddf<<-df
+    highchart() %>%
+      hc_chart(type = "line") %>%
+      hc_xAxis(categories = as.character(df$Date)) %>%
+      hc_yAxis(title = list(text = paste0("Amount (", currency(), ")"))) %>%
+      hc_add_series(
+        name = "Income",
+        data = df$Income,
+        tooltip = list(pointFormat = paste0("<b>Income:</b> ", currency(), "{point.y:,.2f}<br>"))
+      ) %>%
+      hc_add_series(
+        name = "Spending",
+        data = df$Spending,
+        tooltip = list(pointFormat = paste0("<b>Spending:</b> ", currency(), "{point.y:,.2f}<br>"))
+      )
+    
+  })
+  
+  utilization<-reactive({
+    date <- input$date[1]
+    df <- data.frame(
+      Date = as.Date(character()),
+      Allocated = numeric(),
+      Spend = numeric(),
+      stringsAsFactors = FALSE
+    )
+    
+    while (date <= input$date[2]) {
+      df <- rbind(
+        df,
+        data.frame(
+          Date = date,
+          Allocated = main_account()$allocated_amount(c(date, date)),
+          Spend = main_account()$spending(c(date, date)),
+          stringsAsFactors = FALSE
+        )
+      )
+      date <- date + 1
+    }
+    
+    first_nonzero_row <- which(df$Allocated != 0 | df$Spend != 0)
+    
+    if (length(first_nonzero_row) > 0) {
+      df <- df %>% slice(min(first_nonzero_row):n())
+    } else {
+      df <- df %>% slice(n())
+    }
+    
+    df
+  })
 
+  output$utilized <- renderHighchart({
+    df<-utilization()
+    df <- df %>% mutate(utilization = round(100 * Spend / Allocated, 2))
+    
+    highchart() %>%
+      hc_chart(type = "line") %>%
+      hc_xAxis(categories = as.character(df$Date)) %>%
+      hc_yAxis(title = list(text = paste0("Amount (", currency(), ")"))) %>%
+      hc_add_series(
+        name = "Allocated",
+        data = df$Allocated,
+        tooltip = list(pointFormat = paste0("<b>Allocated:</b> ", currency(), "{point.y:,.2f}<br>"))
+      ) %>%
+      hc_add_series(
+        name = "Spend",
+        data = df$Spend,
+        tooltip = list(pointFormat = paste0(
+          "<b>Spend:</b> ", currency(), "{point.y:,.2f}<br>",
+          "<b>Utilization:</b> {point.utilization}%"
+        ))
+      ) %>%
+      hc_plotOptions(series = list(
+        point = list(events = list(
+          mouseOver = JS("
+        function() {
+          var index = this.index;
+          var chart = this.series.chart;
+          var spend = chart.series[1].data[index].y;
+          var allocated = chart.series[0].data[index].y;
+          var utilization = allocated > 0 ? (spend / allocated * 100).toFixed(2) : 0;
+          chart.series[1].data[index].update({ utilization: utilization }, true, false);
+        }
+      ")
+        ))
+      ))
+    
+  })
+  
+  output$spending_drill<-renderHighchart({
+    prepare_drilldown_data <- function(account, drilldown_series = list(),daterange) {
+      children <- account$child_accounts
+      
+      # Base case: If no children, return only the account data
+      if (length(children) == 0) {
+        return(list(
+          name = account$name,
+          y = account$spending(daterange)
+        ))
+      }
+      
+      # Create an empty data list for this account
+      data_points <- list()
+      
+      for (child in children) {
+        child_data <- prepare_drilldown_data(child, drilldown_series,daterange)
+        
+        # Store drilldown data separately
+        if (!is.null(child_data$drilldown)) {
+          drilldown_series[[length(drilldown_series) + 1]] <- child_data$drilldown
+        }
+        
+        # Add child data to parent level
+        data_points <- append(data_points, list(
+          list(
+            name = child$name,
+            y = child$spending(daterange),
+            drilldown = if (length(child$child_accounts) > 0) child$name else NULL
+          )
+        ))
+      }
+      
+      # Return structured data
+      return(list(
+        name = account$name,
+        y = account$spending(daterange),
+        drilldown = list(
+          id = account$name,
+          data = data_points
+        ),
+        drilldown_series = drilldown_series
+      ))
+    }
+    
+    # Generate account data with properly structured drilldowns
+    account_data <- prepare_drilldown_data(main_account(),daterange=input$date)
+    
+    # Extract top-level data (main account level)
+    top_level_data <- lapply(account_data$drilldown$data, function(x) {
+      list(name = x$name, y = x$y, drilldown = x$drilldown)
+    })
+    
+    # Extract all drilldowns (flattened list)
+    drilldown_series <- account_data$drilldown_series
+    
+    # Build Highcharts drilldown pie chart
+    highchart() %>%
+      hc_chart(type = "pie") %>%
+      hc_title(text = "Spending") %>%
+      hc_subtitle(text = "Click on a category to see details") %>%
+      hc_series(
+        list(
+          name = "Accounts",
+          colorByPoint = TRUE,
+          data = top_level_data
+        )
+      ) %>%
+      hc_drilldown(
+        series = drilldown_series
+      ) %>%hc_tooltip(
+        pointFormat = paste0("<b>{point.name}:</b> ", currency(), "{point.y:,.2f}")
+      )
+    
+  })
+  
+  debt_trend_data<-reactive({
+    date <- input$date[1]
+    df <- data.frame(
+      Date = as.Date(character()),
+      overall_debt = numeric(),
+      stringsAsFactors = FALSE
+    )
+    
+    while (date <= input$date[2]) {
+      df <- rbind(
+        df,
+        data.frame(
+          Date = date,
+          overall_debt= main_account()$walking_amount(daterange=c(date, date)),
+          stringsAsFactors = FALSE
+        )
+      )
+      date <- date + 1
+    }
+    
+    if (any(df$overall_debt != 0)) {
+      df <- df%>%
+        filter(row_number() >= which(overall_debt != 0)[1])
+    } else {
+      df <- df%>% slice(n()) # Keep only the last row
+    }
+    df
+  })
+  
+  output$debt<-renderHighchart({
+    debt_data<-debt_trend_data()
+    alala<<-debt_data
+    highchart() %>%
+      hc_chart(type = "line") %>%
+      hc_xAxis(categories = as.character(debt_data$Date)) %>%
+      hc_yAxis(title = list(text = "Debt ($)")) %>%
+      hc_add_series(name = "Debt", data = debt_data$overall_debt)
+  })
+    
+  
 }
 

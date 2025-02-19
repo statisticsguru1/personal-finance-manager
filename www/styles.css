@@ -1027,5 +1027,58 @@ table.dataTable tr:nth-child(even) {
   margin-left: 5px;
 }
 
+/*for reports*/
+.vb-value-box {
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vb-value-box-header {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: #6c757d;
+}
+
+.vb-icon-container {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.vb-icon-blue { background: #E7F3FF; color: #007bff; }  /* Light blue */
+.vb-icon-red { background: #FDECEA; color: #dc3545; }   /* Light red */
+.vb-icon-green { background: #E9F7EF; color: #28a745; } /* Light green */
+.vb-icon-purple { background: #F3E8FF; color: #6f42c1; } /* Light purple */
+
+.vb-value-box-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.vb-value-box-change {
+  font-size: 0.95rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vb-text-green { color: #28a745; }
+.vb-text-red { color: #dc3545; }
+.vb-text-blue { color: #007bff; }
+.vb-text-purple { color: #6f42c1; }
 
 
