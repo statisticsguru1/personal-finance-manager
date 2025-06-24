@@ -12,8 +12,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          install.packages(c("devtools", "testthat", "covr"))
-          devtools::install_deps(dep = TRUE)
+          install.packages(c("devtools", "testthat", "covr"), repos = "https://cloud.r-project.org")
+          devtools::install_deps(dependencies = TRUE)
 
       - name: Run tests
         run: devtools::test()
