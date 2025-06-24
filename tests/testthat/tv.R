@@ -1,18 +1,7 @@
 main <- MainAccount$new("Main")
-child <- ChildAccount$new("Child", allocation = 1, priority = 1)
-  grandchild <- GrandchildAccount$new("GC", allocation = 1, priority = 1)
+ch1 <- ChildAccount$new("child")
+# simulate broken or unset transactions
+ch1$transactions <- NULL
 
-  # Own deposits
-  main$deposit(50, by = "User", channel = "Initial")
-  main$deposit(20, by = "System", channel = "Adjustment")
-
-  # Deposit before attaching children
-  child$deposit(100, by = "User", channel = "Initial")
-  grandchild$deposit(30, by = "User", channel = "Initial")
-
-
-  # Assemble hierarchy
-  main$add_child_account(child)
-  child$add_child_account(grandchild)
-
-main$allocated_amount()
+main$add_child_account(ch1)
+print(acc$allocated_amount())

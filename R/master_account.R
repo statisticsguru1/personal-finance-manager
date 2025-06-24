@@ -1361,7 +1361,7 @@ MainAccount <- R6Class(
         if (length(self$child_accounts) > 0) {
           for (child in self$child_accounts) {
             transactions <- transactions + child$walking_amount(
-              amt_type == "Balance",
+              amt_type = amt_type,
               daterange = daterange
             )
           }

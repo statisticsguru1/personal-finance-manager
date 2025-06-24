@@ -1143,6 +1143,23 @@ test_that("allocated_amount: correctly sums deep descendant user deposits", {
   expect_equal(main$allocated_amount(), 150)
 })
 
+test_that("allocated_amount: returns 0 if no transactions field", {
+  acc <- MainAccount$new("main")
+  acc$transactions <- NULL
+
+  expect_equal(acc$allocated_amount(), 0)
+})
+
+
+test_that("allocated_amount: returns 0 if transactions is NULL (coverage)", {
+  main <- MainAccount$new("Main")
+  ch1 <- ChildAccount$new("child")
+  # simulate broken or unset transactions
+  ch1$transactions <- NULL
+  main$add_child_account(ch1)
+  expect_equal(main$allocated_amount(), 0)
+})
+
 # ====================================================================
 # Test income_utilization method
 # ====================================================================
@@ -1169,15 +1186,14 @@ test_that("income_utilization: handles zero allocated by avoiding division by ze
   #main$withdraw(20, by = "User", channel = "Emergency")
 
   utilization <- main$income_utilization()
+  expect_equal(utilization, 0)
   expect_true(is.finite(utilization))
-  expect_gt(utilization, 0)
 })
 
 test_that("income_utilization: returns 1 when all allocated amount is spent", {
   main <- MainAccount$new("Main")
   main$deposit(80, by = "User", channel = "Initial")
   main$withdraw(80, by = "User", channel = "Usage")
-
   expect_equal(main$income_utilization(), 1)
 })
 
@@ -1200,4 +1216,141 @@ test_that("income_utilization: recursively accounts for child deposits and withd
   # Total allocated = 50 + 50 + 100 = 200
   # Total spending = 50
   expect_equal(main$income_utilization(), 0.25)
+})
+
+# ====================================================================
+# Test walking amount
+# ====================================================================
+
+test_that("walking_amount: returns 0 when Track_dues_and_balance is NULL", {
+  acc <- MainAccount$new("Main")
+  expect_equal(acc$walking_amount("amount_due"), 0)
+  expect_equal(acc$walking_amount("Balance"), 0)
+})
+
+test_that("walking_amount: returns latest due or balance from Track_dues_and_balance", {
+  acc <- GrandchildAccount$new("GC", allocation = 1, priority = 1)
+  acc$Track_dues_and_balance <- data.frame(
+    Date = as.POSIXct(c("2024-01-01", "2024-02-01")),
+    Amount_due = c(100, 150),
+    Balance = c(200, 250)
+  )
+
+  expect_equal(acc$walking_amount("amount_due"), 150)
+  expect_equal(acc$walking_amount("Balance"), 250)
+})
+
+test_that("walking_amount: respects date range filter", {
+  acc <- GrandchildAccount$new("GC", allocation = 1, priority = 1)
+  acc$Track_dues_and_balance <- data.frame(
+    Date = as.POSIXct(c("2022-01-01", "2024-01-01"), tz = "UTC"),
+    Amount_due = c(300, 400),
+    Balance = c(600, 700)
+  )
+  range <- c(as.Date("2023-01-01"), as.Date("2023-12-31"))
+
+  #print(acc$walking_amount("amount_due", daterange = range))
+  expect_equal(acc$walking_amount("amount_due", daterange = range), 0)
+  expect_equal(acc$walking_amount("Balance", daterange = range), 0)
+})
+
+
+
+test_that("walking_amount: aggregates amount_due from nested accounts", {
+  main <- MainAccount$new("Main")
+  child <- ChildAccount$new("Child", allocation = 1, priority = 1)
+  gc1 <- GrandchildAccount$new("GC1", allocation = 0.5, priority = 1)
+  gc2 <- GrandchildAccount$new("GC2", allocation = 0.5, priority = 1)
+
+  gc1$Track_dues_and_balance <- data.frame(
+    Date = as.POSIXct("2024-05-01"),
+    Amount_due = 100,
+    Balance = 200
+  )
+  gc2$Track_dues_and_balance <- data.frame(
+    Date = as.POSIXct("2024-05-01"),
+    Amount_due = 150,
+    Balance = 250
+  )
+
+  main$add_child_account(child)
+  child$add_child_account(gc1)
+  child$add_child_account(gc2)
+
+  expect_equal(main$walking_amount("amount_due"), 250)
+  expect_equal(main$walking_amount("Balance"), 450)
+})
+
+test_that("walking_amount: handles children without tracking data", {
+  main <- MainAccount$new("Main")
+  child <- ChildAccount$new("Child", allocation = 1, priority = 1)
+  gc <- GrandchildAccount$new("GC", allocation = 1, priority = 1)
+
+  gc$Track_dues_and_balance <- data.frame(
+    Date = as.POSIXct("2024-05-01"),
+    Amount_due = 120,
+    Balance = 300
+  )
+
+  main$add_child_account(child)
+  child$add_child_account(gc)
+
+  expect_equal(main$walking_amount("amount_due"), 120)
+  expect_equal(main$walking_amount("Balance"), 300)
+})
+
+
+# ====================================================================
+# Test compute_total_due_within_n_days
+# ====================================================================
+
+test_that("compute_total_due_within_n_days: returns 0 when no due info", {
+  acc <- GrandchildAccount$new("Test", allocation = 1, priority = 1)
+  expect_equal(acc$compute_total_due_within_n_days(7), 0)
+})
+
+test_that("compute_total_due_within_n_days: counts amount due within range", {
+  acc <- GrandchildAccount$new("Test", allocation = 1, priority = 1)
+  acc$amount_due <- 200
+  acc$due_date <- Sys.time() + days(3)
+  expect_equal(acc$compute_total_due_within_n_days(7), 200)
+})
+
+test_that("compute_total_due_within_n_days: ignores amount due beyond range", {
+  acc <- GrandchildAccount$new("Test", allocation = 1, priority = 1)
+  acc$amount_due <- 200
+  acc$due_date <- Sys.time() + days(10)
+  expect_equal(acc$compute_total_due_within_n_days(7), 0)
+})
+
+test_that("compute_total_due_within_n_days: ignores past due_date", {
+  acc <- GrandchildAccount$new("Test", allocation = 1, priority = 1)
+  acc$amount_due <- 150
+  acc$due_date <- Sys.time() - days(1)
+  expect_equal(acc$compute_total_due_within_n_days(7), 0)
+})
+
+test_that("compute_total_due_within_n_days: aggregates recursively", {
+  main <- MainAccount$new("Main")
+  child <- ChildAccount$new("Child", allocation = 1, priority = 1)
+  grand1 <- GrandchildAccount$new("GC1", allocation = 0.5, priority = 1)
+  grand2 <- GrandchildAccount$new("GC2", allocation = 0.5, priority = 1)
+
+  grand1$amount_due <- 100
+  grand1$due_date <- Sys.time() + days(3)
+
+  grand2$amount_due <- 150
+  grand2$due_date <- Sys.time() + days(10)
+
+  child$add_child_account(grand1)
+  child$add_child_account(grand2)
+  main$add_child_account(child)
+
+  expect_equal(main$compute_total_due_within_n_days(7), 100)
+})
+
+test_that("compute_total_due_within_n_days: ignores amount_due with missing due_date", {
+  acc <- GrandchildAccount$new("Test", allocation = 1, priority = 1)
+  acc$amount_due <- 200
+  expect_equal(acc$compute_total_due_within_n_days(7), 0)
 })
