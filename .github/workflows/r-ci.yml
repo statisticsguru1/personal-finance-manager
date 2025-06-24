@@ -57,7 +57,7 @@ jobs:
       - name: Install package dependencies
         run: |
           install.packages(
-            c("devtools", "remotes", "testthat", "covr", "lintr", "tidyverse", "pkgdown"),
+            c("devtools", "remotes", "testthat", "covr", "lintr", "tidyverse", "pkgdown", "R6","uuid"),
             repos = "https://cloud.r-project.org"
           )
           devtools::install_deps(dependencies = TRUE)
