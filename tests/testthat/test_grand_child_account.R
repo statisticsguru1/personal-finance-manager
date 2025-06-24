@@ -61,3 +61,139 @@ test_that("get_due_date returns correct due date", {
   acc <- GrandchildAccount$new("Internet", due_date = due)
   expect_equal(acc$get_due_date(), due)
 })
+
+# =========================================================
+# Test set_fixed_amount method
+# =========================================================
+
+
+test_that("set_fixed_amount sets fixed_amount and updates amount_due correctly", {
+  acc <- GrandchildAccount$new("Rent")
+  acc$balance <- 100
+  acc$num_periods <- 2
+  
+  acc$set_fixed_amount(500)  # Expect: 500 * 2 - 100 = 900
+  expect_equal(acc$fixed_amount, 500)
+  expect_equal(acc$amount_due, 900)
+})
+
+test_that("set_fixed_amount handles zero balance correctly", {
+  acc <- GrandchildAccount$new("Electricity")
+  acc$balance <- 0
+  acc$num_periods <- 3
+  
+  acc$set_fixed_amount(200)  # Expect: 200 * 3 - 0 = 600
+  expect_equal(acc$amount_due, 600)
+})
+
+test_that("set_fixed_amount handles zero fixed_amount", {
+  acc <- GrandchildAccount$new("Water")
+  acc$balance <- 50
+  acc$num_periods <- 2
+  
+  acc$set_fixed_amount(0)  # Expect: 0 * 2 - 50 = -50
+  expect_equal(acc$fixed_amount, 0)
+  expect_equal(acc$amount_due, -50)
+})
+# =========================================================
+# Test get_fixed_amount method 
+# =========================================================
+
+test_that("get_account_type returns correct account type", {
+  acc <- GrandchildAccount$new("Utilities", account_type = "Expense")
+  expect_equal(acc$get_account_type(), "Expense")
+  
+  acc2 <- GrandchildAccount$new("IncomeAccount", account_type = "Income")
+  expect_equal(acc2$get_account_type(), "Income")
+})
+
+# =========================================================
+# Test deposit method
+# =========================================================
+
+test_that("deposit updates balance and logs transaction", {
+  acc <- GrandchildAccount$new("Savings")
+  acc$deposit(100, by = "User", channel = "Bank Transfer")
+
+  expect_equal(acc$balance, 100)
+  expect_equal(nrow(acc$transactions), 1)
+  expect_equal(acc$transactions$Amount[1], 100)
+  expect_equal(acc$transactions$Type[1], "Deposit")
+  expect_equal(acc$transactions$Channel[1], "Bank Transfer")
+  expect_equal(acc$transactions$By[1], "User")
+})
+
+test_that("deposit uses provided transaction_number", {
+  acc <- GrandchildAccount$new("Emergency")
+  acc$deposit(50, transaction_number = "TXN001", by = "System",channel = "MPESA")
+
+  expect_equal(acc$transactions$TransactionID[1], "TXN001")
+})
+
+test_that("deposit assigns generated transaction_id when NULL", {
+  acc <- GrandchildAccount$new("GeneratedIDTest")
+  acc$deposit(70,channel = "MPESA")
+  expect_true(grepl("sys", acc$transactions$TransactionID[1]))  # Assuming sysX format
+})
+
+test_that("deposit respects inactive account status", {
+  acc <- GrandchildAccount$new("Inactive")
+  acc$status <- "closed"
+  acc$deposit(200,channel = "MPESA")
+
+  expect_equal(acc$balance, 0)
+  expect_equal(nrow(acc$transactions), 0)
+})
+
+test_that("deposit fails when channel is NULL", {
+  acc <- GrandchildAccount$new("NoChannel")
+  expect_error(acc$deposit(80), "`channel` is required")
+})
+
+
+test_that("deposit updates amount_due and overall_balance in log", {
+  acc <- GrandchildAccount$new("Tracker", fixed_amount = 300)
+  acc$num_periods <- 1
+  acc$deposit(100,channel = "MPESA")
+
+  expect_equal(acc$Track_dues_and_balance$Amount_due[1], 200)
+  expect_equal(acc$transactions$overall_balance[1], acc$balance)
+})
+
+# =========================================================
+# Test withdrawal method
+# =========================================================
+
+
+test_that("withdraw handles all edge cases and updates states correctly", {
+  acc <- GrandchildAccount$new("Rent", fixed_amount = 75000)
+  acc$deposit(75000, channel = "Bank")
+  
+  # Valid withdrawal: should succeed and update balance, Track_dues_and_balance, num_periods
+  acc$withdraw(35000, channel = "Bank")
+  expect_equal(acc$balance, 40000)
+  expect_equal(nrow(acc$Track_dues_and_balance), 2)
+  expect_equal(acc$num_periods, 1 - (35000 / 75000))  # should reduce proportionally
+  
+  # Withdrawal with amount = 0: should be ignored silently
+  acc$withdraw(0, channel = "Bank")
+  expect_equal(acc$balance, 40000)  # balance remains unchanged
+  
+  # Withdraw remaining amount to test zero balance condition
+  acc$withdraw(40000, channel = "Bank")
+  expect_equal(acc$balance, 0)
+  expect_equal(nrow(acc$Track_dues_and_balance), 3)
+  
+  # Withdrawal with insufficient funds: should not update anything
+  result <- acc$withdraw(1000, channel = "Bank")
+  expect_null(result)
+  expect_equal(acc$balance, 0)
+  expect_equal(nrow(acc$Track_dues_and_balance), 3)  # no new entry
+  
+  # Withdrawal without fixed_amount (should not touch num_periods)
+  acc2 <- GrandchildAccount$new("Random")
+  acc2$deposit(5000, channel = "Bank")
+  acc2$withdraw(2000, channel = "Bank")
+  expect_equal(acc2$balance, 3000)
+  expect_equal(acc2$num_periods, 1)  # untouched
+})

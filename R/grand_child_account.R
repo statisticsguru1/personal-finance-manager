@@ -368,6 +368,11 @@ GrandchildAccount <- R6Class(
       channel = NULL,
       date = Sys.time()
     ) {
+
+      if (missing(channel) || is.null(channel)) {
+        stop("`channel` is required and cannot be NULL.")
+      }
+
       # Check if bill is overdue and update periods
       if (self$account_type == "Bill" & !is.null(self$due_date)) {
         if (date > self$due_date) {
@@ -396,7 +401,7 @@ GrandchildAccount <- R6Class(
           super$deposit(
             amount = deposit_amount,
             transaction_number,
-            By = by,
+            by = by,
             channel,
             date
           )
