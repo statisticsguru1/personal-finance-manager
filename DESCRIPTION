@@ -12,7 +12,6 @@ RoxygenNote: 7.2.3
 Imports:
     R6,
     tidyverse,
-    lubridate,
     uuid
 Suggests: 
     testthat (>= 3.0.0),
