@@ -36,7 +36,16 @@ jobs:
             libfreetype6-dev \
             libpng-dev \
             libtiff5-dev \
-            libjpeg-dev
+            libjpeg-dev \
+            libfontconfig1-dev \
+            libglpk-dev \
+            libx11-dev \
+            libxt-dev \
+            libudunits2-dev \
+            libgdal-dev \
+            libgeos-dev \
+            libproj-dev \
+            libcairo2-dev
 
       - name: Cache R packages
         uses: actions/cache@v3
@@ -47,29 +56,30 @@ jobs:
 
       - name: Install package dependencies
         run: |
-          install.packages(c("devtools", "remotes","tidyverse"), repos = "https://cloud.r-project.org")
+          install.packages(
+            c("devtools", "remotes", "testthat", "covr", "lintr", "tidyverse", "pkgdown"),
+            repos = "https://cloud.r-project.org"
+          )
           devtools::install_deps(dependencies = TRUE)
         shell: Rscript {0}
 
       - name: Lint code
-        run: |
-          install.packages("lintr", repos = "https://cloud.r-project.org")
-          lintr::lint_package()
+        run: lintr::lint_package()
         shell: Rscript {0}
 
       - name: Run tests
-        run: |
-          install.packages("testthat", repos = "https://cloud.r-project.org")
-          devtools::test()
+        run: devtools::test()
         shell: Rscript {0}
 
       - name: Check code (CRAN-style)
-        run: |
-          devtools::check()
+        run: devtools::check()
         shell: Rscript {0}
 
       - name: Test coverage
-        run: |
-          install.packages("covr", repos = "https://cloud.r-project.org")
-          covr::codecov()
+        run: covr::codecov()
         shell: Rscript {0}
+
+      # Optional: pkgdown site (if using)
+      # - name: Build pkgdown site
+      #   run: pkgdown::build_site()
+      #   shell: Rscript {0}
