@@ -153,6 +153,7 @@ GrandchildAccount <- R6Class(
       self$account_type <- account_type
       self$freq <- freq
       self$num_periods <- 1
+      self$priority <- priority
       self$Track_dues_and_balance <- data.frame(
         Date = POSIXct(),
         Amount_due = numeric(),

@@ -45,3 +45,19 @@ test_that("GrandchildAccount initializes correctly with values", {
   expect_equal(acc$freq, "Monthly")
   expect_equal(acc$num_periods, 1)
 })
+
+
+
+# =========================================================
+# Test get due dates method
+# =========================================================
+test_that("get_due_date returns NULL if not set", {
+  acc <- GrandchildAccount$new("Water Bill")
+  expect_null(acc$get_due_date())
+})
+
+test_that("get_due_date returns correct due date", {
+  due <- as.POSIXct("2025-12-01 10:00:00", tz = "UTC")
+  acc <- GrandchildAccount$new("Internet", due_date = due)
+  expect_equal(acc$get_due_date(), due)
+})
