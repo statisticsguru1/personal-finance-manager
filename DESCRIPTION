@@ -16,10 +16,12 @@ Imports:
     tidyverse,
     lubridate,
     uuid
+    devtools
 
 Suggests: 
     testthat (>= 3.0.0),
     covr,
-    lintr
+    lintr,
+    pkgdown  # Include if you'll use pkgdown
 
 Config/testthat/edition: 3

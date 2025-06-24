@@ -23,6 +23,9 @@ jobs:
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
 
+      - name: Create R library directory
+        run: mkdir -p ${{ env.R_LIBS_USER }}
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -51,17 +54,16 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-r-${{ hashFiles('**/DESCRIPTION') }}
+          key: ${{ runner.os }}-r-${{ hashFiles('DESCRIPTION') }}
           restore-keys: ${{ runner.os }}-r-
 
-      - name: Install package dependencies
-        run: |
-          install.packages(
-            c("devtools", "remotes", "testthat", "covr", "lintr", "tidyverse", "pkgdown", "R6","uuid"),
-            repos = "https://cloud.r-project.org"
-          )
-          devtools::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
+      - name: Install R package dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            devtools
+            remotes
+            pkgdown
 
       - name: Lint code
         run: lintr::lint_package()
@@ -79,7 +81,7 @@ jobs:
         run: covr::codecov()
         shell: Rscript {0}
 
-      # Optional: pkgdown site (if using)
+      # Optional: build site
       # - name: Build pkgdown site
       #   run: pkgdown::build_site()
       #   shell: Rscript {0}
