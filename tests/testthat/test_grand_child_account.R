@@ -1,5 +1,4 @@
 library(tidyverse)
-
 # =========================================================
 # Test child initialization method
 # =========================================================
@@ -125,7 +124,12 @@ test_that("deposit updates balance and logs transaction", {
 
 test_that("deposit uses provided transaction_number", {
   acc <- GrandchildAccount$new("Emergency")
-  acc$deposit(50, transaction_number = "TXN001", by = "System",channel = "MPESA")
+  acc$deposit(
+    50,
+    transaction_number = "TXN001",
+    by = "System",
+    channel = "MPESA"
+  )
 
   expect_equal(acc$transactions$TransactionID[1], "TXN001")
 })
@@ -133,7 +137,8 @@ test_that("deposit uses provided transaction_number", {
 test_that("deposit assigns generated transaction_id when NULL", {
   acc <- GrandchildAccount$new("GeneratedIDTest")
   acc$deposit(70,channel = "MPESA")
-  expect_true(grepl("sys", acc$transactions$TransactionID[1]))  # Assuming sysX format
+  # Assuming sysX format
+  expect_true(grepl("sys", acc$transactions$TransactionID[1]))
 })
 
 test_that("deposit respects inactive account status", {
@@ -169,11 +174,13 @@ test_that("withdraw handles all edge cases and updates states correctly", {
   acc <- GrandchildAccount$new("Rent", fixed_amount = 75000)
   acc$deposit(75000, channel = "Bank")
   
-  # Valid withdrawal: should succeed and update balance, Track_dues_and_balance, num_periods
+  # Valid withdrawal: should succeed and update balance, Track_dues_and_balance,
+  # num_periods
   acc$withdraw(35000, channel = "Bank")
   expect_equal(acc$balance, 40000)
   expect_equal(nrow(acc$Track_dues_and_balance), 2)
-  expect_equal(acc$num_periods, 1 - (35000 / 75000))  # should reduce proportionally
+  # should reduce proportionally
+  expect_equal(acc$num_periods, 1 - (35000 / 75000))
   
   # Withdrawal with amount = 0: should be ignored silently
   acc$withdraw(0, channel = "Bank")
@@ -196,4 +203,100 @@ test_that("withdraw handles all edge cases and updates states correctly", {
   acc2$withdraw(2000, channel = "Bank")
   expect_equal(acc2$balance, 3000)
   expect_equal(acc2$num_periods, 1)  # untouched
+})
+
+# =========================================================
+# Test get_account_freq method
+# =========================================================
+
+
+test_that("get_account_freq returns correct frequency", {
+  # Explicitly set frequency
+  acc1 <- GrandchildAccount$new("MonthlyBill", freq = "Monthly")
+  expect_equal(acc1$get_account_freq(), "Monthly")
+  
+  # Another frequency type
+  acc2 <- GrandchildAccount$new("WeeklyBill", freq = "Weekly")
+  expect_equal(acc2$get_account_freq(), "Weekly")
+  
+  # NULL frequency (default)
+  acc3 <- GrandchildAccount$new("UnspecifiedFreq")
+  expect_null(acc3$get_account_freq())
+})
+
+# =========================================================
+# Test set_account_freq method
+# =========================================================
+
+test_that("set_account_freq updates the frequency and prints message", {
+  acc <- GrandchildAccount$new("InternetBill", freq = "Monthly")
+  
+  # Change frequency
+  expect_output(
+    acc$set_account_freq("Quarterly"),
+    "Frequency for InternetBill set to Quarterly"
+  )
+  
+  # Check if internal state is updated
+  expect_equal(acc$get_account_freq(), "Quarterly")
+  
+  # Change to another valid string
+  expect_output(
+    acc$set_account_freq("Annually"),
+    "Frequency for InternetBill set to Annually"
+  )
+  expect_equal(acc$get_account_freq(), "Annually")
+  
+  # Edge case: setting to NULL
+  expect_output(
+    acc$set_account_freq(NULL),
+    "Frequency for InternetBill set to "
+  )
+  expect_null(acc$get_account_freq())
+})
+
+# =========================================================
+# Test get_account_periods method
+# =========================================================
+test_that("get_account_periods returns the correct number of periods", {
+  acc <- GrandchildAccount$new("Health Insurance")
+  
+  # Default value should be 1
+  expect_equal(acc$get_account_periods(), 1)
+  
+  # Manually change the number of periods (simulating internal logic changes)
+  acc$num_periods <- 3
+  expect_equal(acc$get_account_periods(), 3)
+  
+  # Set to 0 (edge case)
+  acc$num_periods <- 0
+  expect_equal(acc$get_account_periods(), 0)
+  
+  # Set to fractional period (possible from withdraw adjustments)
+  acc$num_periods <- 2.5
+  expect_equal(acc$get_account_periods(), 2.5)
+})
+
+# =========================================================
+# Test get_account_periods method
+# =========================================================
+test_that("set_account_periods correctly updates the number of periods", {
+  acc <- GrandchildAccount$new("Internet Subscription")
+  
+  # Set to 5 periods
+  acc$set_account_periods(5)
+  expect_equal(acc$num_periods, 5)
+  
+  # Set to 0 (edge case: may be logically invalid but allowed in current
+  # vimplementation)
+  acc$set_account_periods(0)
+  expect_equal(acc$num_periods, 0)
+  
+  # Set to a decimal value (e.g., withdrawal adjusted)
+  acc$set_account_periods(2.75)
+  expect_equal(acc$num_periods, 2.75)
+  
+  # Set to a negative value (not prevented by current implementation)
+  acc$set_account_periods(-3)
+  expect_equal(acc$num_periods, -3)
 })

@@ -5,8 +5,8 @@
 \title{MainAccount Class}
 \description{
 The `MainAccount` R6 class represents the top-level virtual account in a
- hierarchical financial structure. It receives all income and is responsible
- for distributing funds to its child accounts based on allocation rules.
+hierarchical financial structure. It receives all income and is responsible
+for distributing funds to its child accounts based on allocation rules.
 
 This class is the core of the budgeting engine and manages:
 \itemize{
@@ -20,9 +20,8 @@ This class is the core of the budgeting engine and manages:
 \details{
 The account includes the following core attributes:
 \describe{
-  \item{uuid}{A unique identifier for the account, auto-generated
-  (inherited by all).}
-  \item{name}{Human-readable name for the account (inherited by all).}
+  \item{uuid}{A unique identifier for the account, auto-generated.}
+  \item{name}{Human-readable name for the account.}
   \item{balance}{Current balance in the account.}
   \item{transactions}{A `data.frame` tracking transaction logs, including
   custom system transactions.}
@@ -48,8 +47,12 @@ This is the top-level class in a hierarchy that includes:
 }
 
 \examples{
+library(R6)
+library(uuid)
+library(tidyverse)
 # Create a main account
-acc <- MainAccount$new(name = "Salary Pool")
+
+acc <- MainAccount$new(name = "Salary Pool", balance = 1000)
 
 # Generate a system transaction ID
 acc$generate_transaction_id()
@@ -434,6 +437,29 @@ Sys.Date()))
 account$walking_amount("Balance", c(Sys.Date() - 7, Sys.Date()))
 }
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{uuid}}{Auto-generated unique identifier.}
+
+\item{\code{name}}{Account name.}
+
+\item{\code{balance}}{Current balance.}
+
+\item{\code{transactions}}{A `data.frame` of transaction logs.}
+
+\item{\code{transaction_counter}}{Counter used to generate unique transaction IDs.}
+
+\item{\code{child_accounts}}{List of child accounts.}
+
+\item{\code{total_allocation}}{Numeric. Sum of allocated funds to children.}
+
+\item{\code{path}}{Character vector representing the account's hierarchy path.
+
+# some imports}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -472,7 +498,7 @@ with a unique identifier, user-defined name, zero balance, and an empty
 transaction data frame. Also sets the default account path to
 "main_account".
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MainAccount$new(name)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{MainAccount$new(name, balance = 0)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -480,6 +506,8 @@ transaction data frame. Also sets the default account path to
 \describe{
 \item{\code{name}}{Character. The name of the main account. Used for
 identification in the app UI and reports.}
+
+\item{\code{balance}}{Numeric. Initial balance for the account.}
 }
 \if{html}{\out{</div>}}
 }

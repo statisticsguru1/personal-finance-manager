@@ -8,6 +8,7 @@ library(uuid)
 
 #'@title ChildAccount Class
 #'
+#' @description
 #' An extension of the \code{MainAccount} class used to model specialized
 #' sub-accounts such as goals, needs, or debt repayment accounts.
 #' Child accounts inherit all the core functionality of \code{MainAccount}
@@ -55,6 +56,9 @@ library(uuid)
 #' }
 #'
 #' @examples
+#' library(R6)
+#' library(uuid)
+#' library(tidyverse)
 #' # Create a basic ChildAccount instance
 #' child <- ChildAccount$new(
 #'   name = "Emergency Fund",

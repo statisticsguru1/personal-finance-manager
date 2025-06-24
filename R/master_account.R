@@ -6,10 +6,11 @@ library(uuid)
 # MainAccount Account
 # ==============================================================================
 #' @title MainAccount Class
+#'
 #' @description
 #' The `MainAccount` R6 class represents the top-level virtual account in a
-#'  hierarchical financial structure. It receives all income and is responsible
-#'  for distributing funds to its child accounts based on allocation rules.
+#' hierarchical financial structure. It receives all income and is responsible
+#' for distributing funds to its child accounts based on allocation rules.
 #'
 #' This class is the core of the budgeting engine and manages:
 #' \itemize{
@@ -23,9 +24,8 @@ library(uuid)
 #' @details
 #' The account includes the following core attributes:
 #' \describe{
-#'   \item{uuid}{A unique identifier for the account, auto-generated
-#'   (inherited by all).}
-#'   \item{name}{Human-readable name for the account (inherited by all).}
+#'   \item{uuid}{A unique identifier for the account, auto-generated.}
+#'   \item{name}{Human-readable name for the account.}
 #'   \item{balance}{Current balance in the account.}
 #'   \item{transactions}{A `data.frame` tracking transaction logs, including
 #'   custom system transactions.}
@@ -48,9 +48,30 @@ library(uuid)
 #'   (e.g., rent, savings) and has due dates, frequency, and priority logic.
 #' }
 #'
+#' @param name Character. A name for the account.
+#' @param balance Numeric. Initial balance for the account.
+#'
+#' @field uuid Auto-generated unique identifier.
+#' @field name Account name.
+#' @field balance Current balance.
+#' @field transactions A `data.frame` of transaction logs.
+#' @field transaction_counter Counter used to generate unique transaction IDs.
+#' @field child_accounts List of child accounts.
+#' @field total_allocation Numeric. Sum of allocated funds to children.
+#' @field path Character vector representing the account's hierarchy path.
+#'
+#' # some imports
+#' @importFrom R6 R6Class
+#' @importFrom uuid UUIDgenerate
+#' @importFrom tidyverse tidyverse_packages
+#' 
 #' @examples
+#' library(R6)
+#' library(uuid)
+#' library(tidyverse)
 #' # Create a main account
-#' acc <- MainAccount$new(name = "Salary Pool")
+#' 
+#' acc <- MainAccount$new(name = "Salary Pool", balance = 1000)
 #'
 #' # Generate a system transaction ID
 #' acc$generate_transaction_id()

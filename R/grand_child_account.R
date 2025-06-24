@@ -1,12 +1,13 @@
 # ChildAccount Class (Needs, Goals, Debt Repayment)
 library(R6)
-library(tidyverse)
 library(uuid)
+library(tidyverse)
 # ==============================================================================
 # ChildAccount Account
 # ==============================================================================
 #' @title GrandAccount Class
 #'
+#' @description
 #' Extends \code{ChildAccount} to model low-level accounts such as bills,
 #' loans, and targeted savings. Adds time-based logic, due tracking, and
 #' automatic closure/reactivation to ensure intelligent fund allocation.
@@ -120,6 +121,9 @@ GrandchildAccount <- R6Class(
     #'
     #' @examples
     #' # Initialize a rent account due every 30 days with a fixed monthly cost
+    #' library(R6)
+    #' library(uuid)
+    #' library(tidyverse)
     #' rent <- GrandchildAccount$new(
     #'   name = "Rent",
     #'   allocation = 0.3,
@@ -346,6 +350,17 @@ GrandchildAccount <- R6Class(
     #' due amounts, and transaction history.
     #'
     #' @examples
+    #' # main account
+    #' main<- MainAccount$new("main")
+    #' 
+    #' # child account
+    #' child <- ChildAccount$new(
+    #'   name = "Emergency Fund",
+    #'   allocation = 0.3,
+    #'   priority = 2
+    #' )
+    #' 
+    #' # Grand child account
     #' bill <- GrandchildAccount$new(
     #'   name = "Rent",
     #'   fixed_amount = 75000,
@@ -353,13 +368,16 @@ GrandchildAccount <- R6Class(
     #'   due_date = Sys.Date(),
     #'   freq = 30
     #' )
-    #' bill$deposit(75000)
+    #' # attach grand child to parent
+    #' main$add_child_account(child)
+    #' child$add_child_account(bill)
+    #' bill$deposit(75000,channel="ABSA")
     #'
     #' # Example with surplus being returned to parent:
-    #' bill$deposit(80000)
+    #' bill$deposit(80000,channel="ABSA")
     #'
     #' # Example with underpayment:
-    #' bill$deposit(20000)  # Remains active, shows updated due
+    #' bill$deposit(20000,channel="ABSA")  # Remains active, shows updated due
 
     deposit = function(
       amount,
@@ -519,9 +537,10 @@ GrandchildAccount <- R6Class(
     #' # Withdraw a partial amount from a fully funded rent account
     #' rent <- GrandchildAccount$new("Rent", fixed_amount = 75000,
     #' account_type = "Bill")
-    #' rent$deposit(75000)
-    #' rent$withdraw(35000)  # Now equivalent to 0.53 of the rent period
-    #' remaining.
+    #' rent$deposit(75000,channel="ABSA")
+    #' # Now equivalent to 0.53 of the rent period remaining.
+    #' rent$withdraw(35000,channel="ABSA")
+    #' 
 
     withdraw = function(
       amount,
