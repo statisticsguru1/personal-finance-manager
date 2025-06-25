@@ -239,7 +239,6 @@ ChildAccount <- R6Class(
         }
       } else {
         if(channel == "Returned Extra Allocation"){
-          cat(NULL)
         } else{
         cat("Deposit not allowed. Account is not active.\n")
         }

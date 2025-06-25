@@ -340,3 +340,60 @@ test_that("set_account_periods correctly updates the number of periods", {
   acc$set_account_periods(-3)
   expect_equal(acc$num_periods, -3)
 })
+
+# =========================================================
+# Test get_fixed amount method
+# =========================================================
+test_that("get_fixed_amount returns correct value", {
+  acc <- GrandchildAccount$new(
+    name = "FixedTest",
+    allocation = 1,
+    priority = 1,
+    fixed_amount = 200,
+    due_date = NULL,
+    account_type = "Expense",
+    freq = NULL
+  )
+  
+  expect_equal(acc$get_fixed_amount(), 200)
+})
+
+
+# =========================================================
+# Test set_due_date  method
+# =========================================================
+
+test_that("set_due_date sets the due_date correctly", {
+  acc <- GrandchildAccount$new(
+    name = "DueDateTest",
+    allocation = 1,
+    priority = 1,
+    fixed_amount = 100,
+    due_date = NULL,
+    account_type = "Expense",
+    freq = NULL
+  )
+  
+  acc$set_due_date("2025-07-01")
+  expect_equal(acc$due_date, "2025-07-01")
+})
+
+
+# =========================================================
+# Test  set_account_type   method
+# =========================================================
+
+test_that("set_account_type sets the account_type correctly", {
+  acc <- GrandchildAccount$new(
+    name = "AccountTypeTest",
+    allocation = 1,
+    priority = 1,
+    fixed_amount = 100,
+    due_date = NULL,
+    account_type = "Income",  # Initial value
+    freq = NULL
+  )
+  
+  acc$set_account_type("Expense")  # Change it
+  expect_equal(acc$account_type, "Expense")
+})
