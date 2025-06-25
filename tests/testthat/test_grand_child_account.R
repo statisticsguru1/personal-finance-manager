@@ -1,4 +1,5 @@
 library(tidyverse)
+library(lubridate)
 # =========================================================
 # Test child initialization method
 # =========================================================
@@ -216,6 +217,7 @@ test_that("withdraw handles all edge cases and updates states correctly", {
   # num_periods
   acc$withdraw(35000, channel = "Bank")
   expect_equal(acc$balance, 40000)
+  
   expect_equal(nrow(acc$Track_dues_and_balance), 2)
   # should reduce proportionally
   expect_equal(acc$num_periods, 1 - (35000 / 75000))

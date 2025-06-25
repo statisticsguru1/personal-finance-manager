@@ -64,6 +64,7 @@ library(uuid)
 #' @importFrom R6 R6Class
 #' @importFrom uuid UUIDgenerate
 #' @importFrom tidyverse tidyverse_packages
+#' @importFrom lubridate POSIXct
 #' 
 #' @examples
 #' library(R6)
