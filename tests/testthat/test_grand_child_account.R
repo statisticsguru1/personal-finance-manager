@@ -165,6 +165,44 @@ test_that("deposit updates amount_due and overall_balance in log", {
   expect_equal(acc$transactions$overall_balance[1], acc$balance)
 })
 
+test_that("deposit refunds extra to parent account", {
+  # Step 1: Create main & child (parents of grand child)
+  main<- MainAccount$new("main")
+  child <- ChildAccount$new(
+    "child",
+    allocation=1 # you need allocation otherwise it will be turned inactive
+  )
+  grandchild_acc <- GrandchildAccount$new(
+    name = "Rent",
+    allocation = 1,
+    priority = 1,
+    fixed_amount = 100,
+    due_date = Sys.time() + lubridate::days(5), # Overdue
+    account_type = "Bill",
+    freq = 30 # 30-day billing cycle
+  )
+  
+  # Step 2: Attach grandchild to parent & child to main
+  main$add_child_account(child)
+  child$add_child_account(grandchild_acc)
+  
+  # Step 3: Deposit more than needed into grandchild
+  # Fixed amount = 100, periods = 1, balance = 0 => due = 100
+  # We deposit 150 → 50 should go to parent
+  grandchild_acc$deposit(150, channel = "Bank")
+  
+  # Step 4: Check grandchild was fully funded and is inactive
+  expect_equal(grandchild_acc$status, "inactive")
+  expect_equal(grandchild_acc$balance, 100)
+  expect_equal(grandchild_acc$amount_due, 0)
+  
+  # Step 5: Check refund to parent
+  expect_equal(nrow(child$transactions), 1)
+  expect_equal(child$transactions$Amount[1], 50)
+  expect_equal(child$transactions$Channel[1], "Returned Extra Allocation")
+  expect_equal(child$transactions$By[1], "System")
+})
+
 # =========================================================
 # Test withdrawal method
 # =========================================================

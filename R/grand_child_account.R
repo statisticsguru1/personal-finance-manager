@@ -402,7 +402,7 @@ GrandchildAccount <- R6Class(
             self$num_periods,
             "\n"
           )
-          self$status <- "active"
+          self$status<-"active"
           cat(
             self$name,
             "reactivated. Outstanding balance due:",
@@ -423,7 +423,7 @@ GrandchildAccount <- R6Class(
             channel,
             date
           )
-          self$status <- "inactive"  # Fully funded for the period
+          self$change_status("inactive") # Fully funded for the period
 
           # Move any extra amount to the parent account
           extra_amount <- amount - deposit_amount
@@ -451,7 +451,7 @@ GrandchildAccount <- R6Class(
             )
           )
           cat(self$name, "fully funded for", self$num_periods, "period(s)\n")
-          return()
+          return(invisible(NULL))
         }
       }
 
