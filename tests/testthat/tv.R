@@ -1,5 +1,5 @@
-main<- MainAccount$new("main")
-child <- ChildAccount$new("child",allocation = 1)
+main <- MainAccount$new("main")
+child <- ChildAccount$new("child", allocation = 1)
 grandchild_acc <- GrandchildAccount$new(
   name = "Rent",
   allocation = 1,

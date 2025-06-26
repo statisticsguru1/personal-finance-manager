@@ -221,26 +221,26 @@ ChildAccount <- R6Class(
         )
 
         # Distribute funds to child accounts and reset balance
-        if(channel != "Returned Extra Allocation"){ # exclude refunds
-        self$distribute_to_children(
-          amount,
-          transaction_number
-        )
-        
-        cat(
-          "Deposited:",
-          amount,
-          "via",
-          channel,
-          "- Transaction ID:",
-          transaction_number,
-          "\n"
-        )
+        if (channel != "Returned Extra Allocation") { # exclude refunds
+          self$distribute_to_children(
+            amount,
+            transaction_number
+          )
+
+          cat(
+            "Deposited:",
+            amount,
+            "via",
+            channel,
+            "- Transaction ID:",
+            transaction_number,
+            "\n"
+          )
         }
       } else {
-        if(channel == "Returned Extra Allocation"){
-        } else{
-        cat("Deposit not allowed. Account is not active.\n")
+        if (channel == "Returned Extra Allocation") {
+        } else {
+          cat("Deposit not allowed. Account is not active.\n")
         }
       }
     },

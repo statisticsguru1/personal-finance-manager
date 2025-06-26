@@ -184,7 +184,10 @@ test_that("MainAccount: no active children returns message", {
 })
 
 
-test_that("MainAccount: amount < 0.10 allocated to highest priority active child", {
+test_that(paste(
+  "MainAccount: amount < 0.10 allocated",
+  " to highest priority active child"
+), {
   main_account <- MainAccount$new("Main")
   main_account$deposit(1, channel = "Equity")
 
@@ -441,7 +444,10 @@ test_that("set_child_allocation: throws error if total allocation exceeds 1", {
   )
 })
 
-test_that("set_child_allocation: sets status to inactive when allocation is zero", {
+test_that(paste(
+  "set_child_allocation: sets status",
+  " to inactive when allocation is zero"
+), {
   main_account <- MainAccount$new("Main")
   child <- ChildAccount$new("ChildZero", allocation = 0.3, priority = 1)
   main_account$add_child_account(child)
@@ -467,10 +473,13 @@ test_that("set_child_allocation: updates total_allocation correctly", {
 # ====================================================================
 # Test withdrawal method
 # ====================================================================
-test_that("withdraw: successful withdrawal reduces balance and logs transaction", {
+test_that(paste(
+  "withdraw: successful withdrawal",
+  " reduces balance and logs transaction"
+), {
   account <- MainAccount$new("Main")
   account$deposit(100, channel = "Initial")
-  
+
   account$withdraw(
     amount = 30,
     transaction_number = "TXN100",
@@ -570,7 +579,10 @@ test_that("get_balance: returns correct balance and prints output", {
 # Test get_transactions method
 # ====================================================================
 
-test_that("get_transactions: prints message and returns empty data.frame when no transactions", {
+test_that(paste(
+  "get_transactions: prints message and",
+  " returns empty data.frame when no transactions"
+), {
   account <- MainAccount$new("Main")
 
   # Capture output when there are no transactions
@@ -583,7 +595,10 @@ test_that("get_transactions: prints message and returns empty data.frame when no
   expect_equal(nrow(txns), 0)
 })
 
-test_that("get_transactions: prints transactions and returns data.frame when transactions exist", {
+test_that(paste(
+  "get_transactions: prints transactions and",
+  " returns data.frame when transactions exist"
+), {
   account <- MainAccount$new("Main")
 
   # Add a transaction
@@ -732,7 +747,10 @@ test_that("find_account_by_uuid: returns NULL when UUID is not found", {
   expect_null(main$find_account_by_uuid(ghost_uuid))
 })
 
-test_that("find_account_by_uuid: avoids infinite recursion in the presence of cycles", {
+test_that(paste(
+  "find_account_by_uuid: avoids infinite",
+  " recursion in the presence of cycles"
+), {
   main <- MainAccount$new("Main")
   child <- ChildAccount$new("Child", allocation = 0.4, priority = 1)
   grandchild <- ChildAccount$new("GrandChild", allocation = 0.3, priority = 2)
@@ -831,7 +849,10 @@ test_that("move_balance: throws error if balance is insufficient", {
   )
 })
 
-test_that("move_balance: uses 'Internal Transfer' when transferring between children", {
+test_that(paste(
+  "move_balance: uses 'Internal Transfer'",
+  " when transferring between children"
+), {
   main <- MainAccount$new("Main")
   child1 <- ChildAccount$new("Child1", allocation = 0.5, priority = 1)
   child2 <- ChildAccount$new("Child2", allocation = 0.5, priority = 1)
@@ -1081,7 +1102,10 @@ test_that("total_income: excludes non-user deposits", {
 # ====================================================================
 # Test allocated amount method
 # ====================================================================
-test_that("allocated_amount: includes own deposits (user + system) and child user deposits", {
+test_that(paste(
+  "allocated_amount: includes own deposits",
+  " (user + system) and child user deposits"
+), {
   main <- MainAccount$new("Main")
   child <- ChildAccount$new("Child", allocation = 1, priority = 1)
   grandchild <- GrandchildAccount$new("GC", allocation = 1, priority = 1)
@@ -1163,12 +1187,15 @@ test_that("allocated_amount: returns 0 if transactions is NULL (coverage)", {
 # Test income_utilization method
 # ====================================================================
 
-test_that("income_utilization: correct ratio when spending is half of allocated amount", {
+test_that(paste(
+  "income_utilization: correct ratio",
+  " when spending is half of allocated amount"
+), {
   main <- MainAccount$new("Main")
   child <- ChildAccount$new("Child", allocation = 1, priority = 1)
   main$add_child_account(child)
-  main$deposit(100, by = "User", channel = "Initial")  # main allocated = 100
-  child$withdraw(50, by = "User", channel = "Purchase")  # spending = 50
+  main$deposit(100, by = "User", channel = "Initial")
+  child$withdraw(50, by = "User", channel = "Purchase")
 
   expect_equal(main$income_utilization(), 0.5)
 })
@@ -1180,7 +1207,10 @@ test_that("income_utilization: returns 0 when no spending", {
   expect_equal(main$income_utilization(), 0)
 })
 
-test_that("income_utilization: handles zero allocated by avoiding division by zero", {
+test_that(paste(
+  "income_utilization: handles zero",
+  " allocated by avoiding division by zero"
+), {
   main <- MainAccount$new("Main")
   #main$withdraw(20, by = "User", channel = "Emergency")
 
@@ -1197,7 +1227,10 @@ test_that("income_utilization: returns 1 when all allocated amount is spent", {
 })
 
 
-test_that("income_utilization: recursively accounts for child deposits and withdrawals", {
+test_that(paste(
+  "income_utilization: recursively",
+  " accounts for child deposits and withdrawals"
+), {
   main <- MainAccount$new("Main")
   child <- ChildAccount$new("Child", allocation = 1, priority = 1)
   grandchild <- GrandchildAccount$new("GC", allocation = 1, priority = 1)
@@ -1227,7 +1260,10 @@ test_that("walking_amount: returns 0 when Track_dues_and_balance is NULL", {
   expect_equal(acc$walking_amount("Balance"), 0)
 })
 
-test_that("walking_amount: returns latest due or balance from Track_dues_and_balance", {
+test_that(paste(
+  "walking_amount: returns latest",
+  " due or balance from Track_dues_and_balance"
+), {
   acc <- GrandchildAccount$new("GC", allocation = 1, priority = 1)
   acc$Track_dues_and_balance <- data.frame(
     Date = as.POSIXct(c("2024-01-01", "2024-02-01")),
@@ -1348,7 +1384,10 @@ test_that("compute_total_due_within_n_days: aggregates recursively", {
   expect_equal(main$compute_total_due_within_n_days(7), 100)
 })
 
-test_that("compute_total_due_within_n_days: ignores amount_due with missing due_date", {
+test_that(paste(
+  "compute_total_due_within_n_days:",
+  " ignores amount_due with missing due_date"
+), {
   acc <- GrandchildAccount$new("Test", allocation = 1, priority = 1)
   acc$amount_due <- 200
   expect_equal(acc$compute_total_due_within_n_days(7), 0)

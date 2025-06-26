@@ -65,13 +65,13 @@ library(uuid)
 #' @importFrom uuid UUIDgenerate
 #' @importFrom tidyverse tidyverse_packages
 #' @importFrom lubridate POSIXct
-#' 
+#'
 #' @examples
 #' library(R6)
 #' library(uuid)
 #' library(tidyverse)
 #' # Create a main account
-#' 
+#'
 #' acc <- MainAccount$new(name = "Salary Pool", balance = 1000)
 #'
 #' # Generate a system transaction ID

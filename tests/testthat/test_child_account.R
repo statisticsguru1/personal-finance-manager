@@ -47,7 +47,7 @@ test_that("deposit: does nothing when status is inactive", {
     status = "inactive"
   )
   acc$deposit(100, channel = "User")
-  expect_equal(acc$balance,0)
+  expect_equal(acc$balance, 0)
   expect_equal(nrow(acc$transactions), 0)
 })
 
@@ -68,7 +68,7 @@ test_that("deposit: triggers distribution to children", {
   child <- GrandchildAccount$new("GC", allocation = 1, priority = 1)
   parent$add_child_account(child)
   parent$deposit(100, channel = "Test")
-  
+
   expect_gt(nrow(child$transactions), 0)
   expect_equal(sum(child$transactions$Amount), 100)
 })

@@ -67,22 +67,22 @@ test_that("get_due_date returns correct due date", {
 # =========================================================
 
 
-test_that("set_fixed_amount sets fixed_amount and updates amount_due correctly", {
-  acc <- GrandchildAccount$new("Rent")
-  acc$balance <- 100
-  acc$num_periods <- 2
-  
-  acc$set_fixed_amount(500)  # Expect: 500 * 2 - 100 = 900
-  expect_equal(acc$fixed_amount, 500)
-  expect_equal(acc$amount_due, 900)
-})
+test_that(
+  "set_fixed_amount sets fixed_amount and updates amount_due correctly", {
+    acc <- GrandchildAccount$new("Rent")
+    acc$balance <- 100
+    acc$num_periods <- 2
+    acc$set_fixed_amount(500)
+    expect_equal(acc$fixed_amount, 500)
+    expect_equal(acc$amount_due, 900)
+  }
+)
 
 test_that("set_fixed_amount handles zero balance correctly", {
   acc <- GrandchildAccount$new("Electricity")
   acc$balance <- 0
   acc$num_periods <- 3
-  
-  acc$set_fixed_amount(200)  # Expect: 200 * 3 - 0 = 600
+  acc$set_fixed_amount(200)
   expect_equal(acc$amount_due, 600)
 })
 
@@ -90,19 +90,17 @@ test_that("set_fixed_amount handles zero fixed_amount", {
   acc <- GrandchildAccount$new("Water")
   acc$balance <- 50
   acc$num_periods <- 2
-  
-  acc$set_fixed_amount(0)  # Expect: 0 * 2 - 50 = -50
+  acc$set_fixed_amount(0)
   expect_equal(acc$fixed_amount, 0)
   expect_equal(acc$amount_due, -50)
 })
 # =========================================================
-# Test get_fixed_amount method 
+# Test get_fixed_amount method
 # =========================================================
 
 test_that("get_account_type returns correct account type", {
   acc <- GrandchildAccount$new("Utilities", account_type = "Expense")
   expect_equal(acc$get_account_type(), "Expense")
-  
   acc2 <- GrandchildAccount$new("IncomeAccount", account_type = "Income")
   expect_equal(acc2$get_account_type(), "Income")
 })
@@ -137,7 +135,7 @@ test_that("deposit uses provided transaction_number", {
 
 test_that("deposit assigns generated transaction_id when NULL", {
   acc <- GrandchildAccount$new("GeneratedIDTest")
-  acc$deposit(70,channel = "MPESA")
+  acc$deposit(70, channel = "MPESA")
   # Assuming sysX format
   expect_true(grepl("sys", acc$transactions$TransactionID[1]))
 })
@@ -145,7 +143,7 @@ test_that("deposit assigns generated transaction_id when NULL", {
 test_that("deposit respects inactive account status", {
   acc <- GrandchildAccount$new("Inactive")
   acc$status <- "closed"
-  acc$deposit(200,channel = "MPESA")
+  acc$deposit(200, channel = "MPESA")
 
   expect_equal(acc$balance, 0)
   expect_equal(nrow(acc$transactions), 0)
@@ -160,7 +158,7 @@ test_that("deposit fails when channel is NULL", {
 test_that("deposit updates amount_due and overall_balance in log", {
   acc <- GrandchildAccount$new("Tracker", fixed_amount = 300)
   acc$num_periods <- 1
-  acc$deposit(100,channel = "MPESA")
+  acc$deposit(100, channel = "MPESA")
 
   expect_equal(acc$Track_dues_and_balance$Amount_due[1], 200)
   expect_equal(acc$transactions$overall_balance[1], acc$balance)
@@ -168,10 +166,10 @@ test_that("deposit updates amount_due and overall_balance in log", {
 
 test_that("deposit refunds extra to parent account", {
   # Step 1: Create main & child (parents of grand child)
-  main<- MainAccount$new("main")
+  main <- MainAccount$new("main")
   child <- ChildAccount$new(
     "child",
-    allocation=1 # you need allocation otherwise it will be turned inactive
+    allocation = 1 # you need allocation otherwise it will be turned inactive
   )
   grandchild_acc <- GrandchildAccount$new(
     name = "Rent",
@@ -182,21 +180,21 @@ test_that("deposit refunds extra to parent account", {
     account_type = "Bill",
     freq = 30 # 30-day billing cycle
   )
-  
+
   # Step 2: Attach grandchild to parent & child to main
   main$add_child_account(child)
   child$add_child_account(grandchild_acc)
-  
+
   # Step 3: Deposit more than needed into grandchild
   # Fixed amount = 100, periods = 1, balance = 0 => due = 100
   # We deposit 150 → 50 should go to parent
   grandchild_acc$deposit(150, channel = "Bank")
-  
+
   # Step 4: Check grandchild was fully funded and is inactive
   expect_equal(grandchild_acc$status, "inactive")
   expect_equal(grandchild_acc$balance, 100)
   expect_equal(grandchild_acc$amount_due, 0)
-  
+
   # Step 5: Check refund to parent
   expect_equal(nrow(child$transactions), 1)
   expect_equal(child$transactions$Amount[1], 50)
@@ -212,31 +210,31 @@ test_that("deposit refunds extra to parent account", {
 test_that("withdraw handles all edge cases and updates states correctly", {
   acc <- GrandchildAccount$new("Rent", fixed_amount = 75000)
   acc$deposit(75000, channel = "Bank")
-  
+
   # Valid withdrawal: should succeed and update balance, Track_dues_and_balance,
   # num_periods
   acc$withdraw(35000, channel = "Bank")
   expect_equal(acc$balance, 40000)
-  
+
   expect_equal(nrow(acc$Track_dues_and_balance), 2)
   # should reduce proportionally
   expect_equal(acc$num_periods, 1 - (35000 / 75000))
-  
+
   # Withdrawal with amount = 0: should be ignored silently
   acc$withdraw(0, channel = "Bank")
   expect_equal(acc$balance, 40000)  # balance remains unchanged
-  
+
   # Withdraw remaining amount to test zero balance condition
   acc$withdraw(40000, channel = "Bank")
   expect_equal(acc$balance, 0)
   expect_equal(nrow(acc$Track_dues_and_balance), 3)
-  
+
   # Withdrawal with insufficient funds: should not update anything
   result <- acc$withdraw(1000, channel = "Bank")
   expect_null(result)
   expect_equal(acc$balance, 0)
   expect_equal(nrow(acc$Track_dues_and_balance), 3)  # no new entry
-  
+
   # Withdrawal without fixed_amount (should not touch num_periods)
   acc2 <- GrandchildAccount$new("Random")
   acc2$deposit(5000, channel = "Bank")
@@ -254,11 +252,11 @@ test_that("get_account_freq returns correct frequency", {
   # Explicitly set frequency
   acc1 <- GrandchildAccount$new("MonthlyBill", freq = "Monthly")
   expect_equal(acc1$get_account_freq(), "Monthly")
-  
+
   # Another frequency type
   acc2 <- GrandchildAccount$new("WeeklyBill", freq = "Weekly")
   expect_equal(acc2$get_account_freq(), "Weekly")
-  
+
   # NULL frequency (default)
   acc3 <- GrandchildAccount$new("UnspecifiedFreq")
   expect_null(acc3$get_account_freq())
@@ -270,23 +268,23 @@ test_that("get_account_freq returns correct frequency", {
 
 test_that("set_account_freq updates the frequency and prints message", {
   acc <- GrandchildAccount$new("InternetBill", freq = "Monthly")
-  
+
   # Change frequency
   expect_output(
     acc$set_account_freq("Quarterly"),
     "Frequency for InternetBill set to Quarterly"
   )
-  
+
   # Check if internal state is updated
   expect_equal(acc$get_account_freq(), "Quarterly")
-  
+
   # Change to another valid string
   expect_output(
     acc$set_account_freq("Annually"),
     "Frequency for InternetBill set to Annually"
   )
   expect_equal(acc$get_account_freq(), "Annually")
-  
+
   # Edge case: setting to NULL
   expect_output(
     acc$set_account_freq(NULL),
@@ -300,18 +298,18 @@ test_that("set_account_freq updates the frequency and prints message", {
 # =========================================================
 test_that("get_account_periods returns the correct number of periods", {
   acc <- GrandchildAccount$new("Health Insurance")
-  
+
   # Default value should be 1
   expect_equal(acc$get_account_periods(), 1)
-  
+
   # Manually change the number of periods (simulating internal logic changes)
   acc$num_periods <- 3
   expect_equal(acc$get_account_periods(), 3)
-  
+
   # Set to 0 (edge case)
   acc$num_periods <- 0
   expect_equal(acc$get_account_periods(), 0)
-  
+
   # Set to fractional period (possible from withdraw adjustments)
   acc$num_periods <- 2.5
   expect_equal(acc$get_account_periods(), 2.5)
@@ -322,20 +320,20 @@ test_that("get_account_periods returns the correct number of periods", {
 # =========================================================
 test_that("set_account_periods correctly updates the number of periods", {
   acc <- GrandchildAccount$new("Internet Subscription")
-  
+
   # Set to 5 periods
   acc$set_account_periods(5)
   expect_equal(acc$num_periods, 5)
-  
+
   # Set to 0 (edge case: may be logically invalid but allowed in current
   # vimplementation)
   acc$set_account_periods(0)
   expect_equal(acc$num_periods, 0)
-  
+
   # Set to a decimal value (e.g., withdrawal adjusted)
   acc$set_account_periods(2.75)
   expect_equal(acc$num_periods, 2.75)
-  
+
   # Set to a negative value (not prevented by current implementation)
   acc$set_account_periods(-3)
   expect_equal(acc$num_periods, -3)
@@ -354,7 +352,7 @@ test_that("get_fixed_amount returns correct value", {
     account_type = "Expense",
     freq = NULL
   )
-  
+
   expect_equal(acc$get_fixed_amount(), 200)
 })
 
@@ -373,7 +371,7 @@ test_that("set_due_date sets the due_date correctly", {
     account_type = "Expense",
     freq = NULL
   )
-  
+
   acc$set_due_date("2025-07-01")
   expect_equal(acc$due_date, "2025-07-01")
 })
@@ -393,7 +391,7 @@ test_that("set_account_type sets the account_type correctly", {
     account_type = "Income",  # Initial value
     freq = NULL
   )
-  
+
   acc$set_account_type("Expense")  # Change it
   expect_equal(acc$account_type, "Expense")
 })

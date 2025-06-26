@@ -352,14 +352,14 @@ GrandchildAccount <- R6Class(
     #' @examples
     #' # main account
     #' main<- MainAccount$new("main")
-    #' 
+    #'
     #' # child account
     #' child <- ChildAccount$new(
     #'   name = "Emergency Fund",
     #'   allocation = 0.3,
     #'   priority = 2
     #' )
-    #' 
+    #'
     #' # Grand child account
     #' bill <- GrandchildAccount$new(
     #'   name = "Rent",
@@ -402,7 +402,7 @@ GrandchildAccount <- R6Class(
             self$num_periods,
             "\n"
           )
-          self$status<-"active"
+          self$status <- "active"
           cat(
             self$name,
             "reactivated. Outstanding balance due:",
@@ -540,7 +540,7 @@ GrandchildAccount <- R6Class(
     #' rent$deposit(75000,channel="ABSA")
     #' # Now equivalent to 0.53 of the rent period remaining.
     #' rent$withdraw(35000,channel="ABSA")
-    #' 
+    #'
 
     withdraw = function(
       amount,
