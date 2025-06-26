@@ -1161,8 +1161,6 @@ test_that("allocated_amount: correctly sums deep descendant user deposits", {
   main$add_child_account(child)
   child$add_child_account(grandchild)
   grandchild$add_child_account(great_grandchild)
-
-  # Expected: 100 + 40 + 10
   expect_equal(main$allocated_amount(), 150)
 })
 
@@ -1212,8 +1210,6 @@ test_that(paste(
   " allocated by avoiding division by zero"
 ), {
   main <- MainAccount$new("Main")
-  #main$withdraw(20, by = "User", channel = "Emergency")
-
   utilization <- main$income_utilization()
   expect_equal(utilization, 0)
   expect_true(is.finite(utilization))
@@ -1284,7 +1280,6 @@ test_that("walking_amount: respects date range filter", {
   )
   range <- c(as.Date("2023-01-01"), as.Date("2023-12-31"))
 
-  #print(acc$walking_amount("amount_due", daterange = range))
   expect_equal(acc$walking_amount("amount_due", daterange = range), 0)
   expect_equal(acc$walking_amount("Balance", daterange = range), 0)
 })
