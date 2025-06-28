@@ -1,4 +1,4 @@
-Package: personal.finance.man
+Package: finman
 Type: Package
 Title: Finance Account Management
 Version: 0.0.1
@@ -13,7 +13,8 @@ Imports:
     R6,
     tidyverse,
     uuid,
-    lubridate
+    lubridate,
+    jose
 Suggests: 
     testthat (>= 3.0.0),
     covr,

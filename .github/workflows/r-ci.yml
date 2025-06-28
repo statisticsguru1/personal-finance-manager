@@ -84,3 +84,46 @@ jobs:
         shell: Rscript {0}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  api-tests:
+    runs-on: ubuntu-latest
+    needs: build  # ✅ Waits for build to complete
+
+    env:
+      R_LIBS_USER: ${{ github.workspace }}/.Rlibrary
+      RENV_PATHS_LIBRARY: ${{ github.workspace }}/.Rlibrary
+      TZ: UTC
+      NOT_CRAN: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Restore cached R packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: r-${{ runner.os }}-${{ hashFiles('DESCRIPTION') }}
+          restore-keys: r-${{ runner.os }}-
+
+      - name: Install endpoint test dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          use-lockfile: false
+          extra-packages: |
+            devtools
+            testthat
+            jsonlite
+            jose
+            callr
+            withr
+            here
+            httr
+            plumber
+
+      - name: Run API endpoint tests
+        run: testthat::test_file("api/tests/test_endpoints.R")
+        shell: Rscript {0}

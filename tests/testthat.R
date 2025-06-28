@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(personal.finance.man)
+library(finman)
 
-test_check("personal.finance.man")
+test_check("finman")
