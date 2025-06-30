@@ -15,7 +15,8 @@ Imports:
     uuid,
     lubridate,
     jose,
-    filelock
+    filelock,
+    withr
 Suggests: 
     testthat (>= 3.0.0),
     covr,

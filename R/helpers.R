@@ -230,7 +230,7 @@ with_account_lock <- function(
     user_id,
     expr,
     base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts"),
-    timeout = 10
+    timeout = 1800
 ) {
   if (!is_valid_user_id(user_id)) {
     stop("Invalid user ID format")

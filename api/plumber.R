@@ -54,77 +54,59 @@ ping<-function() {
 #* @param transaction_number Optional transaction number
 #* @param by Who performed the deposit (default = "User")
 #* @param date Timestamp of deposit (default = now)
-deposit <- function(req, res,
-                    uuid,
-                    amount,
-                    channel,
-                    transaction_number = NULL,
-                    by = "User",
-                    date = Sys.time()) {
+#* endpoints/deposit.R
+#* @post /deposit
+#* @param uuid Account UUID (required)
+#* @param amount Deposit amount (required)
+#* @param channel Deposit channel (required)
+#* @param transaction_number Optional transaction number
+#* @param by Who performed the deposit (default = "User")
+#* @param date Timestamp of deposit (default = now)
+deposit<- function(req, res,
+                   uuid,
+                   amount,
+                   channel,
+                   transaction_number = NULL,
+                   by = "User",
+                   date = Sys.time()) {
   user_id <- req$user_id
   role <- req$role
-  start_time <- Sys.time()
   
-  future({
-    with_account_lock(user_id, {
-      tree <- load_user_account(user_id)
-      account <- tree$find_account_by_uuid(uuid)
-      
-      if (is.null(account)) {
-        return(list(
-          success = FALSE,
-          status = if (role == "admin") 404 else 403,
-          error = "Account not found or unauthorized"
-        ))
-      }
-      
-      account$deposit(
-        amount = as.numeric(amount),
-        transaction_number = transaction_number,
-        by = by,
-        channel = channel,
-        date = date
-      )
-      
-      save_user_account(user_id, tree)
-      })
-    
-      list(
-        success = TRUE,
-        account_uuid = uuid,
-        balance = account$balance
-      )
-    
-  }) %...>% {
-    result -> {
-      end_time <- Sys.time()
-      result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
-      result$end_time <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
-      result$execution_time <- as.numeric(
-        difftime(end_time, start_time, units = "secs")
-      )
-      res$status <- result$status %||% 200
-      result
-    }
-  } %...!% {
-    err -> {
-      end_time <- Sys.time()
-      res$status <- 500
-      list(
-        success = FALSE,
-        error = conditionMessage(err),
-        start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
-        end_time = format(end_time, "%Y-%m-%dT%H:%M:%OS3Z"),
-        execution_time = as.numeric(
-          difftime(end_time, start_time, units = "secs")
-        )
-      )
-    }
+  with_account_lock(user_id, {
+  # Load full tree
+  tree <- load_user_account(user_id)
+  
+  # Try to find account
+  account <- tree$find_account_by_uuid(uuid)
+  
+  # Role-based access control
+  if (is.null(account)) {
+    res$status <- if (role == "admin") 404 else 403
+    return(list(error = "Account not found or unauthorized"))
   }
   
-  # Return immediately so Plumber doesn't hang
-  return(NULL)
+  # Proceed with deposit
+  account$deposit(
+    amount = as.numeric(amount),
+    transaction_number = transaction_number,
+    by = by,
+    channel = channel,
+    date = date
+  )
+  
+  # Save updated tree
+  save_user_account(user_id, tree)
+  
+  list(
+    success = TRUE,
+    account_uuid = uuid,
+    balance = account$balance
+  )
+  })
 }
+
+
+
 
 
 #* @post /distribute
