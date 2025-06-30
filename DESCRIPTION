@@ -14,7 +14,8 @@ Imports:
     tidyverse,
     uuid,
     lubridate,
-    jose
+    jose,
+    filelock
 Suggests: 
     testthat (>= 3.0.0),
     covr,
