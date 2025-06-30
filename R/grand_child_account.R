@@ -148,10 +148,12 @@ GrandchildAccount <- R6Class(
       fixed_amount = 0,
       due_date = NULL,
       account_type = "Expense",
-      freq = NULL
+      freq = NULL,
+      status="active"
     ) {
       super$initialize(name, allocation)
       self$fixed_amount <- fixed_amount
+      self$status <- status
       self$due_date <- due_date
       self$amount_due <- fixed_amount
       self$account_type <- account_type

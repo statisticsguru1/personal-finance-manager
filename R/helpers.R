@@ -1,4 +1,5 @@
 library(jose)
+library(filelock)
 #--------------------- validates user id before creating base acc-------------
 #' Validate a User ID Format
 #'
@@ -222,3 +223,43 @@ verify_token <- function(token, secret = secret_key) {
     jose::jwt_decode_hmac(token, secret = secret)
   }, error = function(e) NULL)
 }
+
+
+# -------------------- file lock ---------------------------------------------
+with_account_lock <- function(
+    user_id,
+    expr,
+    base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts"),
+    timeout = 10
+) {
+  if (!is_valid_user_id(user_id)) {
+    stop("Invalid user ID format")
+  }
+  
+  user_dir <- file.path(base_dir, user_id)
+  lockfile <- file.path(user_dir, "account_tree.lock")
+  
+  start_time <- Sys.time()
+  
+  while (file.exists(lockfile)) {
+    if (difftime(Sys.time(), start_time, units = "secs") > timeout) {
+      stop("Could not acquire lock for user [", user_id, "]: timeout reached")
+    }
+    Sys.sleep(0.1)
+  }
+  
+  # Create the lock file with current process ID
+  lock_con <- file(lockfile, open = "w")
+  writeLines(as.character(Sys.getpid()), lock_con)
+  close(lock_con)
+  
+  on.exit({
+    if (file.exists(lockfile)) file.remove(lockfile)
+  }, add = TRUE)
+  
+  force(expr)
+}
+
+
+
+

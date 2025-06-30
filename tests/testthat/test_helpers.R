@@ -1,3 +1,4 @@
+library(filelock)
 # =========================================================
 # Test account id validation helper function
 # =========================================================
@@ -253,4 +254,80 @@ test_that("save_user_account errors if base_dir is invalid", {
   
 })
 
+
+# =========================================================
+# Test file lock helper function
+# =========================================================
+library(testthat)
+library(filelock)
+
+library(testthat)
+
+test_that("with_account_lock() creates and removes lockfile", {
+  base_dir <- tempdir()
+  user_id <- "testuser1"
+  user_dir <- file.path(base_dir, user_id)
+  dir.create(user_dir, recursive = TRUE)
+  
+  lockfile <- file.path(user_dir, "account_tree.lock")
+  expect_false(file.exists(lockfile))
+  
+  with_account_lock(user_id, {
+    expect_true(file.exists(lockfile))
+  }, base_dir = base_dir)
+  
+  expect_false(file.exists(lockfile))
+})
+
+test_that("with_account_lock() blocks concurrent access and times out", {
+  base_dir <- tempdir()
+  user_id <- "testuser2"
+  user_dir <- file.path(base_dir, user_id)
+  dir.create(user_dir, recursive = TRUE)
+  
+  lockfile <- file.path(user_dir, "account_tree.lock")
+  file.create(lockfile)
+  
+  start <- Sys.time()
+  expect_error(
+    with_account_lock(user_id, {
+      cat("Should timeout\n")
+    }, base_dir = base_dir, timeout = 1),
+    "Could not acquire lock",
+    fixed = TRUE
+  )
+  duration <- Sys.time() - start
+  expect_gt(duration, as.difftime(1, units = "secs"))
+  unlink(lockfile)
+})
+
+test_that("with_account_lock() works with return values", {
+  base_dir <- tempdir()
+  user_id <- "testuser3"
+  user_dir <- file.path(base_dir, user_id)
+  dir.create(user_dir, recursive = TRUE)
+  
+  result <- with_account_lock(user_id, {
+    99
+  }, base_dir = base_dir)
+  
+  expect_equal(result, 99)
+  expect_false(file.exists(file.path(user_dir, "account_tree.lock")))
+})
+
+test_that("with_account_lock() cleans up on error", {
+  base_dir <- tempdir()
+  user_id <- "testuser4"
+  user_dir <- file.path(base_dir, user_id)
+  dir.create(user_dir, recursive = TRUE)
+  
+  expect_error(
+    with_account_lock(user_id, {
+      stop("Simulated error")
+    }, base_dir = base_dir),
+    "Simulated error"
+  )
+  
+  expect_false(file.exists(file.path(user_dir, "account_tree.lock")))
+})
 

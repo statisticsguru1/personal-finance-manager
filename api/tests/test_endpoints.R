@@ -3,13 +3,13 @@ library(httr)
 library(jose)
 library(withr)
 library(here)
-library(jsonlite)  # ✅ Required for proper JSON parsing
+library(jsonlite)
 
 devtools::load_all()  # Load your package (e.g., finman)
 
 wait_for_server_ready <- function(
     url = "http://127.0.0.1:8000/__ping__",
-    timeout = 10
+    timeout = 20
 ) {
   start_time <- Sys.time()
   while (as.numeric(Sys.time() - start_time, units = "secs") < timeout) {
