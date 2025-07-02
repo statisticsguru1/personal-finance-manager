@@ -16,7 +16,8 @@ Imports:
     lubridate,
     jose,
     filelock,
-    withr
+    withr,
+    jsonlite
 Suggests: 
     testthat (>= 3.0.0),
     covr,
