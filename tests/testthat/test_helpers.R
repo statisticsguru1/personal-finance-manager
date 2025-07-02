@@ -922,3 +922,10 @@ test_that("with_account_lock() cleans up lockfile after error", {
   
   expect_false(user_file_exists(user_id, "account_tree.lock"))
 })
+test_that("with_account_lock errors on invalid user ID", {
+  expect_error(
+    with_account_lock("invalid id!", { message("This won't run") }),
+    "Invalid user ID format"
+  )
+})
+

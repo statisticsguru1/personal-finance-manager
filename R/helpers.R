@@ -283,6 +283,8 @@ user_file_exists <- function(user_id, file_name = "account_tree.Rds") {
 #'   \item `.json` files are loaded with \code{jsonlite::fromJSON()}
 #'   \item `.csv` files are loaded with \code{read.csv()}
 #' }
+#' some depedencies:
+#' @importFrom utils read.csv write.csv
 #'
 #' @details
 #' This function is intended to be called indirectly through a generic loader
