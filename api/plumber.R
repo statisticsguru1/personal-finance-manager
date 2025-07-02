@@ -55,13 +55,6 @@ ping<-function() {
 #* @param by Who performed the deposit (default = "User")
 #* @param date Timestamp of deposit (default = now)
 #* endpoints/deposit.R
-#* @post /deposit
-#* @param uuid Account UUID (required)
-#* @param amount Deposit amount (required)
-#* @param channel Deposit channel (required)
-#* @param transaction_number Optional transaction number
-#* @param by Who performed the deposit (default = "User")
-#* @param date Timestamp of deposit (default = now)
 deposit<- function(req, res,
                    uuid,
                    amount,

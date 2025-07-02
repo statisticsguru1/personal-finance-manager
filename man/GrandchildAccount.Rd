@@ -315,7 +315,8 @@ parameters like due dates, target amounts, and funding cycles.
   fixed_amount = 0,
   due_date = NULL,
   account_type = "Expense",
-  freq = NULL
+  freq = NULL,
+  status = "active"
 )}\if{html}{\out{</div>}}
 }
 
@@ -344,6 +345,8 @@ behavior. Defaults to "Expense".}
 
 \item{\code{freq}}{Numeric or NULL. Frequency in days for periodic accounts to
 recur. Required for automated reactivation logic.}
+
+\item{\code{status}}{Character. "active", "inactive", or "closed".}
 }
 \if{html}{\out{</div>}}
 }

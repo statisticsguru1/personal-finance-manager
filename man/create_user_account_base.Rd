@@ -6,7 +6,7 @@
 \usage{
 create_user_account_base(
   user_id,
-  base_dir = "user_accounts",
+  base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts"),
   initial_balance = 0
 )
 }
@@ -14,37 +14,14 @@ create_user_account_base(
 \item{user_id}{A validated user ID (must contain only letters,
 digits, and underscores).}
 
-\item{base_dir}{The root directory where user accounts are stored.
-Default is `"user_accounts"`.}
+\item{base_dir}{Deprecated. Use ACCOUNT_BACKEND instead.}
 
-\item{initial_balance}{Optional numeric value specisfying the
-starting balance for the main account. Default is `0`.
-This balance is **not** recorded as a transaction.}
+\item{initial_balance}{Optional numeric value specifying the
+starting balance for the main account. Default is `0`.}
 }
 \value{
 Invisibly returns `TRUE` if the account was created successfully.
 }
 \description{
-Creates a new user directory, initializes a `MainAccount` object as the
-root of their account tree, and saves it to disk. Optionally, the user can
-be initialized with a balance, although this is discouraged unless needed
-for administrative reasons (as it bypasses the transaction log).
-}
-\details{
-The function assumes the `user_id` has already been checked or
-authorized at a higher level (e.g., registration). It will fail if the
-user directory already exists. This function creates no login credentials.
-}
-\note{
-It is **recommended** to always create accounts with a `0` balance and
-record any starting amount using a proper deposit transaction. This ensures
-that all balance-affecting operations are logged and traceable.
-}
-\examples{
-create_user_account_base("user_demo")
-create_user_account_base("admin_user", initial_balance = 1000)
-
-}
-\seealso{
-\code{\link{is_valid_user_id}}, \code{\link{MainAccount}}
+Initializes a `MainAccount` object and saves it using the configured backend.
 }

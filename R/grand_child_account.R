@@ -108,6 +108,7 @@ GrandchildAccount <- R6Class(
     #' behavior. Defaults to "Expense".
     #' @param freq Numeric or NULL. Frequency in days for periodic accounts to
     #'   recur. Required for automated reactivation logic.
+    #' @param status Character. "active", "inactive", or "closed".
     #'
     #' @details
     #' The constructor also initializes a data frame
