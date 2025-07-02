@@ -55,48 +55,49 @@ ping<-function() {
 #* @param by Who performed the deposit (default = "User")
 #* @param date Timestamp of deposit (default = now)
 #* endpoints/deposit.R
-deposit<- function(req, res,
-                   uuid,
-                   amount,
-                   channel,
-                   transaction_number = NULL,
-                   by = "User",
-                   date = Sys.time()) {
+deposit <- function(req, res,
+                    uuid,
+                    amount,
+                    channel,
+                    transaction_number = NULL,
+                    by = "User",
+                    date = Sys.time()) {
   user_id <- req$user_id
   role <- req$role
   
   with_account_lock(user_id, {
-  # Load full tree
-  tree <- load_user_account(user_id)
-  
-  # Try to find account
-  account <- tree$find_account_by_uuid(uuid)
-  
-  # Role-based access control
-  if (is.null(account)) {
-    res$status <- if (role == "admin") 404 else 403
-    return(list(error = "Account not found or unauthorized"))
-  }
-  
-  # Proceed with deposit
-  account$deposit(
-    amount = as.numeric(amount),
-    transaction_number = transaction_number,
-    by = by,
-    channel = channel,
-    date = date
-  )
-  
-  # Save updated tree
-  save_user_account(user_id, tree)
-  
-  list(
-    success = TRUE,
-    account_uuid = uuid,
-    balance = account$balance
-  )
+    # Load full tree
+    tree <- load_user_file(user_id, "account_tree.Rds")
+    
+    # Try to find account
+    account <- tree$find_account_by_uuid(uuid)
+    
+    # Role-based access control
+    if (is.null(account)) {
+      res$status <- if (role == "admin") 404 else 403
+      return(list(error = "Account not found or unauthorized"))
+    }
+    
+    # Proceed with deposit
+    account$deposit(
+      amount = as.numeric(amount),
+      transaction_number = transaction_number,
+      by = by,
+      channel = channel,
+      date = date
+    )
+    
+    # Save updated tree
+    save_user_file(user_id, tree, "account_tree.Rds")
+    
+    list(
+      success = TRUE,
+      account_uuid = uuid,
+      balance = account$balance
+    )
   })
 }
+
 
 
 

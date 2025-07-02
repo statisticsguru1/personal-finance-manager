@@ -25,11 +25,12 @@ test_that("POST /deposit endpoint edge cases", {
   tmp_dir <- tempfile("test-api-deposit-")
   dir.create(tmp_dir, recursive = TRUE)
   Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
+  Sys.setenv(ACCOUNT_BACKEND = "file")
   Sys.setenv(JWT_SECRET = "test-secret")
   secret_key <- Sys.getenv("JWT_SECRET")
   
   create_user_account_base("testuser", tmp_dir, initial_balance = 500)
-  uuid <- load_user_account("testuser", tmp_dir)$uuid
+  uuid <- load_user_file("testuser", "account_tree.Rds")$uuid
   
   log_out <- tempfile("server-out-", fileext = ".log")
   log_err <- tempfile("server-err-", fileext = ".log")
