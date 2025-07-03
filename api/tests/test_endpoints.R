@@ -19,59 +19,62 @@ wait_for_server_ready <- function(
   stop("Server did not become ready within timeout.")
 }
 
-test_that("POST /deposit endpoint edge cases", {
-  # Setup: start server, create user, etc.
-  tmp_dir <- tempfile("test-api-deposit-")
-  dir.create(tmp_dir, recursive = TRUE)
-  Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
-  Sys.setenv(ACCOUNT_BACKEND = "file")
-  Sys.setenv(JWT_SECRET = "test-secret")
-  secret_key <- Sys.getenv("JWT_SECRET")
-  
-  create_user_account_base(
-    user_id = "testuser",
+
+# Setup: start server, create user, etc.
+tmp_dir <- tempfile("test-api-deposit-")
+dir.create(tmp_dir, recursive = TRUE)
+Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
+Sys.setenv(ACCOUNT_BACKEND = "file")
+Sys.setenv(JWT_SECRET = "test-secret")
+secret_key <- Sys.getenv("JWT_SECRET")
+
+create_user_account_base(
+  user_id = "testuser",
+  base_dir = tmp_dir,
+  initial_balance = 500
+)
+uuid <- load_user_file("testuser", "account_tree.Rds")$uuid
+log_out <- tempfile("server-out-", fileext = ".log")
+log_err <- tempfile("server-err-", fileext = ".log")
+
+server <- callr::r_bg(
+  function(main_file, jwt, base_dir, project_dir) {
+    setwd(project_dir)
+    Sys.setenv(JWT_SECRET = jwt)
+    Sys.setenv(ACCOUNT_BASE_DIR = base_dir)
+    Sys.setenv(ACCOUNT_BACKEND = "file")
+    source(main_file)
+  },
+  args = list(
+    main_file = here("api", "main.R"),
+    jwt = secret_key,
     base_dir = tmp_dir,
-    initial_balance = 500
-    )
-  uuid <- load_user_file("testuser", "account_tree.Rds")$uuid
-  log_out <- tempfile("server-out-", fileext = ".log")
-  log_err <- tempfile("server-err-", fileext = ".log")
-  
-  server <- callr::r_bg(
-    function(main_file, jwt, base_dir, project_dir) {
-      setwd(project_dir)
-      Sys.setenv(JWT_SECRET = jwt)
-      Sys.setenv(ACCOUNT_BASE_DIR = base_dir)
-      Sys.setenv(ACCOUNT_BACKEND = "file")
-      source(main_file)
-    },
-    args = list(
-      main_file = here("api", "main.R"),
-      jwt = secret_key,
-      base_dir = tmp_dir,
-      project_dir = here()
-    ),
-    stdout = log_out,
-    stderr = log_err
-  )
-  
-  
-  withr::defer({
-    if (server$is_alive()) server$kill()
-    cat("📤 Server stdout:\n")
-    cat(readLines(log_out, warn = FALSE), sep = "\n")
-    cat("\n📥 Server stderr:\n")
-    cat(readLines(log_err, warn = FALSE), sep = "\n")
-  }, envir = parent.frame())
-  
-  wait_for_server_ready("http://127.0.0.1:8000/__ping__")
-  
-  # Helper: auth token
-  token <- jwt_encode_hmac(
-    jwt_claim(user_id = "testuser", role = "user"),
-    secret = secret_key
-  )
-  
+    project_dir = here()
+  ),
+  stdout = log_out,
+  stderr = log_err
+)
+
+
+withr::defer({
+  if (server$is_alive()) server$kill()
+  cat("📤 Server stdout:\n")
+  cat(readLines(log_out, warn = FALSE), sep = "\n")
+  cat("\n📥 Server stderr:\n")
+  cat(readLines(log_err, warn = FALSE), sep = "\n")
+}, envir = parent.frame())
+
+wait_for_server_ready("http://127.0.0.1:8000/__ping__")
+
+# Helper: auth token
+token <- jwt_encode_hmac(
+  jwt_claim(user_id = "testuser", role = "user"),
+  secret = secret_key
+)
+
+test_that("POST /deposit endpoint edge cases", {
+
+  ## testing deposits 
   # ✅ Case 1: Successful deposit
   res1 <- httr::POST(
     url = "http://127.0.0.1:8000/deposit",
@@ -101,4 +104,55 @@ test_that("POST /deposit endpoint edge cases", {
     encode = "form"
   )
   expect_equal(httr::status_code(res3), 403)
+})
+
+
+test_that("POST /withdraw works", {
+  ## testing withdrawals
+  # ✅ Case 4: Successful withdrawal
+  res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/withdraw",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = uuid, amount = 200, channel = "mpesa"),
+    encode = "form"
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 200)
+  expect_true(parsed4$success)
+  expect_equal(parsed4$account_uuid, uuid)
+  expect_equal(parsed4$balance, 1300)  # 1500 - 200
+  
+  # ✅ Case 5: Withdraw more than balance
+  res5 <- httr::POST(
+    url = "http://127.0.0.1:8000/withdraw",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = uuid, amount = 999999, channel = "bank"),
+    encode = "form"
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 500)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "insufficient|balance", ignore.case = TRUE)
+  
+  # ✅ Case 6: Withdraw with invalid token
+  res6 <- httr::POST(
+    url = "http://127.0.0.1:8000/withdraw",
+    httr::add_headers(Authorization = "Bearer invalidtoken"),
+    body = list(uuid = uuid, amount = 50, channel = "bank"),
+    encode = "form"
+  )
+  expect_equal(httr::status_code(res6), 401)
+  
+  # ✅ Case 7: Withdraw with negative amount
+  res7 <- httr::POST(
+    url = "http://127.0.0.1:8000/withdraw",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = uuid, amount = -100, channel = "bank"),
+    encode = "form"
+  )
+  parsed7 <- jsonlite::fromJSON(rawToChar(res7$content))
+  expect_equal(httr::status_code(res7), 400)
+  expect_false(parsed7$success)
+  expect_match(parsed7$error, "invalid.*amount", ignore.case = TRUE)
+  
 })

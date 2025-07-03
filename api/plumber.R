@@ -101,7 +101,9 @@ deposit <- function(req, res,
     end_time <- Sys.time()
     result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
     result$end_time <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
-    result$execution_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
+    result$execution_time <- as.numeric(
+      difftime(end_time, start_time, units = "secs")
+    )
     
     res$status <- result$status %||% 200
     result
@@ -113,11 +115,92 @@ deposit <- function(req, res,
       error = conditionMessage(err),
       start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
       end_time = format(end_time, "%Y-%m-%dT%H:%M:%OS3Z"),
-      execution_time = as.numeric(difftime(end_time, start_time, units = "secs"))
+      execution_time = as.numeric(
+        difftime(end_time, start_time, units = "secs")
+      )
     )
   })
 }
 
+
+#* endpoints/withdraw.R
+#* @post /withdraw
+#* @param uuid Account UUID (required)
+#* @param amount Withdrawal amount (required)
+#* @param channel Withdrawal channel (required)
+#* @param transaction_number Optional transaction number
+#* @param by Who performed the withdrawal (default = "User")
+#* @param date Timestamp of withdrawal (default = now)
+withdraw <- function(req, res,
+                     uuid,
+                     amount,
+                     channel,
+                     transaction_number = NULL,
+                     by = "User",
+                     date = Sys.time()) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+  
+  amount <- as.numeric(amount)
+  if (is.na(amount) || amount <= 0) {
+    res$status <- 400
+    return(list(success = FALSE, error = "Invalid withdrawal amount"))
+  }
+  
+  future({
+    with_account_lock(user_id, {
+      tree <- load_user_file(user_id, "account_tree.Rds")
+      account <- tree$find_account_by_uuid(uuid)
+      
+      if (is.null(account)) {
+        list(
+          success = FALSE,
+          status = if (role == "admin") 404 else 403,
+          error = "Account not found or unauthorized"
+        )
+      } else {
+        account$withdraw(
+          amount = amount,
+          transaction_number = transaction_number,
+          by = by,
+          channel = channel,
+          date = date
+        )
+        save_user_file(user_id, tree, "account_tree.Rds")
+        
+        list(
+          success = TRUE,
+          status = 200,
+          account_uuid = uuid,
+          balance = account$balance
+        )
+      }
+    })
+  }) %...>% (function(result) {
+    end_time <- Sys.time()
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(end_time, start_time, units = "secs")
+    )
+    
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    end_time <- Sys.time()
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(end_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(end_time, start_time, units = "secs")
+      )
+    )
+  })
+}
 
 
 
