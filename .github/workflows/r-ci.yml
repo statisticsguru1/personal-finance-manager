@@ -66,6 +66,10 @@ jobs:
             devtools
             remotes
             pkgdown
+            
+      - name: Install local package
+        run: devtools::install(local = TRUE, upgrade = "never")
+        shell: Rscript {0}
 
       - name: Lint code
         run: lintr::lint_package()
