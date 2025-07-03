@@ -17,7 +17,8 @@ Imports:
     jose,
     filelock,
     withr,
-    jsonlite
+    jsonlite,
+    rlang
 Suggests: 
     testthat (>= 3.0.0),
     covr,

@@ -1,7 +1,9 @@
 library(plumber)
 library(future)
 library(promises)
+library(rlang)
 plan(multisession)
+
 
 #* @filter auth
 function(req, res) {
@@ -64,39 +66,58 @@ deposit <- function(req, res,
                     date = Sys.time()) {
   user_id <- req$user_id
   role <- req$role
+  start_time <- Sys.time()
   
-  with_account_lock(user_id, {
-    # Load full tree
-    tree <- load_user_file(user_id, "account_tree.Rds")
+  future({
+    with_account_lock(user_id, {
+      tree <- load_user_file(user_id, "account_tree.Rds")
+      account <- tree$find_account_by_uuid(uuid)
+      
+      if (is.null(account)) {
+        list(
+          success = FALSE,
+          status = if (role == "admin") 404 else 403,
+          error = "Account not found or unauthorized"
+        )
+      } else {
+        account$deposit(
+          amount = as.numeric(amount),
+          transaction_number = transaction_number,
+          by = by,
+          channel = channel,
+          date = date
+        )
+        save_user_file(user_id, tree, "account_tree.Rds")
+        
+        list(
+          success = TRUE,
+          status = 200,
+          account_uuid = uuid,
+          balance = account$balance
+        )
+      }
+    })
+  }) %...>% (function(result) {
+    end_time <- Sys.time()
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
     
-    # Try to find account
-    account <- tree$find_account_by_uuid(uuid)
-    
-    # Role-based access control
-    if (is.null(account)) {
-      res$status <- if (role == "admin") 404 else 403
-      return(list(error = "Account not found or unauthorized"))
-    }
-    
-    # Proceed with deposit
-    account$deposit(
-      amount = as.numeric(amount),
-      transaction_number = transaction_number,
-      by = by,
-      channel = channel,
-      date = date
-    )
-    
-    # Save updated tree
-    save_user_file(user_id, tree, "account_tree.Rds")
-    
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    end_time <- Sys.time()
+    res$status <- 500
     list(
-      success = TRUE,
-      account_uuid = uuid,
-      balance = account$balance
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(end_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(difftime(end_time, start_time, units = "secs"))
     )
   })
 }
+
 
 
 

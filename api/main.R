@@ -3,7 +3,8 @@ library(httr)
 library(jsonlite)
 library(sodium)
 library(jose)
-devtools::load_all()
+library(finman)
+
 
 pr <- plumb(file = "api/plumber.R")
 pr$run(

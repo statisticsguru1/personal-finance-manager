@@ -4,8 +4,7 @@ library(jose)
 library(withr)
 library(here)
 library(jsonlite)
-
-devtools::load_all()  # Load your package (e.g., finman)
+library(finman)
 
 wait_for_server_ready <- function(
     url = "http://127.0.0.1:8000/__ping__",
@@ -15,7 +14,7 @@ wait_for_server_ready <- function(
   while (as.numeric(Sys.time() - start_time, units = "secs") < timeout) {
     res <- tryCatch(httr::GET(url), error = function(e) NULL)
     if (!is.null(res) && httr::status_code(res) == 200) return(TRUE)
-    Sys.sleep(0.25)
+    Sys.sleep(0.10)
   }
   stop("Server did not become ready within timeout.")
 }
@@ -29,9 +28,12 @@ test_that("POST /deposit endpoint edge cases", {
   Sys.setenv(JWT_SECRET = "test-secret")
   secret_key <- Sys.getenv("JWT_SECRET")
   
-  create_user_account_base("testuser", tmp_dir, initial_balance = 500)
+  create_user_account_base(
+    user_id = "testuser",
+    base_dir = tmp_dir,
+    initial_balance = 500
+    )
   uuid <- load_user_file("testuser", "account_tree.Rds")$uuid
-  
   log_out <- tempfile("server-out-", fileext = ".log")
   log_err <- tempfile("server-err-", fileext = ".log")
   
@@ -40,6 +42,7 @@ test_that("POST /deposit endpoint edge cases", {
       setwd(project_dir)
       Sys.setenv(JWT_SECRET = jwt)
       Sys.setenv(ACCOUNT_BASE_DIR = base_dir)
+      Sys.setenv(ACCOUNT_BACKEND = "file")
       source(main_file)
     },
     args = list(
@@ -51,6 +54,7 @@ test_that("POST /deposit endpoint edge cases", {
     stdout = log_out,
     stderr = log_err
   )
+  
   
   withr::defer({
     if (server$is_alive()) server$kill()
