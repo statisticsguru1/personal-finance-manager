@@ -1,6 +1,7 @@
 library(filelock)
 library(withr)
 library(jsonlite)
+library(tidyverse)
 # =========================================================
 # Test account id validation helper function
 # =========================================================

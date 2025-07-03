@@ -207,17 +207,22 @@ print(main_acc$balance)
   main_acc$add_child_account(child)
   main_acc$list_child_accounts()
 }
+Recursively find all accounts by name
+
 
 ## ------------------------------------------------
 ## Method `MainAccount$find_account`
 ## ------------------------------------------------
 
 \dontrun{
-  main_acc <- MainAccount$new("Root")
-  bills <- ChildAccount$new("Bills", allocation = 0.5)
-  main_acc$add_child_account(bills)
-  found <- main_acc$find_account("Bills")
-  if (!is.null(found)) cat("Found account:", found$name)
+  main <- MainAccount$new("Main")
+  savings1 <- ChildAccount$new("Savings", allocation = 0.5)
+  savings2 <- ChildAccount$new("Savings", allocation = 0.3)
+  main$add_child_account(savings1)
+  main$add_child_account(savings2)
+  found <- main$find_account("Savings")
+  length(found)  # 2
+  found[[1]]$uuid
 }
 
 ## ------------------------------------------------
@@ -231,6 +236,8 @@ print(main_acc$balance)
   found <- main_acc$find_account_by_uuid(groceries$uuid)
   if (!is.null(found)) cat("Found UUID:", found$uuid)
 }
+Move balance to another account (by UUID)
+
 
 ## ------------------------------------------------
 ## Method `MainAccount$move_balance`
@@ -243,11 +250,11 @@ print(main_acc$balance)
   main_acc$add_child_account(savings)
   main_acc$add_child_account(emergency)
 
-  # Initial deposit to main account
+  # Initial deposit
   main_acc$deposit(1000, channel = "Bank")
 
-  # Move 200 from main to savings
-  main_acc$move_balance("Savings", 200)
+  # Move 200 to savings using UUID
+  main_acc$move_balance(savings$uuid, 200)
 }
 
 ## ------------------------------------------------
@@ -937,6 +944,8 @@ Invisibly returns a character vector of child account names.
   main_acc$add_child_account(child)
   main_acc$list_child_accounts()
 }
+Recursively find all accounts by name
+
 }
 \if{html}{\out{</div>}}
 
@@ -947,37 +956,44 @@ Invisibly returns a character vector of child account names.
 \if{html}{\out{<a id="method-MainAccount-find_account"></a>}}
 \if{latex}{\out{\hypertarget{method-MainAccount-find_account}{}}}
 \subsection{Method \code{find_account()}}{
-Recursively searches for an account by name within the current account
-and its descendants or ancestors. Avoids circular traversal by tracking
-visited paths.
+Recursively searches the current account, its children, and its parent
+chain to collect **all** accounts with a given name. This version differs
+from the original by not stopping at the first match—it returns a list of 
+**all** matches instead.
 
-This method enables name-based lookups within the account tree,
-supporting both downward (children) and upward (parent) traversal.
+It avoids infinite recursion by tracking visited account paths.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MainAccount$find_account(target_name, visited_paths = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{MainAccount$find_account(target_name, visited_paths = NULL, matches = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{target_name}}{Character. The name of the account to locate.}
+\item{\code{target_name}}{Character. The name of the account(s) to locate.}
 
-\item{\code{visited_paths}}{Internal use only. A list of visited paths to
-prevent infinite recursion in cyclic account trees.}
+\item{\code{visited_paths}}{(Internal use only) Tracks visited paths to avoid
+cycles.}
+
+\item{\code{matches}}{(Internal use only) A list to accumulate matches during
+recursion.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-Returns the account object if found, or \code{NULL} if not found.
+A list of account objects matching the given name. If no matches are
+found, returns an empty list.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-  main_acc <- MainAccount$new("Root")
-  bills <- ChildAccount$new("Bills", allocation = 0.5)
-  main_acc$add_child_account(bills)
-  found <- main_acc$find_account("Bills")
-  if (!is.null(found)) cat("Found account:", found$name)
+  main <- MainAccount$new("Main")
+  savings1 <- ChildAccount$new("Savings", allocation = 0.5)
+  savings2 <- ChildAccount$new("Savings", allocation = 0.3)
+  main$add_child_account(savings1)
+  main$add_child_account(savings2)
+  found <- main$find_account("Savings")
+  length(found)  # 2
+  found[[1]]$uuid
 }
 }
 \if{html}{\out{</div>}}
@@ -1021,6 +1037,8 @@ if no match is found.
   found <- main_acc$find_account_by_uuid(groceries$uuid)
   if (!is.null(found)) cat("Found UUID:", found$uuid)
 }
+Move balance to another account (by UUID)
+
 }
 \if{html}{\out{</div>}}
 
@@ -1032,20 +1050,20 @@ if no match is found.
 \if{latex}{\out{\hypertarget{method-MainAccount-move_balance}{}}}
 \subsection{Method \code{move_balance()}}{
 Moves a specified amount from the current account to another account
-identified by its name. This method is useful for internal transfers
-within the account tree. It uses existing `withdraw()` and `deposit()`
-logic, and automatically logs the transfer under the "Internal Transfer"
-channel.
+identified by its **UUID**. This is intended for internal transfers within
+the account tree. It reuses `withdraw()` and `deposit()` logic and logs
+the transfer using the "Internal Transfer" channel.
 
-The search for the target account is performed using `find_account()`.
+The target account is resolved using `find_account_by_uuid()`, not by name.
+This ensures unambiguous targeting even when accounts share the same name.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MainAccount$move_balance(target_account_name, amount)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{MainAccount$move_balance(target_account_uuid, amount)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{target_account_name}}{Character. The name of the account to which
+\item{\code{target_account_uuid}}{Character. The UUID of the account to which
 the funds will be moved.}
 
 \item{\code{amount}}{Numeric. The amount to transfer. Must be less than or equal
@@ -1054,8 +1072,8 @@ to the current account's balance.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-No return value. Side effects include balance modification and a logged
-transaction in both source and target accounts.
+No return value. Side effects include balance updates and transaction logs
+for both the source and target accounts.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -1066,11 +1084,11 @@ transaction in both source and target accounts.
   main_acc$add_child_account(savings)
   main_acc$add_child_account(emergency)
 
-  # Initial deposit to main account
+  # Initial deposit
   main_acc$deposit(1000, channel = "Bank")
 
-  # Move 200 from main to savings
-  main_acc$move_balance("Savings", 200)
+  # Move 200 to savings using UUID
+  main_acc$move_balance(savings$uuid, 200)
 }
 }
 \if{html}{\out{</div>}}

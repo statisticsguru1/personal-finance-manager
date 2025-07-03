@@ -22,6 +22,7 @@ The loaded object, parsed according to the file extension:
   \item `.json` files are loaded with \code{jsonlite::fromJSON()}
   \item `.csv` files are loaded with \code{read.csv()}
 }
+some depedencies:
 }
 \description{
 Loads a user-specific file (e.g., account tree, lock file) from the

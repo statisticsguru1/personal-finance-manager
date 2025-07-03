@@ -1,5 +1,6 @@
 library(jose)
 library(filelock)
+library(tidyverse)
 #--------------------- validates user id before creating base acc-------------
 #' Validate a User ID Format
 #'
@@ -526,7 +527,7 @@ build_plugin_args <- function(backend, mode = "load", ...) {
       uri = Sys.getenv("MONGO_URI"),
       db = Sys.getenv("MONGO_DB")
     ),
-    # 
+    
     # ==== Google Drive Backend ====
     "load_gdrive" = list(
       folder_id = Sys.getenv("GDRIVE_FOLDER_ID")

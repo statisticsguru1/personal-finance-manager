@@ -1,6 +1,7 @@
 library(plumber)
 library(future)
 library(promises)
+library(tidyverse)
 library(rlang)
 plan(multisession)
 
@@ -149,6 +150,7 @@ withdraw <- function(req, res,
   }
   
   future({
+    library(magrittr)
     with_account_lock(user_id, {
       tree <- load_user_file(user_id, "account_tree.Rds")
       account <- tree$find_account_by_uuid(uuid)
@@ -275,67 +277,107 @@ add_child_account <- function(req, res,
                               due_date = NULL,
                               account_type = NULL,
                               freq = NULL,
-                              status="active"
-                              ) {
-  
+                              status = "active") {
   user_id <- req$user_id
-  tree <- load_user_account(user_id)
-  parent <- tree$find_account_by_uuid(parent_uuid)
+  start_time <- Sys.time()
   
-  if (is.null(parent)) {
-    res$status <- 404
-    return(list(success = FALSE, error = "Parent account not found"))
-  }
-  
-  tryCatch({
-    # Choose correct account class
-    child_class <- if (inherits(parent, "MainAccount")) {
-      ChildAccount
-    } else {
-      GrandchildAccount
-    }
-    
-    # Convert inputs to proper types
-    allocation <- as.numeric(allocation)
-    priority <- as.numeric(priority)
-    fixed_amount <- as.numeric(fixed_amount)
-    freq <- if (!is.null(freq)) as.numeric(freq) else NULL
-    due_date <- if (!is.null(due_date)) as.POSIXct(due_date) else NULL
-    
-    # Instantiate account
-    child <- if (identical(child_class, ChildAccount)) {
-      ChildAccount$new(
-        name = name,
-        allocation = allocation,
-        priority = priority,
-        status=status
+  future({
+    #library(tidyverse)
+    with_account_lock(user_id, {
+      tree <- load_user_file(user_id, "account_tree.Rds")
+      parent <- tree$find_account_by_uuid(parent_uuid)
+      
+      if (is.null(parent)) {
+        return(
+          list(
+            success = FALSE,
+            status = 404,
+            error = "Parent account not found"
+          )
+        )
+      }
+      
+      # 🔍 Validate name does not already exist under this parent
+      existing_names <- parent$list_child_accounts()
+      if (name %in% existing_names) {
+        return(
+          list(
+            success = FALSE,
+            status = 400,
+            error = "Account name already exists under this parent"
+          )
+        )
+      }
+      allocation <- suppressWarnings(as.numeric(allocation))
+      
+      if (is.na(allocation) || allocation < 0 || allocation > 1) {
+        return(list(
+          success = FALSE,
+          status = 400,
+          error = "Invalid allocation: must be a number between 0 and 1"
+        ))
+      }
+      
+      
+      # Convert and instantiate
+      allocation <- as.numeric(allocation)
+      priority <- as.numeric(priority)
+      fixed_amount <- as.numeric(fixed_amount)
+      freq <- if (!is.null(freq)) as.numeric(freq) else NULL
+      due_date <- if (!is.null(due_date)) as.POSIXct(due_date) else NULL
+      
+      # Determine which account type to create based on the parent
+      if (inherits(parent, "MainAccount") && !inherits(parent, "ChildAccount")) {
+        child <- ChildAccount$new(
+          name = name,
+          allocation = allocation,
+          priority = priority,
+          status = status
+        )
+      } else {
+        child <- GrandchildAccount$new(
+          name = name,
+          allocation = allocation,
+          priority = priority,
+          fixed_amount = fixed_amount,
+          due_date = due_date,
+          account_type = account_type,
+          freq = freq,
+          status = status
+        )
+      }
+
+      parent$add_child_account(child)
+      save_user_file(user_id, tree, "account_tree.Rds")
+      
+      list(
+        success = TRUE,
+        status = 200,
+        message = paste(name, "added under", parent$name),
+        child_type = class(child)[1],
+        allocation = child$allocation
       )
-    } else {
-      GrandchildAccount$new(
-        name = name,
-        allocation = allocation,
-        priority = priority,
-        fixed_amount = fixed_amount,
-        due_date = due_date,
-        account_type = account_type,
-        freq = freq,
-        status=status
-      )
-    }
-    
-    parent$add_child_account(child)
-    save_user_account(user_id, tree)
-    
-    list(
-      success = TRUE,
-      message = paste(name, "added under", parent$name),
-      child_type = class(child)[1],
-      allocation = child$allocation
+    })
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
     )
-    
-  }, error = function(e) {
-    res$status <- 400
-    list(success = FALSE, error = e$message)
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
   })
 }
+
 

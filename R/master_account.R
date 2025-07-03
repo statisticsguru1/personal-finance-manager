@@ -1,7 +1,6 @@
 library(R6)
 library(tidyverse)
 library(uuid)
-
 # ==============================================================================
 # MainAccount Account
 # ==============================================================================
@@ -299,8 +298,8 @@ MainAccount <- R6Class(
     #'   main_acc <- MainAccount$new(name = "Salary Pool")
     #'   child1 <- ChildAccount$new(name = "Food Fund", allocation = 0.6)
     #'   child2 <- ChildAccount$new(name = "Savings", allocation = 0.4)
-    #'   main_acc$add_child(child1)
-    #'   main_acc$add_child(child2)
+    #'   main_acc$add_child_account(child1)
+    #'   main_acc$add_child_account(child2)
     #'
     #'   main_acc$deposit(amount = 1000, channel = "Bank")
     #'   # This will trigger distribute_to_children internally.
@@ -421,7 +420,7 @@ MainAccount <- R6Class(
       }
       self$child_accounts[[child_account$name]] <- child_account
       self$total_allocation <- self$child_accounts %>%
-        map("allocation") %>%
+        purrr::map("allocation") %>%
         unlist() %>%
         sum(na.rm = TRUE)
     },
@@ -470,7 +469,7 @@ MainAccount <- R6Class(
       }
 
       self$total_allocation <- self$child_accounts %>%
-        map("allocation") %>%
+        purrr::map("allocation") %>%
         unlist() %>%
         sum(na.rm = TRUE)
     },
@@ -622,78 +621,88 @@ MainAccount <- R6Class(
     list_child_accounts = function() {
       if (length(self$child_accounts) == 0) {
         cat("No child accounts found.\n")
+        return(invisible(character()))
       } else {
         cat("\nChild Accounts of", self$name, ":\n")
+        names <- character()
         for (child_account in self$child_accounts) {
           cat("-", child_account$name, "\n")
+          names <- c(names, child_account$name)
         }
+        return(invisible(names))
       }
     },
 
     #------------- Method to find an account by name ------------------------
+    #' Recursively find all accounts by name
+    #'
     #' @description
-    #' Recursively searches for an account by name within the current account
-    #' and its descendants or ancestors. Avoids circular traversal by tracking
-    #' visited paths.
+    #' Recursively searches the current account, its children, and its parent
+    #' chain to collect **all** accounts with a given name. This version differs
+    #'from the original by not stopping at the first match—it returns a list of 
+    #'**all** matches instead.
     #'
-    #' This method enables name-based lookups within the account tree,
-    #' supporting both downward (children) and upward (parent) traversal.
+    #' It avoids infinite recursion by tracking visited account paths.
     #'
-    #' @param target_name Character. The name of the account to locate.
-    #' @param visited_paths Internal use only. A list of visited paths to
-    #' prevent infinite recursion in cyclic account trees.
+    #' @param target_name Character. The name of the account(s) to locate.
+    #' @param visited_paths (Internal use only) Tracks visited paths to avoid
+    #' cycles.
+    #' @param matches (Internal use only) A list to accumulate matches during
+    #' recursion.
     #'
     #' @return
-    #' Returns the account object if found, or \code{NULL} if not found.
+    #' A list of account objects matching the given name. If no matches are
+    #' found, returns an empty list.
     #'
     #' @examples
     #' \dontrun{
-    #'   main_acc <- MainAccount$new("Root")
-    #'   bills <- ChildAccount$new("Bills", allocation = 0.5)
-    #'   main_acc$add_child_account(bills)
-    #'   found <- main_acc$find_account("Bills")
-    #'   if (!is.null(found)) cat("Found account:", found$name)
+    #'   main <- MainAccount$new("Main")
+    #'   savings1 <- ChildAccount$new("Savings", allocation = 0.5)
+    #'   savings2 <- ChildAccount$new("Savings", allocation = 0.3)
+    #'   main$add_child_account(savings1)
+    #'   main$add_child_account(savings2)
+    #'   found <- main$find_account("Savings")
+    #'   length(found)  # 2
+    #'   found[[1]]$uuid
     #' }
-    find_account = function(target_name, visited_paths = NULL) {
-      # Check if the current account is the target
-      if (self$name == target_name) {
-        return(self)
-      }
-
-      # Mark the current path as visited to avoid circular recursion
+    find_account = function(target_name, visited_paths = NULL, matches = NULL) {
+      # Initialize visited paths and match list
       if (is.null(visited_paths)) {
         visited_paths <- list()
       }
+      if (is.null(matches)) {
+        matches <- list()
+      }
+      
+      # Mark current path as visited
       visited_paths[[self$path]] <- TRUE
-
-      # Recursively search through child accounts
-      for (child_name in names(self$child_accounts)) {
-        child_account <- self$child_accounts[[child_name]]
-
-        # If this child account or its path has already been visited, skip it
-        if (child_account$path %in% names(visited_paths)) {
-          next
-        }
-
-        # Search within the child account
-        result <- child_account$find_account(target_name, visited_paths)
-        if (!is.null(result)) {
-          return(result)
+      
+      # Check current node
+      if (self$name == target_name) {
+        matches[[length(matches) + 1]] <- self
+      }
+      
+      # Recursively search children
+      for (child in self$child_accounts) {
+        if (!(child$path %in% names(visited_paths))) {
+          matches <- child$find_account(
+            target_name,
+            visited_paths = visited_paths,
+            matches = matches
+          )
         }
       }
-
-      # If not found in current node or its children,move up to the parent
-      # (if exists)
-      if (
-        !is.null(self$parent) && !(
-          self$parent$path %in% names(visited_paths)
+      
+      # Recurse up to parent if not visited
+      if (!is.null(self$parent) && !(self$parent$path %in% names(visited_paths))) {
+        matches <- self$parent$find_account(
+          target_name,
+          visited_paths = visited_paths,
+          matches = matches
         )
-      ) {
-        return(self$parent$find_account(target_name, visited_paths))
       }
-
-      # If the account is not found in the entire tree, return NULL
-      return(NULL)
+      
+      return(matches)
     },
     #------------- Method to find an account by UUID ------------------------
     #' @description
@@ -758,23 +767,25 @@ MainAccount <- R6Class(
       return(NULL)
     },
     #------------- Method to Move amount  ------------------------
+    #' Move balance to another account (by UUID)
+    #'
     #' @description
     #' Moves a specified amount from the current account to another account
-    #' identified by its name. This method is useful for internal transfers
-    #' within the account tree. It uses existing `withdraw()` and `deposit()`
-    #' logic, and automatically logs the transfer under the "Internal Transfer"
-    #' channel.
+    #' identified by its **UUID**. This is intended for internal transfers within
+    #' the account tree. It reuses `withdraw()` and `deposit()` logic and logs
+    #' the transfer using the "Internal Transfer" channel.
     #'
-    #' The search for the target account is performed using `find_account()`.
+    #' The target account is resolved using `find_account_by_uuid()`, not by name.
+    #' This ensures unambiguous targeting even when accounts share the same name.
     #'
-    #' @param target_account_name Character. The name of the account to which
+    #' @param target_account_uuid Character. The UUID of the account to which
     #' the funds will be moved.
     #' @param amount Numeric. The amount to transfer. Must be less than or equal
     #' to the current account's balance.
     #'
     #' @return
-    #' No return value. Side effects include balance modification and a logged
-    #' transaction in both source and target accounts.
+    #' No return value. Side effects include balance updates and transaction logs
+    #' for both the source and target accounts.
     #'
     #' @examples
     #' \dontrun{
@@ -784,34 +795,31 @@ MainAccount <- R6Class(
     #'   main_acc$add_child_account(savings)
     #'   main_acc$add_child_account(emergency)
     #'
-    #'   # Initial deposit to main account
+    #'   # Initial deposit
     #'   main_acc$deposit(1000, channel = "Bank")
     #'
-    #'   # Move 200 from main to savings
-    #'   main_acc$move_balance("Savings", 200)
+    #'   # Move 200 to savings using UUID
+    #'   main_acc$move_balance(savings$uuid, 200)
     #' }
-    move_balance = function(target_account_name, amount) {
-      # Use the existing withdraw method to remove funds from self
+    move_balance = function(target_account_uuid, amount) {
       self$withdraw(
         amount = amount,
         by = "System",
         channel = "Internal Transfer"
       )
-
-      # Find the target account using the find_account method
-      target_account <- self$find_account(target_account_name)
-
+      
+      target_account <- self$find_account_by_uuid(target_account_uuid)
+      
       if (is.null(target_account)) {
         stop("Target account not found")
       }
-
-      # Use the existing deposit method to add funds to the target account
+      
       target_account$deposit(
         amount = amount,
         by = "System",
         channel = "Internal Transfer"
       )
-
+      
       cat("Moved", amount, "from", self$name, "to", target_account$name, "\n")
     },
 
