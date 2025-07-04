@@ -112,7 +112,7 @@ MainAccount <- R6Class(
     #' main_acc <- MainAccount$new(name = "My Main Account")
     #' print(main_acc$uuid)
     #' print(main_acc$balance)
-    #'  print(main_acc$transactions)
+    #' print(main_acc$transactions)
     #'}
     initialize = function(name, balance = 0) {
       self$uuid <- paste0("acc", uuid::UUIDgenerate())
@@ -306,10 +306,12 @@ MainAccount <- R6Class(
     #' }
     #'
     distribute_to_children = function(amount, transaction, by = "System") {
+      
       if (length(self$child_accounts) == 0) {
         return()
       }
-
+      
+      
       # Filter active child accounts
       active_accounts <- purrr::keep(
         self$child_accounts, ~ .x$status == "active"

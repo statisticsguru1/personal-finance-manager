@@ -576,7 +576,7 @@ build_plugin_args <- function(backend, mode = "load", ...) {
 #' @seealso [jose::jwt_decode_hmac()], [Sys.getenv()]
 #' @export
 
-verify_token <- function(token, secret = secret_key) {
+verify_token <- function(token, secret) {
   tryCatch({
     jose::jwt_decode_hmac(token, secret = secret)
   }, error = function(e) NULL)

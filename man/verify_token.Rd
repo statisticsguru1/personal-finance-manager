@@ -4,7 +4,7 @@
 \alias{verify_token}
 \title{Decode and Verify a JWT Token}
 \usage{
-verify_token(token, secret = secret_key)
+verify_token(token, secret)
 }
 \arguments{
 \item{token}{A character string representing the JWT token (e.g., from an

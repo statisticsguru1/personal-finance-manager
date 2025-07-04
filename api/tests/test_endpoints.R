@@ -267,7 +267,6 @@ test_that("POST /add_sub_account endpoint edge cases", {
     )
   )
   parsed13b <- jsonlite::fromJSON(rawToChar(res13b$content))
-  print(parsed13b)
   expect_equal(httr::status_code(res13b), 200)
   expect_true(parsed13b$success)
   expect_equal(parsed13b$child_type, "GrandchildAccount")
@@ -291,3 +290,147 @@ test_that("POST /add_sub_account endpoint edge cases", {
   expect_true(parsed14$success)
   expect_equal(parsed14$child_type, "GrandchildAccount")
 })
+
+# create a new user
+create_user_account_base(
+  user_id = "testuser1",
+  base_dir = tmp_dir,
+  initial_balance = 1300
+)
+
+token <- jwt_encode_hmac(
+  jwt_claim(user_id = "testuser1", role = "user"),
+  secret = secret_key
+)
+
+# refresh uuid of the main account
+main_uuid<-load_user_file("testuser1", "account_tree.Rds")$uuid
+
+test_that("POST /distribute endpoint handles edge cases", {
+  # Setup: Create account tree with Main > Child1 + Child2
+  res1 <- httr::POST(
+    "http://127.0.0.1:8000/add_sub_account",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      parent_uuid = main_uuid,
+      name = "DistributionChild1",
+      allocation = 0.5,
+      priority = 1
+    ),
+    encode = "json"
+  )
+  uuid1 <- jsonlite::fromJSON(rawToChar(res1$content))$uuid
+  
+  res2 <- httr::POST(
+    "http://127.0.0.1:8000/add_sub_account",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      parent_uuid = main_uuid,
+      name = "DistributionChild2",
+      allocation = 0.5,
+      priority = 2
+    ),
+    encode = "json"
+  )
+  uuid2 <- jsonlite::fromJSON(rawToChar(res2$content))$uuid
+  
+  expect_equal(length(load_user_file("testuser", "account_tree.Rds")$child_accounts), 2)
+  
+  # ✅ Case 15: Successful distribution
+  res15 <- httr::POST(
+    "http://127.0.0.1:8000/distribute",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = main_uuid, amount = 1000),
+    encode = "json"
+  )
+  parsed15 <- jsonlite::fromJSON(rawToChar(res15$content))
+  expect_equal(httr::status_code(res15), 200)
+  expect_true(parsed15$success)
+  expect_match(parsed15$message, "Distributed")
+  expect_equal(load_user_file("testuser1", "account_tree.Rds")$balance, 300)
+  expect_equal(load_user_file("testuser1", "account_tree.Rds")$child_accounts[[1]]$balance, 500)
+  expect_equal(load_user_file("testuser1", "account_tree.Rds")$child_accounts[[2]]$balance, 500)
+  
+  # ✅ Case 16: Distribution with custom transaction
+  res16 <- httr::POST(
+    "http://127.0.0.1:8000/distribute",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = main_uuid, amount = 200, transaction = "custom-txn"),
+    encode = "json"
+  )
+  parsed16 <- jsonlite::fromJSON(rawToChar(res16$content))
+  expect_equal(httr::status_code(res16), 200)
+  expect_true(parsed16$success)
+  expect_match(parsed16$message, "Distributed")
+  
+  # 🚫 Case 17: Distribution to nonexistent UUID
+  res17 <- httr::POST(
+    "http://127.0.0.1:8000/distribute",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = "non-existent-uuid", amount = 100),
+    encode = "json"
+  )
+  parsed17 <- jsonlite::fromJSON(rawToChar(res17$content))
+  expect_equal(httr::status_code(res17), 403)
+  expect_false(parsed17$success %||% FALSE)
+  expect_match(parsed17$error, "not found|unauthorized", ignore.case = TRUE)
+  
+  # 🚫 Case 18: Negative amount
+  res18 <- httr::POST(
+    "http://127.0.0.1:8000/distribute",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = main_uuid, amount = -100),
+    encode = "json"
+  )
+  parsed18 <- jsonlite::fromJSON(rawToChar(res18$content))
+  expect_equal(httr::status_code(res18), 500)
+  expect_false(parsed18$success)
+  expect_match(parsed18$error, "negative|invalid", ignore.case = TRUE)
+  
+  # 🚫 Case 19: Non-numeric amount
+  res19 <- httr::POST(
+    "http://127.0.0.1:8000/distribute",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = main_uuid, amount = "abc"),
+    encode = "json"
+  )
+  parsed19 <- jsonlite::fromJSON(rawToChar(res19$content))
+  expect_equal(httr::status_code(res19), 500)
+  expect_false(parsed19$success)
+  expect_match(parsed19$error, "Amount should be numeric", ignore.case = TRUE)
+  
+  # 🚫 Case 20: Missing amount
+  res20 <- httr::POST(
+    "http://127.0.0.1:8000/distribute",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = main_uuid),
+    encode = "json"
+  )
+  parsed20 <- jsonlite::fromJSON(rawToChar(res20$content))
+  print(parsed20)
+  expect_equal(httr::status_code(res20), 500)
+  expect_false(parsed20$success)
+  expect_match(parsed20$error, "Missing amount", ignore.case = TRUE)
+  
+  # 🚫 Case 21: Unauthorized token
+  res21 <- httr::POST(
+    "http://127.0.0.1:8000/distribute",
+    httr::add_headers(Authorization = "Bearer badtoken"),
+    body = list(uuid = main_uuid, amount = 100),
+    encode = "json"
+  )
+  expect_equal(httr::status_code(res21), 401)
+  
+  # 🚫 Case 22: Zero amount
+  res22 <- httr::POST(
+    "http://127.0.0.1:8000/distribute",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = main_uuid, amount = 0),
+    encode = "json"
+  )
+  parsed22 <- jsonlite::fromJSON(rawToChar(res22$content))
+  expect_equal(httr::status_code(res22), 500)
+  expect_false(parsed22$success)
+  expect_match(parsed22$error, "zero|amount", ignore.case = TRUE)
+})
+

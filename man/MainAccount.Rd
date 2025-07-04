@@ -75,7 +75,7 @@ acc$uuid
 main_acc <- MainAccount$new(name = "My Main Account")
 print(main_acc$uuid)
 print(main_acc$balance)
- print(main_acc$transactions)
+print(main_acc$transactions)
 }
 
 ## ------------------------------------------------
@@ -138,8 +138,8 @@ print(main_acc$balance)
   main_acc <- MainAccount$new(name = "Salary Pool")
   child1 <- ChildAccount$new(name = "Food Fund", allocation = 0.6)
   child2 <- ChildAccount$new(name = "Savings", allocation = 0.4)
-  main_acc$add_child(child1)
-  main_acc$add_child(child2)
+  main_acc$add_child_account(child1)
+  main_acc$add_child_account(child2)
 
   main_acc$deposit(amount = 1000, channel = "Bank")
   # This will trigger distribute_to_children internally.
@@ -524,7 +524,7 @@ identification in the app UI and reports.}
 main_acc <- MainAccount$new(name = "My Main Account")
 print(main_acc$uuid)
 print(main_acc$balance)
- print(main_acc$transactions)
+print(main_acc$transactions)
 }
 }
 \if{html}{\out{</div>}}
@@ -708,8 +708,8 @@ logs in both the main account and all affected child accounts.
   main_acc <- MainAccount$new(name = "Salary Pool")
   child1 <- ChildAccount$new(name = "Food Fund", allocation = 0.6)
   child2 <- ChildAccount$new(name = "Savings", allocation = 0.4)
-  main_acc$add_child(child1)
-  main_acc$add_child(child2)
+  main_acc$add_child_account(child1)
+  main_acc$add_child_account(child2)
 
   main_acc$deposit(amount = 1000, channel = "Bank")
   # This will trigger distribute_to_children internally.

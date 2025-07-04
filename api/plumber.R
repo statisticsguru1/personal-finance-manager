@@ -205,10 +205,6 @@ withdraw <- function(req, res,
 }
 
 
-
-
-
-
 #* @post /distribute
 #* @param uuid UUID of the parent account
 #* @param amount Amount to distribute
@@ -217,42 +213,91 @@ withdraw <- function(req, res,
 #* @json
 distribute <- function(req, res,
                        uuid,
-                       amount,
+                       amount=NULL,
                        transaction = NULL,
-                       by = "System"
-                       ) {
+                       by = "System") {
   user_id <- req$user_id
   role <- req$role
+  start_time <- Sys.time()
   
-  # Load the account tree
-  tree <- load_user_account(user_id)
-  account <- tree$find_account_by_uuid(uuid)
-  
-  if (is.null(account)) {
-    res$status <- if (role == "admin") 404 else 403
-    return(list(error = "Account not found or unauthorized"))
-  }
-  
-  # Proceed with distribution
-  tryCatch({
-    account$distribute_to_children(
-      amount = as.numeric(amount),
-      transaction = if (is.null(transaction)) paste0(
-        "dist-", Sys.time()
-      ) else transaction,
-      by = by
-    )
+  future({
+    with_account_lock(user_id, {
+      tree <- load_user_file(user_id, "account_tree.Rds")
+      account <- tree$find_account_by_uuid(uuid)
+      
+      if (is.null(account)) {
+        return(list(
+          success = FALSE,
+          status = if (role == "admin") 404 else 403,
+          error = "Account not found or unauthorized"
+        ))
+      }
+      
+      if (is.null(amount)) {
+        return(list(
+          success = FALSE,
+          status = 500,
+          error = "Missing amount"
+        ))
+      }
+      
+      if (is.na(amount) || length(amount) != 1 || !is.numeric(amount)) {
+        return(list(
+          success = FALSE,
+          status = 500,
+          error = "Amount should be numeric"
+        ))
+      }
+      
+      if (amount < 0) {
+        return(list(
+          success = FALSE,
+          status = 500,
+          error = "Negative amount is not allowed"
+        ))
+      }
+      if (amount == 0) {
+        return(list(
+          success = FALSE,
+          status = 500,
+          error = "zero|amount"
+        ))
+      }
     
-    save_user_account(user_id, tree)
-    
-    list(
-      success = TRUE,
-      message = paste("Distributed", amount, "from", account$name),
-      uuid = uuid
-    )
-  }, error = function(e) {
+      
+      # Perform the distribution
+      account$distribute_to_children(
+        amount = as.numeric(amount),
+        transaction = transaction %||% paste0("dist-", Sys.time()),
+        by = by
+      )
+      
+      save_user_file(user_id, tree, "account_tree.Rds")
+      
+      list(
+        success = TRUE,
+        status = 200,
+        message = paste("Distributed", amount, "from", account$name),
+        uuid = uuid
+      )
+    })
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
     res$status <- 500
-    list(success = FALSE, error = e$message)
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
   })
 }
 
