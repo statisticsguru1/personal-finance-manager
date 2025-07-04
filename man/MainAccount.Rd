@@ -207,7 +207,7 @@ print(main_acc$transactions)
   main_acc$add_child_account(child)
   main_acc$list_child_accounts()
 }
-Recursively find all accounts by name
+# Recursively find all accounts by name
 
 
 ## ------------------------------------------------
@@ -236,7 +236,7 @@ Recursively find all accounts by name
   found <- main_acc$find_account_by_uuid(groceries$uuid)
   if (!is.null(found)) cat("Found UUID:", found$uuid)
 }
-Move balance to another account (by UUID)
+# Move balance to another account (by UUID)
 
 
 ## ------------------------------------------------
@@ -944,7 +944,7 @@ Invisibly returns a character vector of child account names.
   main_acc$add_child_account(child)
   main_acc$list_child_accounts()
 }
-Recursively find all accounts by name
+# Recursively find all accounts by name
 
 }
 \if{html}{\out{</div>}}
@@ -1037,7 +1037,7 @@ if no match is found.
   found <- main_acc$find_account_by_uuid(groceries$uuid)
   if (!is.null(found)) cat("Found UUID:", found$uuid)
 }
-Move balance to another account (by UUID)
+# Move balance to another account (by UUID)
 
 }
 \if{html}{\out{</div>}}

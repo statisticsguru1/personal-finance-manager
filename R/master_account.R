@@ -636,7 +636,7 @@ MainAccount <- R6Class(
     },
 
     #------------- Method to find an account by name ------------------------
-    #' Recursively find all accounts by name
+    #' # Recursively find all accounts by name
     #'
     #' @description
     #' Recursively searches the current account, its children, and its parent
@@ -769,7 +769,7 @@ MainAccount <- R6Class(
       return(NULL)
     },
     #------------- Method to Move amount  ------------------------
-    #' Move balance to another account (by UUID)
+    #' # Move balance to another account (by UUID)
     #'
     #' @description
     #' Moves a specified amount from the current account to another account
