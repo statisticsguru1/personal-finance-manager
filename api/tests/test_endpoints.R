@@ -93,6 +93,9 @@ token <- jwt_encode_hmac(
   secret = secret_key
 )
 
+# ============================================================================
+# Tier one endpoints
+# ============================================================================
 
 # ============================================================================
 # Testing the /deposit endpoint
@@ -1674,8 +1677,8 @@ test_that("GET /income_utilization works", {
     query = list()
   )
   parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
-  expect_equal(httr::status_code(res5), 500)
-  expect_match(parsed5$error, "500 - Internal server error", ignore.case = TRUE)
+  expect_equal(httr::status_code(res5), 400)
+  expect_match(parsed5$error, "UUID is required", ignore.case = TRUE)
 
   # ✅ Case 6: No Authorization
   res6 <- httr::GET(
@@ -1761,4 +1764,312 @@ test_that("GET /walking_amount works", {
   expect_equal(httr::status_code(res5), 200)
   expect_true(parsed5$success)
   expect_true(is.numeric(parsed5$walking_amount))  # fallback behavior
+})
+
+# ============================================================================
+# Tier two endpoints
+# ============================================================================
+## some set up
+main_uuid <- load_user_file("testuser", "account_tree.Rds")$uuid
+
+# Setup: Create account tree with Main > Child1 + Child2
+rest <- httr::POST(
+  "http://127.0.0.1:8000/add_sub_account",
+  httr::add_headers(Authorization = paste("Bearer", token)),
+  body = list(
+    parent_uuid = main_uuid,
+    name = "Debts",
+    allocation = 0.1,
+    priority = 1
+  ),
+  encode = "json"
+)
+
+debts_uuid <-load_user_file(
+  "testuser",
+  "account_tree.Rds"
+)$find_account("Debts")[[1]]$uuid
+
+
+
+# ============================================================================
+# Testing the /change_account_status endpoint
+# ============================================================================
+
+test_that("POST /change_account_status works", {
+  
+  # --- Case 1: Valid change to 'inactive' ---
+  res1 <- httr::POST(
+    url = "http://127.0.0.1:8000/change_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = debts_uuid, status = "active"),
+    encode = "json"
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$new_status, "active")
+  
+  # --- Case 2: Attempt to close account with balance > 0 ---
+  
+  ## deposit to 100 to make sure balance isnot 0
+  res21<-httr::POST(
+    url = "http://127.0.0.1:8000/deposit",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = debts_uuid, amount = 100, channel="Barclays"),
+    encode = "form"
+  )
+
+  res2 <- httr::POST(
+    url = "http://127.0.0.1:8000/change_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = debts_uuid, status = "closed"),
+    encode = "form"
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 400)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "Withdraw from this account")
+  
+  # --- Case 3: Withdraw to 0 balance then close ---
+  res22<-httr::POST(
+    url = "http://127.0.0.1:8000/withdraw",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = debts_uuid, amount = 100,channel="Mpesa"),
+    encode = "json"
+  )
+
+  res3 <- httr::POST(
+    url = "http://127.0.0.1:8000/change_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = debts_uuid, status = "closed"),
+    encode = "json"
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 200)
+  expect_true(parsed3$success)
+  expect_equal(parsed3$new_status, "closed")
+  
+  # --- Case 4: Missing UUID ---
+  res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/change_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(status = "inactive"),
+    encode = "json"
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 400)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "UUID is required")
+  
+  # --- Case 5: Missing status ---
+  res5 <- httr::POST(
+    url = "http://127.0.0.1:8000/change_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = debts_uuid),
+    encode = "json"
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 400)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "Status is required")
+  
+  # --- Case 6: Invalid UUID ---
+  res6 <- httr::POST(
+    url = "http://127.0.0.1:8000/change_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = "fake-uuid", status = "inactive"),
+    encode = "json"
+  )
+  parsed6 <- jsonlite::fromJSON(rawToChar(res6$content))
+  expect_equal(httr::status_code(res6), 404)
+  expect_false(parsed6$success)
+  expect_match(parsed6$error, "Account not found")
+  
+  # --- Case 7: UUID of main account (unauthorized) ---
+  res7 <- httr::POST(
+    url = "http://127.0.0.1:8000/change_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = uuid, status = "inactive"),
+    encode = "json"
+  )
+  parsed7 <- jsonlite::fromJSON(rawToChar(res7$content))
+  expect_equal(httr::status_code(res7), 403)
+  expect_false(parsed7$success)
+  expect_match(parsed7$error, "only allowed on child or grandchild")
+})
+
+# ============================================================================
+# Testing the /get_account_status
+# ============================================================================
+
+test_that("GET /get_account_status works", {
+  
+  # --- Valid request: should return status for a valid child/grandchild account
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = debts_uuid)
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_match(parsed1$account_status, "closed")
+  
+  # --- Invalid uuid: should return 403 with error message ---
+  res2 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = "non-existent-uuid")
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 403)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "Account not found")
+  
+  # --- Missing uuid: should return 400 ---
+  res3 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token))
+    # No uuid param
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "UUID is required")
+  
+  # --- Wrong class: trying to call on main account should return 403 ---
+  res4 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_status",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = uuid)
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "only allowed on child or grandchild accounts")
+})
+
+
+
+# ============================================================================
+# Testing the /set_priority endpoint
+# ============================================================================
+
+test_that("POST /set_priority works", {
+  
+  # --- Valid request ---
+  res1 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_priority",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = debts_uuid, priority = "High"),
+    encode = "form"
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$priority, "High")
+  expect_equal(parsed1$uuid, debts_uuid)
+  expect_match(parsed1$message, "Priority set to")
+  
+  # --- Missing UUID ---
+  res2 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_priority",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(priority = "Low"),
+    encode = "form"
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 400)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "UUID is required")
+  
+  # --- Missing priority ---
+  res3 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_priority",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = debts_uuid),
+    encode = "form"
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "Priority is required")
+  
+  # --- Invalid UUID (not found) ---
+  res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_priority",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = "non-existent", priority = "Medium"),
+    encode = "form"
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "Account not found")
+  
+  # --- Invalid account type (e.g. MainAccount) ---
+  res5 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_priority",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = uuid, priority = "Critical"),
+    encode = "form"
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 403)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "only allowed on child or grandchild")
+})
+
+
+# ============================================================================
+# Testing the /get_priority endpoint
+# ============================================================================
+
+test_that("GET /get_priority works", {
+  # 1. Valid request for child account
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_priority",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = debts_uuid)
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_true(is.numeric(parsed1$priority) || is.character(parsed1$priority))
+  
+  # 2. Missing UUID
+  res2 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_priority",
+    httr::add_headers(Authorization = paste("Bearer", token))
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 400)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "UUID is required", ignore.case = TRUE)
+  
+  # 3. Invalid UUID (not found)
+  res3 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_priority",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = "non-existent-uuid")
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 403)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "Account not found", ignore.case = TRUE)
+  
+  # 4. UUID of a main account (not a child or grandchild)
+  res4 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_priority",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid =uuid)
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(
+    parsed4$error, "Priority only available for child or grandchild",
+    ignore.case = TRUE
+  )
 })
