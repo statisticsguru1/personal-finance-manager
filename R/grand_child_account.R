@@ -431,7 +431,6 @@ GrandchildAccount <- R6Class(
           # Move any extra amount to the parent account
           extra_amount <- amount - deposit_amount
           if (extra_amount > 0) {
-            #parent_name <- self$parent$name  #get parent
             self$parent$deposit(
               amount = extra_amount,
               by = "System",

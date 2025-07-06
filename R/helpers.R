@@ -37,24 +37,24 @@ is_valid_user_id <- function(user_id) {
 #'
 #' @export
 create_user_account_base <- function(
-    user_id,
-    base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts"),
-    initial_balance = 0
+  user_id,
+  base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts"),
+  initial_balance = 0
 ) {
   if (!is_valid_user_id(user_id)) {
     stop("Invalid user ID format")
   }
-  
+
   # Prevent overwriting existing user data
   if (user_file_exists(user_id, file_name = "account_tree.Rds")) {
     stop("User already exists")
   }
-  
+
   # Create and save main account tree
   main <- MainAccount$new(name = "Main", balance = initial_balance)
-  
+
   save_user_file(user_id, main, file_name = "account_tree.Rds")
-  
+
   invisible(TRUE)
 }
 
@@ -98,41 +98,41 @@ create_user_account_base <- function(
 load_user_file <- function(user_id, file_name = "account_tree.Rds") {
   backend <- Sys.getenv("ACCOUNT_BACKEND", "file")
   fn_name <- paste0("load_from_", backend)
-  
+
   if (!exists(fn_name, mode = "function")) {
     stop("No loader plugin found for backend: ", backend)
   }
-  
+
   args <- build_plugin_args(
     backend,
     "load",
     user_id = user_id,
     file_name = file_name
   )
-  
+
   do.call(fn_name, args)
 }
 
 
 
 
-# ------------ save account/lockfiles -------------------------------------------
+# ------------ save account/lockfiles ---------------------------------------
 #' Save a User-Specific File via Plugin Backend
 #'
-#' Saves an R object to a user-specific location using the appropriate plugin 
-#' backend (e.g., `"file"`, `"mongo"`, `"gdrive"`). The format and destination 
+#' Saves an R object to a user-specific location using the appropriate plugin
+#' backend (e.g., `"file"`, `"mongo"`, `"gdrive"`). The format and destination
 #' are determined by the backend and file extension.
 #'
-#' This function acts as a plugin launcher for saving user-related data, 
-#' including account trees (`.Rds`), transaction records (`.csv`), 
-#' metadata (`.json`), or lockfiles (`.lock`). It delegates the actual 
-#' save operation to the corresponding backend plugin function (e.g., 
+#' This function acts as a plugin launcher for saving user-related data,
+#' including account trees (`.Rds`), transaction records (`.csv`),
+#' metadata (`.json`), or lockfiles (`.lock`). It delegates the actual
+#' save operation to the corresponding backend plugin function (e.g.,
 #' `save_to_file()`).
 #'
 #' @param user_id A character string representing the unique user ID.
-#' @param object The R object to save. This can be any R object appropriate 
+#' @param object The R object to save. This can be any R object appropriate
 #'   for the file extension used (e.g., list, data.frame, custom class).
-#' @param file_name The file name, including the extension (e.g., 
+#' @param file_name The file name, including the extension (e.g.,
 #'   `"account_tree.Rds"`, `"meta.json"`, `"transactions.csv"`,
 #'   `"account_tree.lock"`).
 #'
@@ -140,13 +140,14 @@ load_user_file <- function(user_id, file_name = "account_tree.Rds") {
 #' persisting a file via the selected backend plugin.
 #'
 #' @details
-#' The appropriate plugin is selected based on the `ACCOUNT_BACKEND` environment 
-#' variable (default: `"file"`). The function builds the arguments required by 
+#' The appropriate plugin is selected based on the `ACCOUNT_BACKEND`
+#' environment
+#' variable (default: `"file"`). The function builds the arguments required by
 #' the plugin using [build_plugin_args()], then delegates the save operation.
 #'
 #' An error is raised if no suitable save plugin is found.
 #'
-#' @seealso [build_plugin_args()], [load_user_file()], [remove_user_file()], 
+#' @seealso [build_plugin_args()], [load_user_file()], [remove_user_file()],
 #'   [user_file_exists()]
 #'
 #' @examples
@@ -165,18 +166,18 @@ load_user_file <- function(user_id, file_name = "account_tree.Rds") {
 save_user_file <- function(user_id, object, file_name = "account_tree.Rds") {
   backend <- Sys.getenv("ACCOUNT_BACKEND", "file")
   fn_name <- paste0("save_to_", backend)
-  
+
   if (!exists(fn_name, mode = "function")) {
     stop("No save plugin found for backend: ", backend)
   }
-  
+
   args <- build_plugin_args(
     backend, "save",
     user_id = user_id,
     object = object,
     file_name = file_name
   )
-  
+
   do.call(fn_name, args)
 }
 
@@ -212,12 +213,17 @@ save_user_file <- function(user_id, object, file_name = "account_tree.Rds") {
 remove_user_file <- function(user_id, file_name = "account_tree.Rds") {
   backend <- Sys.getenv("ACCOUNT_BACKEND", "file")
   fn_name <- paste0("remove_from_", backend)
-  
+
   if (!exists(fn_name, mode = "function")) {
     stop("No remove plugin found for backend: ", backend)
   }
-  
-  args <- build_plugin_args(backend, "remove", user_id = user_id, file_name = file_name)
+
+  args <- build_plugin_args(
+    backend,
+    "remove",
+    user_id = user_id,
+    file_name = file_name
+  )
   do.call(fn_name, args)
 }
 
@@ -248,18 +254,18 @@ remove_user_file <- function(user_id, file_name = "account_tree.Rds") {
 user_file_exists <- function(user_id, file_name = "account_tree.Rds") {
   backend <- Sys.getenv("ACCOUNT_BACKEND", "file")
   fn_name <- paste0("file_exists_", backend)
-  
+
   if (!exists(fn_name, mode = "function")) {
     stop("No file-exists plugin found for backend: ", backend)
   }
-  
+
   args <- build_plugin_args(
     backend,
     "file_exists",
     user_id = user_id,
     file_name = file_name
   )
-  
+
   do.call(fn_name, args)
 }
 
@@ -273,9 +279,9 @@ user_file_exists <- function(user_id, file_name = "account_tree.Rds") {
 #'extension.
 #'
 #' @param user_id A character string representing the user's unique identifier.
-#' @param file_name The name of the file to load (e.g., `"account_tree.Rds"`, 
+#' @param file_name The name of the file to load (e.g., `"account_tree.Rds"`,
 #'        `"data.json"`).
-#' @param base_dir The base directory where user data is stored. This should 
+#' @param base_dir The base directory where user data is stored. This should
 #'        point to the top-level folder containing all user subdirectories.
 #'
 #' @return The loaded object, parsed according to the file extension:
@@ -304,7 +310,7 @@ user_file_exists <- function(user_id, file_name = "account_tree.Rds") {
 #' @export
 load_from_file <- function(user_id, file_name, base_dir) {
   file_path <- file.path(base_dir, user_id, file_name)
-  
+
   ext <- tools::file_ext(file_path)
   switch(ext,
          "Rds" = readRDS(file_path),
@@ -380,31 +386,32 @@ load_from_file <- function(user_id, file_name, base_dir) {
 save_to_file <- function(user_id, object, file_name, base_dir) {
   user_dir <- file.path(base_dir, user_id)
   if (!dir.exists(user_dir)) dir.create(user_dir, recursive = TRUE)
-  
+
   file_path <- file.path(user_dir, file_name)
   ext <- tools::file_ext(file_name)
-  
-  switch(ext,
-         "Rds" = saveRDS(object, file_path),
-         "json" = jsonlite::write_json(object, file_path, auto_unbox = TRUE),
-         "csv" = write.csv(object, file_path, row.names = FALSE),
-         "lock" = writeLines(as.character(object), file_path),
-         {
-           warning(
-             sprintf(
-               "Unrecognized file extension '.%s'.\n
-               The object will be saved using R's binary `serialize()`.
-               \nTo handle this file type properly, consider extending the save 
-               \nplugin for 'file' backend.",
-               ext
-             )
-           )
-           con <- file(file_path, open = "wb")
-           on.exit(close(con), add = TRUE)
-           serialize(object, con)
-         }
+
+  switch(
+    ext,
+    "Rds" = saveRDS(object, file_path),
+    "json" = jsonlite::write_json(object, file_path, auto_unbox = TRUE),
+    "csv" = write.csv(object, file_path, row.names = FALSE),
+    "lock" = writeLines(as.character(object), file_path),
+    {
+      warning(
+        sprintf(
+          "Unrecognized file extension '.%s'.\n
+          The object will be saved using R's binary `serialize()`.
+          \nTo handle this file type properly, consider extending the save 
+          \nplugin for 'file' backend.",
+          ext
+        )
+      )
+      con <- file(file_path, open = "wb")
+      on.exit(close(con), add = TRUE)
+      serialize(object, con)
+    }
   )
-  
+
   invisible(file_path)
 }
 
@@ -492,10 +499,10 @@ file_exists_file <- function(user_id, file_name, base_dir) {
 
 build_plugin_args <- function(backend, mode = "load", ...) {
   base_args <- list(...)
-  
+
   plugin_args <- switch(
     paste0(mode, "_", backend),
-    
+
     # ==== File Backend ====
     "load_file" = list(
       base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
@@ -509,7 +516,7 @@ build_plugin_args <- function(backend, mode = "load", ...) {
     "remove_file" = list(
       base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
     ),
-    
+
     # ==== Mongo Backend ====
     "load_mongo" = list(
       uri = Sys.getenv("MONGO_URI"),
@@ -527,7 +534,7 @@ build_plugin_args <- function(backend, mode = "load", ...) {
       uri = Sys.getenv("MONGO_URI"),
       db = Sys.getenv("MONGO_DB")
     ),
-    
+
     # ==== Google Drive Backend ====
     "load_gdrive" = list(
       folder_id = Sys.getenv("GDRIVE_FOLDER_ID")
@@ -541,10 +548,10 @@ build_plugin_args <- function(backend, mode = "load", ...) {
     "remove_gdrive" = list(
       folder_id = Sys.getenv("GDRIVE_FOLDER_ID")
     ),
-    
+
     stop("Unknown plugin configuration for backend: ", backend)
   )
-  
+
   c(base_args, plugin_args)
 }
 
@@ -597,34 +604,33 @@ verify_token <- function(token, secret) {
 #' @return Returns the result of evaluating `expr`.
 #' @export
 with_account_lock <- function(
-    user_id,
-    expr,
-    timeout = 1800
+  user_id,
+  expr,
+  timeout = 1800
 ) {
   if (!is_valid_user_id(user_id)) {
     stop("Invalid user ID format")
   }
-  
+
   lockfile <- "account_tree.lock"
   start_time <- Sys.time()
-  
+
   while (user_file_exists(user_id, lockfile)) {
     if (difftime(Sys.time(), start_time, units = "secs") > timeout) {
       stop("Could not acquire lock for user [", user_id, "]: timeout reached")
     }
     Sys.sleep(0.1)
   }
-  
+
   # Create the lock file using the plugin
   save_user_file(
     user_id, object = as.character(Sys.getpid()), file_name = lockfile
   )
-  
+
   # Ensure lock is removed after execution
   on.exit({
     remove_user_file(user_id, file_name = lockfile)
   }, add = TRUE)
-  
+
   force(expr)
 }
-

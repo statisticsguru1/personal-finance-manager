@@ -1785,7 +1785,7 @@ rest <- httr::POST(
   encode = "json"
 )
 
-debts_uuid <-load_user_file(
+debts_uuid <- load_user_file(
   "testuser",
   "account_tree.Rds"
 )$find_account("Debts")[[1]]$uuid
@@ -1797,7 +1797,7 @@ debts_uuid <-load_user_file(
 # ============================================================================
 
 test_that("POST /change_account_status works", {
-  
+
   # --- Case 1: Valid change to 'inactive' ---
   res1 <- httr::POST(
     url = "http://127.0.0.1:8000/change_account_status",
@@ -1809,14 +1809,14 @@ test_that("POST /change_account_status works", {
   expect_equal(httr::status_code(res1), 200)
   expect_true(parsed1$success)
   expect_equal(parsed1$new_status, "active")
-  
+
   # --- Case 2: Attempt to close account with balance > 0 ---
-  
+
   ## deposit to 100 to make sure balance isnot 0
-  res21<-httr::POST(
+  res21 <- httr::POST(
     url = "http://127.0.0.1:8000/deposit",
     httr::add_headers(Authorization = paste("Bearer", token)),
-    body = list(uuid = debts_uuid, amount = 100, channel="Barclays"),
+    body = list(uuid = debts_uuid, amount = 100, channel = "Barclays"),
     encode = "form"
   )
 
@@ -1830,12 +1830,12 @@ test_that("POST /change_account_status works", {
   expect_equal(httr::status_code(res2), 400)
   expect_false(parsed2$success)
   expect_match(parsed2$error, "Withdraw from this account")
-  
+
   # --- Case 3: Withdraw to 0 balance then close ---
-  res22<-httr::POST(
+  res22 <- httr::POST(
     url = "http://127.0.0.1:8000/withdraw",
     httr::add_headers(Authorization = paste("Bearer", token)),
-    body = list(uuid = debts_uuid, amount = 100,channel="Mpesa"),
+    body = list(uuid = debts_uuid, amount = 100, channel = "Mpesa"),
     encode = "json"
   )
 
@@ -1849,7 +1849,7 @@ test_that("POST /change_account_status works", {
   expect_equal(httr::status_code(res3), 200)
   expect_true(parsed3$success)
   expect_equal(parsed3$new_status, "closed")
-  
+
   # --- Case 4: Missing UUID ---
   res4 <- httr::POST(
     url = "http://127.0.0.1:8000/change_account_status",
@@ -1861,7 +1861,7 @@ test_that("POST /change_account_status works", {
   expect_equal(httr::status_code(res4), 400)
   expect_false(parsed4$success)
   expect_match(parsed4$error, "UUID is required")
-  
+
   # --- Case 5: Missing status ---
   res5 <- httr::POST(
     url = "http://127.0.0.1:8000/change_account_status",
@@ -1873,7 +1873,7 @@ test_that("POST /change_account_status works", {
   expect_equal(httr::status_code(res5), 400)
   expect_false(parsed5$success)
   expect_match(parsed5$error, "Status is required")
-  
+
   # --- Case 6: Invalid UUID ---
   res6 <- httr::POST(
     url = "http://127.0.0.1:8000/change_account_status",
@@ -1885,7 +1885,7 @@ test_that("POST /change_account_status works", {
   expect_equal(httr::status_code(res6), 404)
   expect_false(parsed6$success)
   expect_match(parsed6$error, "Account not found")
-  
+
   # --- Case 7: UUID of main account (unauthorized) ---
   res7 <- httr::POST(
     url = "http://127.0.0.1:8000/change_account_status",
@@ -1904,7 +1904,7 @@ test_that("POST /change_account_status works", {
 # ============================================================================
 
 test_that("GET /get_account_status works", {
-  
+
   # --- Valid request: should return status for a valid child/grandchild account
   res1 <- httr::GET(
     url = "http://127.0.0.1:8000/get_account_status",
@@ -1915,7 +1915,7 @@ test_that("GET /get_account_status works", {
   expect_equal(httr::status_code(res1), 200)
   expect_true(parsed1$success)
   expect_match(parsed1$account_status, "closed")
-  
+
   # --- Invalid uuid: should return 403 with error message ---
   res2 <- httr::GET(
     url = "http://127.0.0.1:8000/get_account_status",
@@ -1926,7 +1926,7 @@ test_that("GET /get_account_status works", {
   expect_equal(httr::status_code(res2), 403)
   expect_false(parsed2$success)
   expect_match(parsed2$error, "Account not found")
-  
+
   # --- Missing uuid: should return 400 ---
   res3 <- httr::GET(
     url = "http://127.0.0.1:8000/get_account_status",
@@ -1937,7 +1937,7 @@ test_that("GET /get_account_status works", {
   expect_equal(httr::status_code(res3), 400)
   expect_false(parsed3$success)
   expect_match(parsed3$error, "UUID is required")
-  
+
   # --- Wrong class: trying to call on main account should return 403 ---
   res4 <- httr::GET(
     url = "http://127.0.0.1:8000/get_account_status",
@@ -1957,7 +1957,7 @@ test_that("GET /get_account_status works", {
 # ============================================================================
 
 test_that("POST /set_priority works", {
-  
+
   # --- Valid request ---
   res1 <- httr::POST(
     url = "http://127.0.0.1:8000/set_priority",
@@ -1971,7 +1971,7 @@ test_that("POST /set_priority works", {
   expect_equal(parsed1$priority, "High")
   expect_equal(parsed1$uuid, debts_uuid)
   expect_match(parsed1$message, "Priority set to")
-  
+
   # --- Missing UUID ---
   res2 <- httr::POST(
     url = "http://127.0.0.1:8000/set_priority",
@@ -1983,7 +1983,7 @@ test_that("POST /set_priority works", {
   expect_equal(httr::status_code(res2), 400)
   expect_false(parsed2$success)
   expect_match(parsed2$error, "UUID is required")
-  
+
   # --- Missing priority ---
   res3 <- httr::POST(
     url = "http://127.0.0.1:8000/set_priority",
@@ -1995,7 +1995,7 @@ test_that("POST /set_priority works", {
   expect_equal(httr::status_code(res3), 400)
   expect_false(parsed3$success)
   expect_match(parsed3$error, "Priority is required")
-  
+
   # --- Invalid UUID (not found) ---
   res4 <- httr::POST(
     url = "http://127.0.0.1:8000/set_priority",
@@ -2007,7 +2007,7 @@ test_that("POST /set_priority works", {
   expect_equal(httr::status_code(res4), 403)
   expect_false(parsed4$success)
   expect_match(parsed4$error, "Account not found")
-  
+
   # --- Invalid account type (e.g. MainAccount) ---
   res5 <- httr::POST(
     url = "http://127.0.0.1:8000/set_priority",
@@ -2037,7 +2037,7 @@ test_that("GET /get_priority works", {
   expect_equal(httr::status_code(res1), 200)
   expect_true(parsed1$success)
   expect_true(is.numeric(parsed1$priority) || is.character(parsed1$priority))
-  
+
   # 2. Missing UUID
   res2 <- httr::GET(
     url = "http://127.0.0.1:8000/get_priority",
@@ -2047,7 +2047,7 @@ test_that("GET /get_priority works", {
   expect_equal(httr::status_code(res2), 400)
   expect_false(parsed2$success)
   expect_match(parsed2$error, "UUID is required", ignore.case = TRUE)
-  
+
   # 3. Invalid UUID (not found)
   res3 <- httr::GET(
     url = "http://127.0.0.1:8000/get_priority",
@@ -2058,12 +2058,12 @@ test_that("GET /get_priority works", {
   expect_equal(httr::status_code(res3), 403)
   expect_false(parsed3$success)
   expect_match(parsed3$error, "Account not found", ignore.case = TRUE)
-  
+
   # 4. UUID of a main account (not a child or grandchild)
   res4 <- httr::GET(
     url = "http://127.0.0.1:8000/get_priority",
     httr::add_headers(Authorization = paste("Bearer", token)),
-    query = list(uuid =uuid)
+    query = list(uuid = uuid)
   )
   parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
   expect_equal(httr::status_code(res4), 403)

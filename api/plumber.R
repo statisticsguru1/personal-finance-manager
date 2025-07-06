@@ -1741,17 +1741,22 @@ change_account_status <- function(req, res, uuid = NULL, status = NULL) {
           )
         ))
       }
-      
+
       result <- tryCatch({
         account$change_status(status)
         save_user_file(user_id, tree, "account_tree.Rds")  # persist change
-        
+
         list(
           success = TRUE,
           status = 200,
           uuid = uuid,
           new_status = account$status,
-          message = paste("Account", account$name, "status updated to", account$status)
+          message = paste(
+            "Account",
+            account$name,
+            "status updated to",
+            account$status
+          )
         )
       }, error = function(e) {
         list(
@@ -1761,13 +1766,19 @@ change_account_status <- function(req, res, uuid = NULL, status = NULL) {
           uuid = uuid
         )
       })
-      
+
       result
     })
   }) %...>% (function(result) {
     result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
     result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
-    result$execution_time <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+    result$execution_time <- as.numeric(
+      difftime(
+        Sys.time(),
+        start_time,
+        units = "secs"
+      )
+    )
     res$status <- result$status %||% 200
     result
   }) %...!% (function(err) {
@@ -1777,7 +1788,13 @@ change_account_status <- function(req, res, uuid = NULL, status = NULL) {
       error = conditionMessage(err),
       start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
       end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
-      execution_time = as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+      execution_time = as.numeric(
+        difftime(
+          Sys.time(),
+          start_time,
+          units = "secs"
+        )
+      )
     )
   })
 }
@@ -1793,11 +1810,11 @@ get_account_status <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
   role <- req$role
   start_time <- Sys.time()
-  
+
   future({
     # Load account tree
     tree <- load_user_file(user_id, "account_tree.Rds")
-    
+
     if (is.null(tree)) {
       return(list(
         success = FALSE,
@@ -1805,7 +1822,7 @@ get_account_status <- function(req, res, uuid = NULL) {
         error = "User not found or unauthorized access"
       ))
     }
-    
+
     if (is.null(uuid) || uuid == "") {
       return(list(
         success = FALSE,
@@ -1813,7 +1830,7 @@ get_account_status <- function(req, res, uuid = NULL) {
         error = "UUID is required"
       ))
     }
-    
+
     account <- tree$find_account_by_uuid(uuid)
     if (is.null(account)) {
       return(list(
@@ -1822,7 +1839,7 @@ get_account_status <- function(req, res, uuid = NULL) {
         error = "Account not found"
       ))
     }
-    
+
     # Check class inheritance
     if (!inherits(account, "ChildAccount")) {
       return(list(
@@ -1831,7 +1848,7 @@ get_account_status <- function(req, res, uuid = NULL) {
         error = "This operation is only allowed on child or grandchild accounts"
       ))
     }
-    
+
     list(
       success = TRUE,
       status = 200,
@@ -1841,7 +1858,13 @@ get_account_status <- function(req, res, uuid = NULL) {
   }) %...>% (function(result) {
     result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
     result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
-    result$execution_time <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+    result$execution_time <- as.numeric(
+      difftime(
+        Sys.time(),
+        start_time,
+        units = "secs"
+      )
+    )
     res$status <- result$status %||% 200
     result
   }) %...!% (function(err) {
@@ -1851,7 +1874,13 @@ get_account_status <- function(req, res, uuid = NULL) {
       error = conditionMessage(err),
       start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
       end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
-      execution_time = as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+      execution_time = as.numeric(
+        difftime(
+          Sys.time(),
+          start_time,
+          units = "secs"
+        )
+      )
     )
   })
 }
@@ -1867,12 +1896,12 @@ set_priority <- function(req, res, uuid = NULL, priority = NULL) {
   user_id <- req$user_id
   role <- req$role
   start_time <- Sys.time()
-  
+
   future({
     with_account_lock(user_id, {
       # Load account tree
       tree <- load_user_file(user_id, "account_tree.Rds")
-      
+
       if (is.null(tree)) {
         return(list(
           success = FALSE,
@@ -1880,7 +1909,7 @@ set_priority <- function(req, res, uuid = NULL, priority = NULL) {
           error = "User not found or unauthorized access"
         ))
       }
-      
+
       if (is.null(uuid) || uuid == "") {
         return(list(
           success = FALSE,
@@ -1888,7 +1917,7 @@ set_priority <- function(req, res, uuid = NULL, priority = NULL) {
           error = "UUID is required"
         ))
       }
-      
+
       if (is.null(priority) || priority == "") {
         return(list(
           success = FALSE,
@@ -1896,7 +1925,7 @@ set_priority <- function(req, res, uuid = NULL, priority = NULL) {
           error = "Priority is required"
         ))
       }
-      
+
       account <- tree$find_account_by_uuid(uuid)
       if (is.null(account)) {
         return(list(
@@ -1905,19 +1934,22 @@ set_priority <- function(req, res, uuid = NULL, priority = NULL) {
           error = "Account not found"
         ))
       }
-      
+
       if (!inherits(account, "ChildAccount")) {
         return(list(
           success = FALSE,
           status = 403,
-          error = "This operation is only allowed on child or grandchild accounts"
+          error = paste(
+            "This operation is only allowed",
+            "on child or grandchild accounts"
+          )
         ))
       }
-      
+
       tryCatch({
         account$set_priority(priority)
         save_user_file(user_id, tree, "account_tree.Rds")
-        
+
         list(
           success = TRUE,
           status = 200,
@@ -1932,7 +1964,13 @@ set_priority <- function(req, res, uuid = NULL, priority = NULL) {
   }) %...>% (function(result) {
     result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
     result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
-    result$execution_time <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+    result$execution_time <- as.numeric(
+      difftime(
+        Sys.time(),
+        start_time,
+        units = "secs"
+      )
+    )
     res$status <- result$status %||% 200
     result
   }) %...!% (function(err) {
@@ -1942,7 +1980,13 @@ set_priority <- function(req, res, uuid = NULL, priority = NULL) {
       error = conditionMessage(err),
       start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
       end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
-      execution_time = as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+      execution_time = as.numeric(
+        difftime(
+          Sys.time(),
+          start_time,
+          units = "secs"
+        )
+      )
     )
   })
 }
@@ -1956,10 +2000,10 @@ get_priority <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
   role <- req$role
   start_time <- Sys.time()
-  
+
   future({
     tree <- load_user_file(user_id, "account_tree.Rds")
-    
+
     if (is.null(tree)) {
       return(list(
         success = FALSE,
@@ -1967,7 +2011,7 @@ get_priority <- function(req, res, uuid = NULL) {
         error = "User not found or unauthorized access"
       ))
     }
-    
+
     if (is.null(uuid) || uuid == "") {
       return(list(
         success = FALSE,
@@ -1975,7 +2019,7 @@ get_priority <- function(req, res, uuid = NULL) {
         error = "UUID is required"
       ))
     }
-    
+
     account <- tree$find_account_by_uuid(uuid)
     if (is.null(account)) {
       return(list(
@@ -1984,7 +2028,7 @@ get_priority <- function(req, res, uuid = NULL) {
         error = "Account not found"
       ))
     }
-    
+
     if (!inherits(account, "ChildAccount")) {
       return(list(
         success = FALSE,
@@ -1992,9 +2036,9 @@ get_priority <- function(req, res, uuid = NULL) {
         error = "Priority only available for child or grandchild accounts"
       ))
     }
-    
+
     priority <- account$get_priority()
-    
+
     list(
       success = TRUE,
       status = 200,
@@ -2004,7 +2048,13 @@ get_priority <- function(req, res, uuid = NULL) {
   }) %...>% (function(result) {
     result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
     result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
-    result$execution_time <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+    result$execution_time <- as.numeric(
+      difftime(
+        Sys.time(),
+        start_time,
+        units = "secs"
+      )
+    )
     res$status <- result$status %||% 200
     result
   }) %...!% (function(err) {
@@ -2014,9 +2064,9 @@ get_priority <- function(req, res, uuid = NULL) {
       error = conditionMessage(err),
       start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
       end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
-      execution_time = as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
     )
   })
 }
-
-

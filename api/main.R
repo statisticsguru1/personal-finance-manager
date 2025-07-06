@@ -12,4 +12,3 @@ pr$run(
   port = as.numeric(Sys.getenv("PORT", unset = 8000)),
   swagger = FALSE
 )
-

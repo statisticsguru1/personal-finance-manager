@@ -661,7 +661,7 @@ test_that("find_account: finds immediate child account in list", {
   main <- MainAccount$new("Main")
   child <- ChildAccount$new("Child", allocation = 0.5, priority = 1)
   main$add_child_account(child)
-  
+
   result <- main$find_account("Child")
   expect_length(result, 1)
   expect_identical(result[[1]], child)
@@ -677,7 +677,7 @@ test_that("find_account: finds grandchild account recursively in list", {
   )
   child$add_child_account(grandchild)
   main$add_child_account(child)
-  
+
   result <- main$find_account("Grandchild")
   expect_length(result, 1)
   expect_identical(result[[1]], grandchild)
@@ -694,7 +694,7 @@ test_that("find_account: finds parent from child (upward traversal)", {
   main <- MainAccount$new("Main")
   child <- ChildAccount$new("Child", allocation = 0.5, priority = 1)
   main$add_child_account(child)
-  
+
   result <- child$find_account("Main")
   expect_length(result, 1)
   expect_identical(result[[1]], main)
@@ -704,13 +704,13 @@ test_that("find_account: handles cycles gracefully", {
   main <- MainAccount$new("Main")
   child <- ChildAccount$new("Child", allocation = 0.5, priority = 1)
   grandchild <- ChildAccount$new("GrandChild", allocation = 0.3, priority = 2)
-  
+
   main$add_child_account(child)
   child$add_child_account(grandchild)
-  
+
   # Inject a cycle
   grandchild$add_child_account(child)
-  
+
   result <- main$find_account("GhostAccount")
   expect_type(result, "list")
   expect_length(result, 0)
@@ -720,12 +720,16 @@ test_that("find_account: finds multiple accounts with the same name", {
   main <- MainAccount$new("Main")
   child1 <- ChildAccount$new("Savings", allocation = 0.4, priority = 1)
   child2 <- ChildAccount$new("Emergency", allocation = 0.3, priority = 1)
-  grandchild1 <- GrandchildAccount$new("Savings", allocation = 0.2, priority = 1)
-  
+  grandchild1 <- GrandchildAccount$new(
+    "Savings",
+    allocation = 0.2,
+    priority = 1
+  )
+
   child2$add_child_account(grandchild1)
   main$add_child_account(child1)
   main$add_child_account(child2)
-  
+
   result <- main$find_account("Savings")
   expect_length(result, 2)
   expect_setequal(
@@ -822,17 +826,17 @@ test_that("find_account_by_uuid: does not re-traverse already visited parent", {
 # ====================================================================
 test_that("move_balance: transfers from one child to another", {
   main <- MainAccount$new("Main")
-  
+
   child1 <- ChildAccount$new("Child1", allocation = 0.6, priority = 1)
   child2 <- ChildAccount$new("Child2", allocation = 0.4, priority = 2)
-  
+
   main$add_child_account(child1)
   main$add_child_account(child2)
-  
+
   main$deposit(100, channel = "Initial")
-  
+
   child1$move_balance(child2$uuid, 30)
-  
+
   expect_equal(child1$get_balance(), 30)  # started with 60
   expect_equal(child2$get_balance(), 70)  # started with 40 + 30
 })
@@ -840,7 +844,7 @@ test_that("move_balance: transfers from one child to another", {
 test_that("move_balance: throws error if target account does not exist", {
   main <- MainAccount$new("Main")
   main$deposit(100, channel = "Initial")
-  
+
   expect_error(
     main$move_balance("non-existent-uuid", 30),
     "Target account not found"
@@ -851,30 +855,31 @@ test_that("move_balance: throws error if balance is insufficient", {
   main <- MainAccount$new("Main")
   child <- ChildAccount$new("Child", allocation = 0.5, priority = 1)
   main$add_child_account(child)
-  
+
   expect_error(
     main$move_balance(child$uuid, 10),
     "Insufficient balance"
   )
 })
 
-test_that("move_balance: uses 'Internal Transfer' when transferring between children", {
-  main <- MainAccount$new("Main")
-  child1 <- ChildAccount$new("Child1", allocation = 0.5, priority = 1)
-  child2 <- ChildAccount$new("Child2", allocation = 0.5, priority = 1)
-  main$add_child_account(child1)
-  main$add_child_account(child2)
-  
-  main$deposit(100, channel = "Initial")
-  
-  child1$move_balance(child2$uuid, 20)
-  
-  last_txn1 <- tail(child1$get_transactions(), 1)
-  last_txn2 <- tail(child2$get_transactions(), 1)
-  
-  expect_equal(last_txn1$Channel, "Internal Transfer")
-  expect_equal(last_txn2$Channel, "Internal Transfer")
-})
+test_that(
+  paste(
+    "move_balance: uses 'Internal Transfer'",
+    "when transferring between children"
+  ), {
+    main <- MainAccount$new("Main")
+    child1 <- ChildAccount$new("Child1", allocation = 0.5, priority = 1)
+    child2 <- ChildAccount$new("Child2", allocation = 0.5, priority = 1)
+    main$add_child_account(child1)
+    main$add_child_account(child2)
+    main$deposit(100, channel = "Initial")
+    child1$move_balance(child2$uuid, 20)
+    last_txn1 <- tail(child1$get_transactions(), 1)
+    last_txn2 <- tail(child2$get_transactions(), 1)
+    expect_equal(last_txn1$Channel, "Internal Transfer")
+    expect_equal(last_txn2$Channel, "Internal Transfer")
+  }
+)
 
 
 # ====================================================================
