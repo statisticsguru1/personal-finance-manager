@@ -306,12 +306,11 @@ MainAccount <- R6Class(
     #' }
     #'
     distribute_to_children = function(amount, transaction, by = "System") {
-      
+
       if (length(self$child_accounts) == 0) {
         return()
       }
-      
-      
+
       # Filter active child accounts
       active_accounts <- purrr::keep(
         self$child_accounts, ~ .x$status == "active"
@@ -623,7 +622,7 @@ MainAccount <- R6Class(
     list_child_accounts = function() {
       if (length(self$child_accounts) == 0) {
         cat("No child accounts found.\n")
-        return(invisible(character()))
+        invisible(character())
       } else {
         cat("\nChild Accounts of", self$name, ":\n")
         names <- character()
@@ -631,7 +630,7 @@ MainAccount <- R6Class(
           cat("-", child_account$name, "\n")
           names <- c(names, child_account$name)
         }
-        return(invisible(names))
+        invisible(names)
       }
     },
 
@@ -641,7 +640,7 @@ MainAccount <- R6Class(
     #' @description
     #' Recursively searches the current account, its children, and its parent
     #' chain to collect **all** accounts with a given name. This version differs
-    #'from the original by not stopping at the first match—it returns a list of 
+    #'from the original by not stopping at the first match—it returns a list of
     #'**all** matches instead.
     #'
     #' It avoids infinite recursion by tracking visited account paths.
@@ -675,15 +674,15 @@ MainAccount <- R6Class(
       if (is.null(matches)) {
         matches <- list()
       }
-      
+
       # Mark current path as visited
       visited_paths[[self$path]] <- TRUE
-      
+
       # Check current node
       if (self$name == target_name) {
         matches[[length(matches) + 1]] <- self
       }
-      
+
       # Recursively search children
       for (child in self$child_accounts) {
         if (!(child$path %in% names(visited_paths))) {
@@ -694,16 +693,18 @@ MainAccount <- R6Class(
           )
         }
       }
-      
+
       # Recurse up to parent if not visited
-      if (!is.null(self$parent) && !(self$parent$path %in% names(visited_paths))) {
+      if (
+        !is.null(self$parent) && !(self$parent$path %in% names(visited_paths))
+      ) {
         matches <- self$parent$find_account(
           target_name,
           visited_paths = visited_paths,
           matches = matches
         )
       }
-      
+
       return(matches)
     },
     #------------- Method to find an account by UUID ------------------------
@@ -773,12 +774,13 @@ MainAccount <- R6Class(
     #'
     #' @description
     #' Moves a specified amount from the current account to another account
-    #' identified by its **UUID**. This is intended for internal transfers within
-    #' the account tree. It reuses `withdraw()` and `deposit()` logic and logs
-    #' the transfer using the "Internal Transfer" channel.
+    #' identified by its **UUID**. This is intended for internal transfers
+    #' within the account tree. It reuses `withdraw()` and `deposit()` logic
+    #' and logs the transfer using the "Internal Transfer" channel.
     #'
-    #' The target account is resolved using `find_account_by_uuid()`, not by name.
-    #' This ensures unambiguous targeting even when accounts share the same name.
+    #' The target account is resolved using `find_account_by_uuid()`,
+    #' not by name. This ensures unambiguous targeting even when accounts
+    #' share the same name.
     #'
     #' @param target_account_uuid Character. The UUID of the account to which
     #' the funds will be moved.
@@ -786,8 +788,8 @@ MainAccount <- R6Class(
     #' to the current account's balance.
     #'
     #' @return
-    #' No return value. Side effects include balance updates and transaction logs
-    #' for both the source and target accounts.
+    #' No return value. Side effects include balance updates and transaction
+    #' logs for both the source and target accounts.
     #'
     #' @examples
     #' \dontrun{
@@ -804,24 +806,22 @@ MainAccount <- R6Class(
     #'   main_acc$move_balance(savings$uuid, 200)
     #' }
     move_balance = function(target_account_uuid, amount) {
+      target_account <- self$find_account_by_uuid(target_account_uuid)
+      if (is.null(target_account)) {
+        stop("Target account not found")
+      }
       self$withdraw(
         amount = amount,
         by = "System",
         channel = "Internal Transfer"
       )
-      
-      target_account <- self$find_account_by_uuid(target_account_uuid)
-      
-      if (is.null(target_account)) {
-        stop("Target account not found")
-      }
-      
+
       target_account$deposit(
         amount = amount,
         by = "System",
         channel = "Internal Transfer"
       )
-      
+
       cat("Moved", amount, "from", self$name, "to", target_account$name, "\n")
     },
 
