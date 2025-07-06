@@ -1601,7 +1601,6 @@ income_utilization <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
         error = "User not found or unauthorized access"
       ))
     }
-    print(tree)
     if (is.null(uuid) || uuid == "") {
       return(list(
         success = FALSE,
