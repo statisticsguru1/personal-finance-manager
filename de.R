@@ -6,3 +6,4 @@ for (i in 1:20) {
   if (!is.null(res) && httr::status_code(res) == 200) break
   Sys.sleep(0.25)
 }
+print(res$status_code)

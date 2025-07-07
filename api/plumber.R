@@ -1678,7 +1678,7 @@ walking_amount <- function(req, res) {
 
 # =============================================================================
 # second  tier end points
-# These apply to second tier account types ( Child, Grand child)
+# These apply to second tier account types ( Children, Grand children)
 # =============================================================================
 
 # ------------------change_account_status endpoint -----------------------------
@@ -2066,6 +2066,886 @@ get_priority <- function(req, res, uuid = NULL) {
       end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
       execution_time = as.numeric(
         difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
+  })
+}
+
+# =============================================================================
+# Third  tier end points
+# These apply to third tier account types (Grand children)
+# =============================================================================
+
+# ------------------set_due_date endpoint -------------------------------------
+
+#* Set due date for a grandchild account
+#* @post /set_due_date
+#* @param uuid UUID of the grandchild account
+#* @param due_date The due date (string in ISO format or date)
+#* @form
+set_due_date <- function(req, res, uuid = NULL, due_date = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    with_account_lock(user_id, {
+      # Load the user's account tree
+      tree <- load_user_file(user_id, "account_tree.Rds")
+
+      if (is.null(tree)) {
+        return(list(
+          success = FALSE,
+          status = if (role == "admin") 404 else 403,
+          error = "User not found or unauthorized access"
+        ))
+      }
+
+      if (is.null(uuid) || uuid == "") {
+        return(list(success = FALSE, status = 400, error = "UUID is required"))
+      }
+
+      if (is.null(due_date) || due_date == "") {
+        return(
+          list(success = FALSE, status = 400, error = "Due date is required")
+        )
+      }
+
+      account <- tree$find_account_by_uuid(uuid)
+
+      if (is.null(account)) {
+        return(list(success = FALSE, status = 403, error = "Account not found"))
+      }
+
+      # Check if it's a grandchild (inherits from GrandchildAccount)
+      if (!inherits(account, "GrandchildAccount")) {
+        return(list(
+          success = FALSE,
+          status = 403,
+          error = "Due date only applicable to grandchild accounts"
+        ))
+      }
+
+      # Parse due date
+      parsed_date <- tryCatch(as.POSIXct(due_date), error = function(e) NA)
+      if (length(parsed_date) == 0 || is.na(parsed_date)) {
+        return(
+          list(
+            success = FALSE,
+            status = 400,
+            error = "Invalid due date format"
+          )
+        )
+      }
+
+      # Call method
+      account$set_due_date(parsed_date)
+
+      # Save updated tree
+      save_user_file(user_id, tree, "account_tree.Rds")
+
+      list(
+        success = TRUE,
+        status = 200,
+        message = paste("Due date set for", account$name),
+        uuid = uuid,
+        due_date = as.character(parsed_date)
+      )
+    })
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(
+        Sys.time(),
+        start_time,
+        units = "secs"
+      )
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(
+          Sys.time(),
+          start_time,
+          units = "secs"
+        )
+      )
+    )
+  })
+}
+
+
+# ------------------get_due_date endpoint -------------------------------------
+
+#* Get the due date of a grandchild account
+#* @get /get_due_date
+#* @param uuid UUID of the grandchild account
+#* @json
+get_due_date <- function(req, res, uuid = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    # Load account tree
+    tree <- load_user_file(user_id, "account_tree.Rds")
+
+    if (is.null(tree)) {
+      return(list(
+        success = FALSE,
+        status = if (role == "admin") 404 else 403,
+        error = "User not found or unauthorized access"
+      ))
+    }
+
+    if (is.null(uuid) || uuid == "") {
+      return(list(
+        success = FALSE,
+        status = 400,
+        error = "UUID is required"
+      ))
+    }
+
+    account <- tree$find_account_by_uuid(uuid)
+    if (is.null(account)) {
+      return(list(
+        success = FALSE,
+        status = 403,
+        error = "Account not found"
+      ))
+    }
+
+    if (!inherits(account, "GrandchildAccount")) {
+      return(list(
+        success = FALSE,
+        status = 403,
+        error = "Due date only applicable to grandchild accounts"
+      ))
+    }
+
+    list(
+      success = TRUE,
+      status = 200,
+      uuid = uuid,
+      due_date = as.character(account$get_due_date())
+    )
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
+  })
+}
+
+
+# ------------------set_fixed_amount endpoint ----------------------------------
+
+#* Set the fixed amount and compute amount_due for a grandchild account
+#* @param uuid UUID of the grandchild account
+#* @param fixed_amount Numeric fixed amount per period
+#* @post /set_fixed_amount
+#* @json
+set_fixed_amount <- function(req, res, uuid = NULL, fixed_amount = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    with_account_lock(user_id, {
+      # Validate presence of UUID and amount
+      if (is.null(uuid) || uuid == "") {
+        return(list(success = FALSE, status = 400, error = "UUID is required"))
+      }
+      if (is.null(fixed_amount) || fixed_amount == "") {
+        return(
+          list(
+            success = FALSE,
+            status = 400,
+            error = "Fixed amount is required"
+          )
+        )
+      }
+
+      # Parse amount safely
+      fixed_amount <- suppressWarnings(as.numeric(fixed_amount))
+      if (is.na(fixed_amount) || fixed_amount < 0) {
+        return(
+          list(
+            success = FALSE,
+            status = 400,
+            error = "Fixed amount must be a non-negative number"
+          )
+        )
+      }
+
+      # Load tree
+      tree <- load_user_file(user_id, "account_tree.Rds")
+      if (is.null(tree)) {
+        return(list(
+          success = FALSE,
+          status = if (role == "admin") 404 else 403,
+          error = "User not found or unauthorized access"
+        ))
+      }
+
+      acct <- tree$find_account_by_uuid(uuid)
+      if (is.null(acct)) {
+        return(list(success = FALSE, status = 403, error = "Account not found"))
+      }
+
+      # Check that it's a grandchild (inherits from GrandchildAccount)
+      if (!inherits(acct, "GrandchildAccount") || is.null(acct$parent)) {
+        return(
+          list(
+            success = FALSE,
+            status = 403,
+            error = "Fixed amount only applicable to grandchild accounts"
+          )
+        )
+      }
+
+      # Call method
+      tryCatch({
+        acct$set_fixed_amount(fixed_amount)
+        save_user_file(user_id, tree, "account_tree.Rds")
+
+        list(
+          success = TRUE,
+          status = 200,
+          uuid = uuid,
+          fixed_amount = fixed_amount,
+          amount_due = acct$amount_due
+        )
+      }, error = function(e) {
+        list(success = FALSE, status = 400, error = e$message)
+      })
+    })
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
+  })
+}
+
+# ------------------get_fixed_amount endpoint ----------------------------------
+
+#* Get the fixed amount for a grandchild account
+#* @get /get_fixed_amount
+#* @param uuid UUID of the account
+#* @json
+get_fixed_amount <- function(req, res, uuid = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    # Load account tree
+    tree <- load_user_file(user_id, "account_tree.Rds")
+
+    if (is.null(tree)) {
+      return(list(
+        success = FALSE,
+        status = if (role == "admin") 404 else 403,
+        error = "User not found or unauthorized access"
+      ))
+    }
+
+    if (is.null(uuid) || uuid == "") {
+      return(list(
+        success = FALSE,
+        status = 400,
+        error = "UUID is required"
+      ))
+    }
+
+    account <- tree$find_account_by_uuid(uuid)
+    if (is.null(account)) {
+      return(list(
+        success = FALSE,
+        status = 403,
+        error = "Account not found"
+      ))
+    }
+
+    # Validate class inheritance
+    if (!inherits(account, "GrandchildAccount")) {
+      return(list(
+        success = FALSE,
+        status = 403,
+        error = "This endpoint is only applicable to grandchild accounts"
+      ))
+    }
+
+    fixed_amount <- account$get_fixed_amount()
+
+    list(
+      success = TRUE,
+      status = 200,
+      uuid = uuid,
+      fixed_amount = fixed_amount
+    )
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
+  })
+}
+
+# ------------------set_account_type endpoint ----------------------------------
+#* Set account type for a grandchild account
+#* @post /set_account_type
+#* @param uuid UUID of the grandchild account
+#* @param account_type The new account type to assign
+#* @form
+set_account_type <- function(req, res, uuid = NULL, account_type = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    with_account_lock(user_id, {
+      # Load tree
+      tree <- load_user_file(user_id, "account_tree.Rds")
+
+      if (is.null(tree)) {
+        return(list(
+          success = FALSE,
+          status = if (role == "admin") 404 else 403,
+          error = "User not found or unauthorized access"
+        ))
+      }
+
+      # UUID must be provided
+      if (is.null(uuid) || uuid == "") {
+        return(list(
+          success = FALSE,
+          status = 400,
+          error = "UUID is required"
+        ))
+      }
+
+      # account_type must be provided
+      if (is.null(account_type) || account_type == "") {
+        return(list(
+          success = FALSE,
+          status = 400,
+          error = "Account type is required"
+        ))
+      }
+
+      # Find account
+      account <- tree$find_account_by_uuid(uuid)
+      if (is.null(account)) {
+        return(list(
+          success = FALSE,
+          status = 403,
+          error = "Account not found"
+        ))
+      }
+
+      # Check class
+      if (!inherits(account, "GrandchildAccount")) {
+        return(list(
+          success = FALSE,
+          status = 403,
+          error = "This endpoint is only applicable to grandchild accounts"
+        ))
+      }
+
+      # Attempt update
+      tryCatch({
+        account$set_account_type(account_type)
+        save_user_file(user_id, tree, "account_tree.Rds")
+
+        list(
+          success = TRUE,
+          status = 200,
+          message = paste("Account type updated to", account_type),
+          uuid = uuid,
+          account_type = account$account_type
+        )
+      }, error = function(e) {
+        list(success = FALSE, status = 500, error = e$message)
+      })
+    })
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
+  })
+}
+
+
+# -----------------get_account_type endpoint ----------------------------------
+#* Get the account type of a grandchild account
+#* @get /get_account_type
+#* @param uuid UUID of the account
+#* @json
+get_account_type <- function(req, res, uuid = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    tree <- load_user_file(user_id, "account_tree.Rds")
+
+    if (is.null(tree)) {
+      return(list(
+        success = FALSE,
+        status = if (role == "admin") 404 else 403,
+        error = "User not found or unauthorized access"
+      ))
+    }
+
+    if (is.null(uuid) || uuid == "") {
+      return(list(
+        success = FALSE,
+        status = 400,
+        error = "UUID is required"
+      ))
+    }
+
+    account <- tree$find_account_by_uuid(uuid)
+    if (is.null(account)) {
+      return(list(
+        success = FALSE,
+        status = 403,
+        error = "Account not found"
+      ))
+    }
+
+    if (!inherits(account, "GrandchildAccount")) {
+      return(list(
+        success = FALSE,
+        status = 403,
+        error = "This method is only applicable to grandchild accounts"
+      ))
+    }
+
+    list(
+      success = TRUE,
+      status = 200,
+      uuid = uuid,
+      account_type = account$get_account_type()
+    )
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
+  })
+}
+
+
+# -----------------set_account_freq endpoint ----------------------------------
+#* Set frequency for a grandchild account
+#* @post /set_account_freq
+#* @param uuid UUID of the grandchild account
+#* @param account_freq New frequency (e.g., "Monthly", "Weekly", etc.)
+#* @form
+function(req, res, uuid = NULL, account_freq = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    with_account_lock(user_id, {
+      tree <- load_user_file(user_id, "account_tree.Rds")
+
+      # Validate UUID
+      if (is.null(uuid) || uuid == "") {
+        return(list(success = FALSE, status = 400, error = "UUID is required"))
+      }
+
+      account <- tree$find_account_by_uuid(uuid)
+
+      if (is.null(account)) {
+        return(list(success = FALSE, status = 403, error = "Account not found"))
+      }
+
+      # Validate class
+      if (!inherits(account, "GrandchildAccount")) {
+        return(list(
+          success = FALSE,
+          status = 403,
+          error = "This endpoint is only applicable to grandchild accounts"
+        ))
+      }
+
+      # Validate frequency
+      if (is.null(account_freq) || account_freq == "") {
+        return(
+          list(
+            success = FALSE,
+            status = 400,
+            error = "account_freq is required"
+          )
+        )
+      }
+
+      # Apply method
+      tryCatch({
+        account$set_account_freq(account_freq)
+        save_user_file(user_id, tree, "account_tree.Rds")
+
+        list(
+          success = TRUE,
+          status = 200,
+          message = paste(
+            "Frequency for",
+            account$name,
+            "set to",
+            account_freq
+          ),
+          uuid = uuid,
+          freq = account_freq
+        )
+      }, error = function(e) {
+        list(success = FALSE, status = 500, error = conditionMessage(e))
+      })
+    })
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
+  })
+}
+
+
+# -----------------get_account_freq endpoint ----------------------------------
+#* Get the frequency of a grandchild account
+#* @get /get_account_freq
+#* @param uuid The UUID of the grandchild account
+#* @json
+get_account_freq <- function(req, res, uuid = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    # Load account tree
+    tree <- load_user_file(user_id, "account_tree.Rds")
+
+    if (is.null(tree)) {
+      return(list(
+        success = FALSE,
+        status = if (role == "admin") 404 else 403,
+        error = "User not found or unauthorized access"
+      ))
+    }
+
+    if (is.null(uuid) || uuid == "") {
+      return(list(
+        success = FALSE,
+        status = 400,
+        error = "UUID is required"
+      ))
+    }
+
+    account <- tree$find_account_by_uuid(uuid)
+
+    if (is.null(account)) {
+      return(list(
+        success = FALSE,
+        status = 403,
+        error = "Account not found"
+      ))
+    }
+
+    # Check class is GrandchildAccount
+    if (!inherits(account, "GrandchildAccount")) {
+      return(list(
+        success = FALSE,
+        status = 403,
+        error = "This endpoint is only applicable to grandchild accounts"
+      ))
+    }
+
+    list(
+      success = TRUE,
+      status = 200,
+      uuid = uuid,
+      freq = account$get_account_freq()
+    )
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
+  })
+}
+
+
+
+# ------------------set_account_periods endpoint -------------------------------
+#* Set number of periods for a grandchild account
+#* @param uuid UUID of the grandchild account
+#* @param periods Number of periods (positive integer)
+#* @post /set_account_periods
+#* @serializer json list(na = "string")
+set_account_periods <- function(req, res, uuid = NULL, periods = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    with_account_lock(user_id, {
+      tree <- load_user_file(user_id, "account_tree.Rds")
+
+      if (is.null(tree)) {
+        return(list(
+          success = FALSE,
+          status = if (role == "admin") 404 else 403,
+          error = "User not found or unauthorized access"
+        ))
+      }
+
+      if (is.null(uuid) || uuid == "") {
+        return(list(success = FALSE, status = 400, error = "UUID is required"))
+      }
+
+      account <- tree$find_account_by_uuid(uuid)
+
+      if (is.null(account)) {
+        return(list(success = FALSE, status = 403, error = "Account not found"))
+      }
+
+      if (!inherits(account, "GrandchildAccount")) {
+        return(list(
+          success = FALSE,
+          status = 403,
+          error = "This endpoint is only applicable to grandchild accounts"
+        ))
+      }
+
+      # Validate periods
+      periods <- suppressWarnings(as.integer(periods))
+      if (is.na(periods) || periods <= 0) {
+        return(
+          list(
+            success = FALSE,
+            status = 400,
+            error = "Invalid number of periods"
+          )
+        )
+      }
+
+      tryCatch({
+        account$set_account_periods(periods)
+        save_user_file(user_id, tree, "account_tree.Rds")
+
+        list(
+          success = TRUE,
+          status = 200,
+          uuid = uuid,
+          periods = periods,
+          message = paste("Number of periods set to", periods)
+        )
+      }, error = function(e) {
+        list(success = FALSE, status = 400, error = e$message)
+      })
+    })
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(Sys.time(), start_time, units = "secs")
+      )
+    )
+  })
+}
+
+
+# ------------------set_account_periods endpoint -------------------------------
+#* Get number of periods for a grandchild account
+#* @get /get_account_periods
+#* @param uuid UUID of the grandchild account
+#* @json
+get_account_periods <- function(req, res, uuid = NULL) {
+  user_id <- req$user_id
+  role <- req$role
+  start_time <- Sys.time()
+
+  future({
+    # Load account tree
+    tree <- load_user_file(user_id, "account_tree.Rds")
+
+    if (is.null(tree)) {
+      return(list(
+        success = FALSE,
+        status = if (role == "admin") 404 else 403,
+        error = "User not found or unauthorized access"
+      ))
+    }
+
+    if (is.null(uuid) || uuid == "") {
+      return(list(success = FALSE, status = 400, error = "UUID is required"))
+    }
+
+    account <- tree$find_account_by_uuid(uuid)
+    if (is.null(account)) {
+      return(list(success = FALSE, status = 403, error = "Account not found"))
+    }
+
+    if (!inherits(account, "GrandchildAccount")) {
+      return(list(
+        success = FALSE,
+        status = 403,
+        error = "This method is only applicable to grandchild accounts"
+      ))
+    }
+
+    periods <- account$get_account_periods()
+
+    list(
+      success = TRUE,
+      status = 200,
+      uuid = uuid,
+      periods = periods
+    )
+  }) %...>% (function(result) {
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(Sys.time(), start_time, units = "secs")
+    )
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(
+          Sys.time(),
+          start_time,
+          units = "secs"
+        )
       )
     )
   })

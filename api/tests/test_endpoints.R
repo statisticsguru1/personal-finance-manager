@@ -2073,3 +2073,818 @@ test_that("GET /get_priority works", {
     ignore.case = TRUE
   )
 })
+
+
+# ============================================================================
+# Tier three endpoints
+# ============================================================================
+## some set up
+main_uuid <- load_user_file("testuser", "account_tree.Rds")$uuid
+
+Debts_uuid <- load_user_file(
+  "testuser",
+  "account_tree.Rds"
+)$find_account(
+  "Debts"
+)[[1]]$uuid
+
+
+
+SubFarming_uuid <- load_user_file(
+  "testuser",
+  "account_tree.Rds"
+)$find_account(
+  "SubFarming"
+)[[1]]$uuid
+
+
+
+# ============================================================================
+# Testing the /set_due_date endpoint
+# ============================================================================
+
+test_that("POST /set_due_date works as expected", {
+
+  # --- Valid request: set due date for a grandchild ---
+  res1 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = SubFarming_uuid,
+      due_date = "2025-08-30"
+    ),
+    encode = "form"
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$uuid, SubFarming_uuid)
+  expect_match(parsed1$due_date, "2025-08-30")
+
+  # --- Invalid: due_date missing ---
+  res2 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = SubFarming_uuid),
+    encode = "form"
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 400)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "Due date is required")
+
+  # --- Invalid: uuid missing ---
+  res3 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(due_date = "2025-09-10"),
+    encode = "form"
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "UUID is required")
+
+  # --- Invalid: due_date format ---
+  res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = SubFarming_uuid,
+      due_date = "invalid-date"
+    ),
+    encode = "form"
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 400)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "Invalid due date format")
+
+  # --- Invalid: account is child, not grandchild ---
+  res5 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = Debts_uuid,
+      due_date = "2025-12-12"
+    ),
+    encode = "form"
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 403)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "Due date only applicable to grandchild accounts")
+
+  # --- Invalid: UUID does not exist ---
+  res6 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = "non-existent-uuid",
+      due_date = "2025-10-01"
+    ),
+    encode = "form"
+  )
+  parsed6 <- jsonlite::fromJSON(rawToChar(res6$content))
+  expect_equal(httr::status_code(res6), 403)
+  expect_false(parsed6$success)
+  expect_match(parsed6$error, "Account not found")
+
+  # --- Invalid: applying to main account ---
+  res7 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = uuid,
+      due_date = "2025-10-01"
+    ),
+    encode = "form"
+  )
+  parsed7 <- jsonlite::fromJSON(rawToChar(res7$content))
+  expect_equal(httr::status_code(res7), 403)
+  expect_false(parsed7$success)
+  expect_match(parsed7$error, "Due date only applicable to grandchild accounts")
+})
+
+
+# ============================================================================
+# Testing the /get_due_date endpoint
+# ============================================================================
+test_that("GET /get_due_date works correctly", {
+
+  # --- Valid grandchild account ---
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = SubFarming_uuid)
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$uuid, SubFarming_uuid)
+  expect_true(is.character(parsed1$due_date))
+
+  # --- Invalid UUID (not found) ---
+  res2 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = "non-existent-uuid")
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 403)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "Account not found")
+
+  # --- Missing UUID ---
+  res3 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token))
+    # No uuid
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "UUID is required")
+
+  # --- Child account (not allowed) ---
+  res4 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = Debts_uuid)
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "Due date only applicable to grandchild accounts")
+
+  # --- Main account (not allowed) ---
+  res5 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_due_date",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = uuid)
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 403)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "Due date only applicable to grandchild accounts")
+})
+
+
+# ============================================================================
+# Testing the /set_fixed_amount endpoint
+# ============================================================================
+
+test_that("POST /set_fixed_amount works for grandchild accounts only", {
+  # --- Valid grandchild request ---
+  res1 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = SubFarming_uuid,
+      fixed_amount = 1200
+    ),
+    encode = "form"
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$fixed_amount, 1200)
+  expect_true(is.numeric(parsed1$amount_due))
+
+  # --- Missing fixed_amount ---
+  res2 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = SubFarming_uuid
+    ),
+    encode = "form"
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 400)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "Fixed amount is required", ignore.case = TRUE)
+
+  # --- Invalid fixed_amount ---
+  res3 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = SubFarming_uuid,
+      fixed_amount = "nonsense"
+    ),
+    encode = "form"
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "non-negative number", ignore.case = TRUE)
+
+  # --- Invalid: child account (Debts_uuid) ---
+  res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = Debts_uuid,
+      fixed_amount = 500
+    ),
+    encode = "form"
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "grandchild accounts", ignore.case = TRUE)
+
+  # --- Invalid: main account ---
+  res5 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = uuid,
+      fixed_amount = 500
+    ),
+    encode = "form"
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 403)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "grandchild accounts", ignore.case = TRUE)
+
+  # --- Missing UUID ---
+  res6 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(fixed_amount = 500),
+    encode = "form"
+  )
+  parsed6 <- jsonlite::fromJSON(rawToChar(res6$content))
+  expect_equal(httr::status_code(res6), 400)
+  expect_false(parsed6$success)
+  expect_match(parsed6$error, "UUID is required", ignore.case = TRUE)
+})
+
+
+# ============================================================================
+# Testing the /get_fixed_amount endpoint
+# ============================================================================
+
+test_that("GET /get_fixed_amount works", {
+
+  # --- Valid: Grandchild account ---
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = SubFarming_uuid)
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_true(is.numeric(parsed1$fixed_amount))
+  expect_equal(parsed1$uuid, SubFarming_uuid)
+
+  # --- Invalid: Main account ---
+  res2 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = uuid)
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 403)
+  expect_false(parsed2$success)
+  expect_match(
+    parsed2$error,
+    "only applicable to grandchild accounts",
+    ignore.case = TRUE
+  )
+
+  # --- Invalid: Child account ---
+  res3 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = Debts_uuid)
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 403)
+  expect_false(parsed3$success)
+  expect_match(
+    parsed3$error,
+    "only applicable to grandchild accounts",
+    ignore.case = TRUE
+  )
+
+  # --- Missing UUID ---
+  res4 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token))
+    # No query param
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 400)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "UUID is required", ignore.case = TRUE)
+
+  # --- Non-existent UUID ---
+  res5 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_fixed_amount",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = "non-existent-uuid-999")
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 403)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "Account not found", ignore.case = TRUE)
+})
+
+
+# ============================================================================
+# Testing the /set_account_types endpoint
+# ============================================================================
+test_that("POST /set_account_type works as expected", {
+
+  # --- Valid case: grandchild account ---
+  res1 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = SubFarming_uuid,
+      account_type = "Bill"
+    ),
+    encode = "form"
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$account_type, "Bill")
+  expect_match(parsed1$message, "Account type updated to")
+
+  # --- Missing uuid ---
+  res2 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(account_type = "Fixed"),
+    encode = "form"
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 400)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "UUID is required")
+
+  # --- Missing account_type ---
+  res3 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = SubFarming_uuid),
+    encode = "form"
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "Account type is required")
+
+  # --- Invalid uuid ---
+  res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = "non-existent-uuid", account_type = "loan"),
+    encode = "form"
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "Account not found")
+
+  # --- Wrong class: main account ---
+  res5 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = uuid, account_type = "savings"),
+    encode = "form"
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 403)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "only applicable to grandchild")
+
+  # --- Wrong class: child account ---
+  res6 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = Debts_uuid, account_type = "monthly"),
+    encode = "form"
+  )
+  parsed6 <- jsonlite::fromJSON(rawToChar(res6$content))
+  expect_equal(httr::status_code(res6), 403)
+  expect_false(parsed6$success)
+  expect_match(parsed6$error, "only applicable to grandchild")
+})
+
+
+# ============================================================================
+# Testing the /get_account_type endpoint
+# ============================================================================
+
+test_that("GET /get_account_type works correctly", {
+
+  # 1. Valid request (GrandchildAccount)
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = SubFarming_uuid)  # grandchild uuid
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$uuid, SubFarming_uuid)
+  expect_true(is.character(parsed1$account_type))
+
+  # 2. Invalid UUID
+  res2 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = "invalid-uuid-123")
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+
+  expect_equal(httr::status_code(res2), 403)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "Account not found")
+
+  # 3. Missing UUID
+  res3 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token))
+    # no uuid param
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "UUID is required")
+
+  # 4. UUID for non-grandchild account (e.g. child or main)
+  res4 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_type",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = Debts_uuid)  # this is a child account
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "only applicable to grandchild accounts")
+})
+
+
+# ============================================================================
+# Testing the /set_account_freq endpoint
+# ============================================================================
+
+test_that("POST /set_account_freq works", {
+
+  # --- Valid request ---
+  res1 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = SubFarming_uuid,
+      account_freq = "Monthly"
+    ),
+    encode = "form"
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$freq, "Monthly")
+  expect_equal(parsed1$uuid, SubFarming_uuid)
+
+  # --- Missing uuid ---
+  res2 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      account_freq = "Monthly"
+    ),
+    encode = "form"
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 400)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "UUID is required")
+
+  # --- Missing account_freq ---
+  res3 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = SubFarming_uuid
+    ),
+    encode = "form"
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "account_freq is required")
+
+  # --- Invalid UUID ---
+  res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = "invalid-uuid",
+      account_freq = "Weekly"
+    ),
+    encode = "form"
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "Account not found")
+
+  # --- Not a grandchild (use child uuid) ---
+  res5 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(
+      uuid = Debts_uuid,  # child uuid
+      account_freq = "Quarterly"
+    ),
+    encode = "form"
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 403)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "only applicable to grandchild")
+})
+
+
+# ============================================================================
+# Testing the /get_account_freq endpoint
+# ============================================================================
+
+test_that("GET /get_account_freq works", {
+
+  # --- Valid grandchild account request ---
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = SubFarming_uuid)  # grandchild
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_true(is.character(parsed1$freq) || is.null(parsed1$freq))
+
+  # --- Invalid UUID ---
+  res2 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = "invalid-uuid")
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 403)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "Account not found", ignore.case = TRUE)
+
+  # --- Missing UUID ---
+  res3 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token))
+    # no uuid
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "UUID is required", ignore.case = TRUE)
+
+  # --- Not applicable to main account ---
+  res4 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = uuid)  # main
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(
+    parsed4$error,
+    "only applicable to grandchild",
+    ignore.case = TRUE
+  )
+
+  # --- Not applicable to child account ---
+  res5 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_freq",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = Debts_uuid)  # child
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 403)
+  expect_false(parsed5$success)
+  expect_match(
+    parsed5$error,
+    "only applicable to grandchild",
+    ignore.case = TRUE
+  )
+})
+
+
+# ============================================================================
+# Testing the /set_account_periods endpoint
+# ============================================================================
+
+test_that("POST /set_account_periods works for valid and invalid cases", {
+
+  # --- Valid request to grandchild ---
+  res1 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_periods",
+    body = list(
+      uuid = SubFarming_uuid,
+      periods = 6
+    ),
+    encode = "form",
+    httr::add_headers(Authorization = paste("Bearer", token))
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$periods, 6)
+  expect_match(parsed1$message, "Number of periods set to 6")
+
+  # --- Invalid uuid (not found) ---
+  res2 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_periods",
+    body = list(
+      uuid = "invalid-uuid",
+      periods = 3
+    ),
+    encode = "form",
+    httr::add_headers(Authorization = paste("Bearer", token))
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 403)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "Account not found")
+
+  # --- Missing UUID ---
+  res3 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_periods",
+    body = list(
+      periods = 3
+    ),
+    encode = "form",
+    httr::add_headers(Authorization = paste("Bearer", token))
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 400)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "UUID is required")
+
+  # --- Invalid account type: using main account uuid ---
+  res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_periods",
+    body = list(
+      uuid = uuid,
+      periods = 4
+    ),
+    encode = "form",
+    httr::add_headers(Authorization = paste("Bearer", token))
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "only applicable to grandchild accounts")
+
+  # --- Invalid periods (non-numeric) ---
+  res5 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_periods",
+    body = list(
+      uuid = SubFarming_uuid,
+      periods = "nonsense"
+    ),
+    encode = "form",
+    httr::add_headers(Authorization = paste("Bearer", token))
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 400)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "Invalid number of periods")
+
+  # --- Invalid periods (negative value) ---
+  res6 <- httr::POST(
+    url = "http://127.0.0.1:8000/set_account_periods",
+    body = list(
+      uuid = SubFarming_uuid,
+      periods = -3
+    ),
+    encode = "form",
+    httr::add_headers(Authorization = paste("Bearer", token))
+  )
+  parsed6 <- jsonlite::fromJSON(rawToChar(res6$content))
+  expect_equal(httr::status_code(res6), 400)
+  expect_false(parsed6$success)
+  expect_match(parsed6$error, "Invalid number of periods")
+})
+
+
+# ============================================================================
+# Testing the /get_account_periods
+# ============================================================================
+
+test_that("GET /get_account_periods works correctly", {
+  # --- Valid request for a grandchild account ---
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_periods",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = SubFarming_uuid)
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(httr::status_code(res1), 200)
+  expect_true(parsed1$success)
+  expect_equal(parsed1$uuid, SubFarming_uuid)
+  expect_true(is.numeric(parsed1$periods))
+
+  # --- Missing UUID ---
+  res2 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_periods",
+    httr::add_headers(Authorization = paste("Bearer", token))
+    # No UUID
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(httr::status_code(res2), 400)
+  expect_false(parsed2$success)
+  expect_match(parsed2$error, "UUID is required")
+
+  # --- UUID does not exist ---
+  res3 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_periods",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = "nonexistent-uuid-1234")
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  expect_equal(httr::status_code(res3), 403)
+  expect_false(parsed3$success)
+  expect_match(parsed3$error, "Account not found")
+
+  # --- Child account (invalid class) ---
+  res4 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_periods",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = Debts_uuid)
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+  expect_equal(httr::status_code(res4), 403)
+  expect_false(parsed4$success)
+  expect_match(parsed4$error, "only applicable to grandchild accounts")
+
+  # --- Main account (invalid class) ---
+  res5 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_account_periods",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = uuid)
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  expect_equal(httr::status_code(res5), 403)
+  expect_false(parsed5$success)
+  expect_match(parsed5$error, "only applicable to grandchild accounts")
+})
