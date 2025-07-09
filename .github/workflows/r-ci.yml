@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      R_LIBS_USER: ${{ github.workspace }}/.Rlibrary
-      RENV_PATHS_LIBRARY: ${{ github.workspace }}/.Rlibrary
+      R_LIBS_USER: ${{ github.workspace}}/.Rlibrary
+      RENV_PATHS_LIBRARY: ${{ github.workspace}}/.Rlibrary
       TZ: UTC
       _R_CHECK_SYSTEM_CLOCK_: FALSE
       NOT_CRAN: true
@@ -86,7 +86,7 @@ jobs:
         shell: Rscript {0}
 
       - name: Test coverage
-        run: covr::codecov(package = "finman", token = Sys.getenv("CODECOV_TOKEN"))
+        run: covr::codecov(path = "finman", token = Sys.getenv("CODECOV_TOKEN"))
         shell: Rscript {0}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
