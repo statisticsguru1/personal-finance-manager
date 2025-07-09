@@ -9,10 +9,10 @@ load_from_file(user_id, file_name, base_dir)
 \arguments{
 \item{user_id}{A character string representing the user's unique identifier.}
 
-\item{file_name}{The name of the file to load (e.g., `"account_tree.Rds"`, 
+\item{file_name}{The name of the file to load (e.g., `"account_tree.Rds"`,
 `"data.json"`).}
 
-\item{base_dir}{The base directory where user data is stored. This should 
+\item{base_dir}{The base directory where user data is stored. This should
 point to the top-level folder containing all user subdirectories.}
 }
 \value{

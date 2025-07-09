@@ -958,7 +958,7 @@ Invisibly returns a character vector of child account names.
 \subsection{Method \code{find_account()}}{
 Recursively searches the current account, its children, and its parent
 chain to collect **all** accounts with a given name. This version differs
-from the original by not stopping at the first match—it returns a list of 
+from the original by not stopping at the first match—it returns a list of
 **all** matches instead.
 
 It avoids infinite recursion by tracking visited account paths.
@@ -1050,12 +1050,13 @@ if no match is found.
 \if{latex}{\out{\hypertarget{method-MainAccount-move_balance}{}}}
 \subsection{Method \code{move_balance()}}{
 Moves a specified amount from the current account to another account
-identified by its **UUID**. This is intended for internal transfers within
-the account tree. It reuses `withdraw()` and `deposit()` logic and logs
-the transfer using the "Internal Transfer" channel.
+identified by its **UUID**. This is intended for internal transfers
+within the account tree. It reuses `withdraw()` and `deposit()` logic
+and logs the transfer using the "Internal Transfer" channel.
 
-The target account is resolved using `find_account_by_uuid()`, not by name.
-This ensures unambiguous targeting even when accounts share the same name.
+The target account is resolved using `find_account_by_uuid()`,
+not by name. This ensures unambiguous targeting even when accounts
+share the same name.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MainAccount$move_balance(target_account_uuid, amount)}\if{html}{\out{</div>}}
 }
@@ -1072,8 +1073,8 @@ to the current account's balance.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-No return value. Side effects include balance updates and transaction logs
-for both the source and target accounts.
+No return value. Side effects include balance updates and transaction
+logs for both the source and target accounts.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

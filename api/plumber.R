@@ -3,45 +3,126 @@ library(future)
 library(promises)
 library(tidyverse)
 library(rlang)
-plan(multisession)
+plan(sequential)
 
 
 # -------------- Auth Filters --------------------------------------------------
 
-#* @filter auth
-function(req, res) {
-  # Skip auth for the health check
-  if (req$PATH_INFO == "/__ping__") {
-    return(forward())
+# Initialize rate limit tracker
+if (!exists("rate_limiter")) {
+  rate_limiter <- new.env()
+}
+
+# ─── Initialize request tracker for exponential backoff ───
+if (!exists("request_tracker", inherits = FALSE)) {
+  request_tracker <- new.env()
+}
+
+MAX_REQUESTS <- as.numeric(Sys.getenv("MAX_REQUESTS", unset = 1000))
+WINDOW_SIZE <- as.numeric(Sys.getenv("WINDOW_SIZE", unset = 3600))
+
+
+# Rate limit check
+check_rate_limit <- function(user_id) {
+  now <- Sys.time()
+  rl <- rate_limiter[[user_id]]
+
+  if (is.null(rl)) {
+    rate_limiter[[user_id]] <- list(
+      window_start = now,
+      count = 1
+    )
+    return(TRUE)
   }
 
-  auth_header <- req$HTTP_AUTHORIZATION
+  elapsed <- as.numeric(difftime(now, rl$window_start, units = "secs"))
 
+  if (elapsed > WINDOW_SIZE) {
+    # Reset window
+    rate_limiter[[user_id]] <- list(
+      window_start = now,
+      count = 1
+    )
+    return(TRUE)
+  }
+
+  if (rl$count < MAX_REQUESTS) {
+    rl$count <- rl$count + 1
+    rate_limiter[[user_id]] <- rl
+    return(TRUE)
+  }
+
+  return(FALSE)
+}
+
+
+#* @filter auth
+function(req, res) {
+  if (req$PATH_INFO == "/__ping__") return(forward())
+
+  auth_header <- req$HTTP_AUTHORIZATION
   if (is.null(auth_header) || !startsWith(auth_header, "Bearer ")) {
     res$status <- 401
     return(list(error = "Missing or invalid token"))
   }
 
   secret_key <- Sys.getenv("JWT_SECRET")
-
   if (secret_key == "") {
     res$status <- 500
     return(list(error = "Server misconfigured (missing JWT_SECRET)"))
   }
 
   token <- sub("Bearer ", "", auth_header)
-
   decoded <- verify_token(token, secret = secret_key)
 
+  # ─────── Failed Auth: Apply Exponential Backoff ───────
   if (is.null(decoded)) {
+    user_id <- token  # fallback identifier
+    now <- Sys.time()
+    tracker <- request_tracker[[user_id]]
+
+    if (is.null(tracker)) {
+      request_tracker[[user_id]] <- list(last_try = now, attempt = 0)
+    } else {
+      elapsed <- as.numeric(difftime(now, tracker$last_try, units = "secs"))
+      expected_wait <- 2^tracker$attempt
+
+      if (elapsed < expected_wait) {
+        res$status <- 429
+        return(
+          list(
+            error = paste(
+              "Too many failed attempts. Wait",
+              round(expected_wait - elapsed, 2),
+              "seconds."
+            )
+          )
+        )
+      } else {
+        request_tracker[[user_id]]$last_try <- now
+        request_tracker[[user_id]]$attempt <- tracker$attempt + 1
+      }
+    }
+
     res$status <- 401
     return(list(error = "Invalid or expired token"))
   }
 
-  req$user_id <- decoded$user_id
+  # ─────── Successful Auth: Enforce Rate Limit ───────
+  user_id <- decoded$user_id
+  req$user_id <- user_id
   req$role <- decoded$role
+
+  if (!check_rate_limit(user_id)) {
+    res$status <- 429
+    return(list(error = "Rate limit exceeded. Try later."))
+  }
+
   forward()
 }
+
+
+
 
 # =============================================================================
 # General end points

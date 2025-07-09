@@ -16,7 +16,7 @@ library(tidyverse)
 
 wait_for_server_ready <- function(
   url = "http://127.0.0.1:8000/__ping__",
-  timeout = 40
+  timeout = 80
 ) {
   start_time <- Sys.time()
   while (as.numeric(Sys.time() - start_time, units = "secs") < timeout) {
@@ -35,8 +35,11 @@ tmp_dir <- tempfile("test-api-deposit-")
 dir.create(tmp_dir, recursive = TRUE)
 Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
 Sys.setenv(ACCOUNT_BACKEND = "file")
+Sys.setenv(MAX_REQUESTS = 100000)
+Sys.setenv(WINDOW_SIZE = 3600)s
 Sys.setenv(JWT_SECRET = "test-secret")
 secret_key <- Sys.getenv("JWT_SECRET")
+
 
 create_user_account_base(
   user_id = "testuser",
@@ -174,6 +177,7 @@ test_that("POST /withdraw works", {
     body = list(uuid = uuid, amount = 50, channel = "bank"),
     encode = "form"
   )
+  parsed6 <- jsonlite::fromJSON(rawToChar(res6$content))
   expect_equal(httr::status_code(res6), 401)
 
   # ✅ Case 7: Withdraw with negative amount
