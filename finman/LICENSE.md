@@ -1,18 +1,13 @@
-# Source-Available License
+# Proprietary License
 
 © 2025 Festus Nzuma. All rights reserved.
 
-This software is provided for **viewing and evaluation purposes only**. You may read and inspect the source code, but **you may not**:
+This software is proprietary and not open source. You may **not**:
 
-- Copy or redistribute the code or any part of it
+- Use, copy, or redistribute the code
 - Modify or create derivative works
-- Use any portion of the code in other software or systems
-- Deploy the software for commercial or public use
+- Deploy the code in any public or commercial setting
 
-Use is restricted to private, non-commercial environments unless **explicit written permission** is granted by the author.
+Viewing the code is allowed **only** for evaluation purposes.
 
-To request permission or discuss licensing terms, contact:
-
-📧 mutindafestus27@gmail.com
-
-Any unauthorized use is strictly prohibited and may result in legal action.
+📩 Contact: mutindafestus27@gmail.com for licensing inquiries.
