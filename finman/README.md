@@ -7,23 +7,47 @@
 
 ---
 
-> **Finman**: A recursive financial account management engine in R.  
-> Built for investment groups, cooperative systems, and personal finance automation.
+> The **Finman** package provides a robust, extensible framework for modeling personal
+and group financial systems using hierarchical accounts. Built with R6,
+it supports object-oriented definitions for accounts at multiple levels — from
+ general-purpose wallets to specialized savings and debt accounts — with
+ flexible rules for allocation, due tracking, and status management.
 
 ---
 
 ## 📦 Overview
 
-**Finman** provides a robust object-oriented structure (via R6) for managing a hierarchy of financial accounts, including:
+**Finman** provides a robust object-oriented structure (via R6) for managing a 
+hierarchy of financial accounts
 
-- ✅ Master / main accounts
-- ✅ Child and grandchild accounts
-- ✅ Transaction & balance tracking
-- ✅ Due amounts and priority logic
-- ✅ Configurable allocation rules
-- ✅ API-ready & UI-ready logic layer
+### 🔧 What It Does
+📁 **Hierarchical Account Structure:**
 
-Finman powers the backend of a broader financial management system including REST APIs (via Plumber) and dashboards (Shiny/React).
+`MainAccount:` Root account that holds and distributes funds.
+
+`ChildAccount:` Intermediate accounts with customizable allocation and prioritization.
+
+`GrandchildAccount:` Specialized accounts for fixed dues (e.g., rent, internet) with due dates and periods.
+
+🔄 **Automatic Allocation & Balancing:**
+
+Deposits flow down through the account hierarchy based on allocation percentages and account status.
+
+Fully funded accounts become inactive, allowing surplus to remain or be redirected.
+
+🔒 **Concurrency-Safe Modifications:**
+
+Built-in file locking to avoid race conditions when working in shared or API environments.
+
+📈 **Stateful Tracking:**
+
+Balances, dues, fixed amounts, priorities, and transaction history are persistently stored per user.
+
+🧱 **Composable Architecture:**
+
+
+The package is designed to power the backend of a broader financial management system
+including REST APIs (via Plumber) and dashboards (Shiny/React).
 
 ---
 
@@ -56,24 +80,19 @@ child$get_balance()  # 500 (50% allocation)
 
 ---
 
+
 ## 📚 Documentation
 
 Visit the full documentation site at:
 
 ➡️ [https://festusnzuma.github.io/personal-finance-manager](https://festusnzuma.github.io/personal-finance-manager)
 
+## Developer Notes
+- Modular R6 class definitions allow you to extend or override behavior.
+
+- All logic is pure R and does not depend on external DBs or systems.
+
 ---
-
-## ✅ Features
-
-| Feature | Status |
-|--------|--------|
-| Recursive account hierarchy | ✔️ |
-| Balance + due tracking | ✔️ |
-| Allocation control | ✔️ |
-| Secure credential helpers | ✔️ |
-| API integration support | ✔️ |
-| CI-tested and coverage-tracked | ✔️ |
 
 ---
 
@@ -114,7 +133,8 @@ You **may**:
 
 ## 🤝 Contributing
 
-This package is not currently accepting public contributions. For private collaboration inquiries, contact the author.
+This package is not currently accepting public contributions. 
+For private collaboration inquiries, contact the author.
 
 ---
 
