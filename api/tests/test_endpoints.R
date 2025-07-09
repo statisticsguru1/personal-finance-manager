@@ -36,7 +36,7 @@ dir.create(tmp_dir, recursive = TRUE)
 Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
 Sys.setenv(ACCOUNT_BACKEND = "file")
 Sys.setenv(MAX_REQUESTS = 100000)
-Sys.setenv(WINDOW_SIZE = 3600)s
+Sys.setenv(WINDOW_SIZE = 3600)
 Sys.setenv(JWT_SECRET = "test-secret")
 secret_key <- Sys.getenv("JWT_SECRET")
 

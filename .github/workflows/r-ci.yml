@@ -7,7 +7,8 @@ on:
     branches: [main, refactor-main-account-docs]
 
 jobs:
-  build:
+  finman-build:
+    name: 🔧 Finman R Package Build
     runs-on: ubuntu-latest
 
     env:
@@ -31,7 +32,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: r-${{ runner.os }}-${{ hashFiles('DESCRIPTION') }}
+          key: r-${{ runner.os }}-${{ hashFiles('finman/DESCRIPTION') }}
           restore-keys: r-${{ runner.os }}-
 
       - name: Install system dependencies
@@ -61,37 +62,39 @@ jobs:
       - name: Install R package dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          use-lockfile: false
           extra-packages: |
             devtools
             remotes
             pkgdown
-            
+          working-directory: finman
+          use-lockfile: false
+
       - name: Install local package
-        run: devtools::install(upgrade = "never")
+        run: devtools::install("finman", upgrade = "never")
         shell: Rscript {0}
 
       - name: Lint code
-        run: lintr::lint_package()
+        run: lintr::lint_package("finman")
         shell: Rscript {0}
 
       - name: Run tests
-        run: devtools::test()
+        run: devtools::test(pkg = "finman")
         shell: Rscript {0}
 
       - name: Check code (CRAN-style)
-        run: devtools::check()
+        run: devtools::check(pkg = "finman")
         shell: Rscript {0}
 
       - name: Test coverage
-        run: covr::codecov(token = Sys.getenv("CODECOV_TOKEN"))
+        run: covr::codecov(package = "finman", token = Sys.getenv("CODECOV_TOKEN"))
         shell: Rscript {0}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   api-tests:
+    name: 🌐 Finman R Package Build
     runs-on: ubuntu-latest
-    needs: build  # ✅ Waits for build to complete
+    needs: build
 
     env:
       R_LIBS_USER: ${{ github.workspace }}/.Rlibrary
@@ -110,7 +113,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: r-${{ runner.os }}-${{ hashFiles('DESCRIPTION') }}
+          key: r-${{ runner.os }}-${{ hashFiles('finman/DESCRIPTION') }}
           restore-keys: r-${{ runner.os }}-
 
       - name: Install endpoint test dependencies
@@ -127,6 +130,10 @@ jobs:
             here
             httr
             plumber
+
+      - name: Install local package
+        run: devtools::install("finman", upgrade = "never")
+        shell: Rscript {0}
 
       - name: Run API endpoint tests
         run: testthat::test_file("api/tests/test_endpoints.R")
