@@ -1,9 +1,11 @@
 # Finman <img src="https://img.shields.io/badge/status-active-brightgreen" align="right"/>
 
-[![R-CMD-check](https://github.com/statisticsguru1/personal-finance-manager/actions/workflows/r-ci.yml/badge.svg?branch=refactor-main-account-docs)
+![R-CMD-check](https://github.com/statisticsguru1/personal-finance-manager/actions/workflows/r-ci.yml/badge.svg?branch=refactor-main-account-docs)
 [![codecov](https://codecov.io/github/statisticsguru1/personal-finance-manager/branch/refactor-main-account-docs/graph/badge.svg?token=O02A92ODYD)](https://codecov.io/github/statisticsguru1/personal-finance-manager)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![License: Proprietary](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
+![Last Commit](https://img.shields.io/github/last-commit/statisticsguru1/personal-finance-manager)
+
 
 ---
 
