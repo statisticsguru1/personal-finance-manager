@@ -1,0 +1,19 @@
+url: ~
+template:
+  bootstrap: 5
+  bootswatch: simplex
+
+navbar:
+  structure:
+    left:
+      - home
+      - reference
+      - articles
+      - news
+  fixed: false
+
+authors:
+  Festus Nzuma:
+    href: https://github.com/festusnzuma
+
+

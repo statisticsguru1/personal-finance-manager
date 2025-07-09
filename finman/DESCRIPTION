@@ -22,6 +22,9 @@ Suggests:
     testthat (>= 3.0.0),
     covr,
     lintr,
-    pkgdown
+    pkgdown,
+    knitr,
+    rmarkdown
 Config/testthat/edition: 3
 License: file LICENSE
+VignetteBuilder: knitr

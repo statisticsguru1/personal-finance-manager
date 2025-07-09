@@ -1,0 +1,4 @@
+*.html
+*.R
+docs/*.Rproj.user
+docs/.DS_Store
