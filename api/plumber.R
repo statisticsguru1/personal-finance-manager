@@ -1,9 +1,23 @@
+
 library(plumber)
 library(future)
 library(promises)
 library(tidyverse)
 library(rlang)
 plan(sequential)
+
+#* @apiTitle Personal Finance Manager API
+#* @apiDescription Secure API for managing user accounts, transactions, and balances.
+#* @apiVersion 1.0.0
+#* @apiContact list(
+#*   name = "Festus Nzuma",
+#*   url = "https://github.com/statisticsguru1/personal-finance-manager",
+#*   email = "mutindafestus27@gmail.com"
+#* )
+#* @apiLicense list(
+#*   name = "Proprietary License",
+#*   url = "https://github.com/statisticsguru1/personal-finance-manager/LICENSE"
+#* )
 
 
 # -------------- Auth Filters --------------------------------------------------
@@ -22,7 +36,14 @@ MAX_REQUESTS <- as.numeric(Sys.getenv("MAX_REQUESTS", unset = 1000))
 WINDOW_SIZE <- as.numeric(Sys.getenv("WINDOW_SIZE", unset = 3600))
 
 
-# Rate limit check
+#' Check Rate Limit for a Given User
+#'
+#' @description Internal helper that implements a sliding window rate limit.
+#' Limits the number of API calls per user based on `MAX_REQUESTS` and `WINDOW_SIZE`.
+#'
+#' @param user_id A character string uniquely identifying the user.
+#' @return TRUE if the user is allowed to proceed; FALSE if the rate limit is
+#'  exceeded.
 check_rate_limit <- function(user_id) {
   now <- Sys.time()
   rl <- rate_limiter[[user_id]]
@@ -57,6 +78,15 @@ check_rate_limit <- function(user_id) {
 
 
 #* @filter auth
+#* @tag auth
+#* @apiTag auth "Authentication and Rate Limiting"
+#* Authenticates requests using JWT tokens.
+#* Adds user ID and role to `req` on success.
+#* Applies exponential backoff and request rate limiting per user.
+#*
+#* @response 401 Invalid or missing token
+#* @response 429 Rate limit exceeded or backoff triggered
+#* @response 500 Missing or invalid server secret
 function(req, res) {
   if (req$PATH_INFO == "/__ping__") return(forward())
 
@@ -140,15 +170,19 @@ ping <- function() {
 
 # -------------- Deposit endpoint ----------------------------------------------
 
-#* endpoints/deposit.R
 #* @post /deposit
+#* Deposit money into an account
+#*
+#* Allows a user or admin to deposit a specified amount into a specific account
+#* identified by its UUID.Performs permission checks and updates the account tree
+#*  in persistent storage.
+#*
 #* @param uuid Account UUID (required)
 #* @param amount Deposit amount (required)
 #* @param channel Deposit channel (required)
 #* @param transaction_number Optional transaction number
 #* @param by Who performed the deposit (default = "User")
 #* @param date Timestamp of deposit (default = now)
-#* endpoints/deposit.R
 deposit <- function(req, res,
                     uuid,
                     amount,
@@ -217,8 +251,12 @@ deposit <- function(req, res,
 
 # --------------- Withdraw endpoint --------------------------------------------
 
-#* endpoints/withdraw.R
 #* @post /withdraw
+#* Withdraw money from an account
+#*
+#* Allows a user or admin to withdraw a specified amount from a target account
+#* (via UUID), with appropriate checks and persistence to disk.
+#*
 #* @param uuid Account UUID (required)
 #* @param amount Withdrawal amount (required)
 #* @param channel Withdrawal channel (required)

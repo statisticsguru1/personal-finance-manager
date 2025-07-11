@@ -3,8 +3,13 @@ Type: Package
 Title: Finance Account Management
 Version: 0.0.1
 Authors@R: 
-    person("Festus", "Nzuma", email = "mutindafestus27@gmail.com", role = c("aut", "cre"))
+    person("Festus", "Nzuma", 
+           email = "mutindafestus27@gmail.com", 
+           role = c("aut", "cre"), 
+           comment = c(GitHub = "statisticsguru1"))
 Description: Core logic for managing master and child accounts recursively, including tracking balances, transactions, and dues across nested accounts.
+URL: https://github.com/statisticsguru1/personal-finance-manager/tree/refactor-main-account-docs, https://statisticsguru1.github.io/portfolio/
+BugReports: https://github.com/statisticsguru1/personal-finance-manager/issues
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2

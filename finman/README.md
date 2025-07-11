@@ -102,7 +102,7 @@ Visit the full documentation site at:
 
 | Metric               | Status        |
 |----------------------|---------------|
-| R CMD Check          | [![R-CMD-check](https://github.com/statisticsguru1/personal-finance-manager/actions/workflows/r-ci.yml/badge.svg?branch=refactor-main-account-docs)
+| R CMD Check          | ![R-CMD-check](https://github.com/statisticsguru1/personal-finance-manager/actions/workflows/r-ci.yml/badge.svg?branch=refactor-main-account-docs)
 | Test Coverage        | [![codecov](https://codecov.io/github/statisticsguru1/personal-finance-manager/branch/refactor-main-account-docs/graph/badge.svg?token=O02A92ODYD)](https://codecov.io/github/statisticsguru1/personal-finance-manager)|
 | License              | [![License: Proprietary](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE) |
 | Lifecycle            | ![Lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg) |
@@ -158,11 +158,11 @@ personal-finance-manager/
 
 ## 🏁 Roadmap
 
-- [x] Core account logic
-- [x] API testing
-- [ ] Loan + fixed account extension
-- [ ] Shiny frontend integration
-- [ ] React client support
+- [x] Core account logic.
+- [x] API development.
+- [ ] Load testing.
+- [ ] Shiny frontend integration.
+- [ ] React frontend integration.
 
 ---
 

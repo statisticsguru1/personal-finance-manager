@@ -35,8 +35,11 @@ tmp_dir <- tempfile("test-api-deposit-")
 dir.create(tmp_dir, recursive = TRUE)
 Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
 Sys.setenv(ACCOUNT_BACKEND = "file")
+Sys.setenv(MAX_REQUESTS = 100000)
+Sys.setenv(WINDOW_SIZE = 3600)
 Sys.setenv(JWT_SECRET = "test-secret")
 secret_key <- Sys.getenv("JWT_SECRET")
+
 
 create_user_account_base(
   user_id = "testuser",
@@ -174,6 +177,7 @@ test_that("POST /withdraw works", {
     body = list(uuid = uuid, amount = 50, channel = "bank"),
     encode = "form"
   )
+  parsed6 <- jsonlite::fromJSON(rawToChar(res6$content))
   expect_equal(httr::status_code(res6), 401)
 
   # ✅ Case 7: Withdraw with negative amount
@@ -223,7 +227,6 @@ test_that("POST /add_sub_account endpoint edge cases", {
     )
   )
   parsed9 <- jsonlite::fromJSON(rawToChar(res9$content))
-  print(parsed9)
   expect_equal(httr::status_code(res9), 400)
   expect_false(parsed9$success)
   expect_match(parsed9$error, "already exists", ignore.case = TRUE)

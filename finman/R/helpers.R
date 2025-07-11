@@ -23,7 +23,7 @@ is_valid_user_id <- function(user_id) {
 }
 
 #--------------- creates base account during reg----------------------------
-#' Create a New User Account Directory and Main Account Tree
+#' Create a New User Account.
 #'
 #' Initializes a `MainAccount` object and saves it using the configured backend.
 #'
@@ -401,7 +401,7 @@ save_to_file <- function(user_id, object, file_name, base_dir) {
         sprintf(
           "Unrecognized file extension '.%s'.\n
           The object will be saved using R's binary `serialize()`.
-          \nTo handle this file type properly, consider extending the save 
+          \nTo handle this file type properly, consider extending the save
           \nplugin for 'file' backend.",
           ext
         )
