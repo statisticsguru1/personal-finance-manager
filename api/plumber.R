@@ -76,9 +76,8 @@ check_rate_limit <- function(user_id) {
   return(FALSE)
 }
 
-
-#* @filter auth
 #* @tag auth
+#* @filter auth
 #* @apiTag auth "Authentication and Rate Limiting"
 #* Authenticates requests using JWT tokens.
 #* Adds user ID and role to `req` on success.
@@ -170,19 +169,20 @@ ping <- function() {
 
 # -------------- Deposit endpoint ----------------------------------------------
 
+#* @tag accounts
 #* @post /deposit
-#* Deposit money into an account
-#*
+#* @summary Deposit money into an account
+#* @description
 #* Allows a user or admin to deposit a specified amount into a specific account
-#* identified by its UUID.Performs permission checks and updates the account tree
-#*  in persistent storage.
+#*  identified by its UUID.
+#* Performs permission checks and updates the account tree in persistent storage.
 #*
-#* @param uuid Account UUID (required)
-#* @param amount Deposit amount (required)
-#* @param channel Deposit channel (required)
-#* @param transaction_number Optional transaction number
-#* @param by Who performed the deposit (default = "User")
-#* @param date Timestamp of deposit (default = now)
+#* @param uuid:str* Account UUID (required)
+#* @param amount:float* Deposit amount (required)
+#* @param channel:str* Deposit channel (required)
+#* @param transaction_number:str Optional transaction number
+#* @param by:str Who performed the deposit (default = "User")
+#* @param date:str Timestamp of deposit (default = now)
 deposit <- function(req, res,
                     uuid,
                     amount,
@@ -251,18 +251,19 @@ deposit <- function(req, res,
 
 # --------------- Withdraw endpoint --------------------------------------------
 
+#* @tag accounts
 #* @post /withdraw
-#* Withdraw money from an account
+#* @summary Withdraw money from an account
+#* @description
+#* Allows a user or admin to withdraw a specified amount from a target account (via UUID),
+#* with appropriate checks and persistence to disk.
 #*
-#* Allows a user or admin to withdraw a specified amount from a target account
-#* (via UUID), with appropriate checks and persistence to disk.
-#*
-#* @param uuid Account UUID (required)
-#* @param amount Withdrawal amount (required)
-#* @param channel Withdrawal channel (required)
-#* @param transaction_number Optional transaction number
-#* @param by Who performed the withdrawal (default = "User")
-#* @param date Timestamp of withdrawal (default = now)
+#* @param uuid:str* Account UUID (required)
+#* @param amount:float* Withdrawal amount (required)
+#* @param channel:str* Withdrawal channel (required)
+#* @param transaction_number:str Optional transaction number
+#* @param by:str Who performed the withdrawal (default = "User")
+#* @param date:str Timestamp of withdrawal (default = now)
 withdraw <- function(req, res,
                      uuid,
                      amount,
@@ -337,12 +338,21 @@ withdraw <- function(req, res,
 
 # --------------- Distribute endpoint ------------------------------------------
 
+#* @tag accounts
 #* @post /distribute
-#* @param uuid UUID of the parent account
-#* @param amount Amount to distribute
-#* @param transaction Transaction reference (optional)
-#* @param by Initiator (default: "System")
+#* @summary Distribute funds to child accounts
+#* @description
+#* Distributes a given amount from a parent account to all of its active
+#* children based on their allocation.
+#* Requires the parent account UUID and amount. Optional metadata like
+#* `transaction` and `by` can be provided.
+#*
+#* @param uuid:str* UUID of the parent account
+#* @param amount:float* Amount to distribute (must be > 0)
+#* @param transaction:str Optional transaction reference
+#* @param by:str Initiator of the distribution (default: "System")
 #* @json
+
 distribute <- function(req, res,
                        uuid,
                        amount = NULL,
@@ -437,17 +447,25 @@ distribute <- function(req, res,
 
 # --------------- Add child acc endpoint --------------------------------------
 
-#* Add a child or grandchild account under a parent
+#* @tag accounts
 #* @post /add_sub_account
-#* @param parent_uuid The UUID of the parent account
-#* @param name The name of the child account
-#* @param allocation The allocation fraction (e.g., 0.3)
-#* @param priority Optional priority weight (default: 0)
-#* @param fixed_amount Optional (used only for grandchild)
-#* @param due_date Optional (ISO string)
-#* @param account_type Optional (used only for grandchild)
-#* @param freq Optional (used only for grandchild)
+#* @summary Add a child or grandchild account under a parent account
+#* @description
+#* Adds a new child or grandchild account to an existing parent account.
+#* - If the parent is a main account, a `ChildAccount` is created.
+#* - If the parent is a child account, a `GrandchildAccount` is created.
+#* Automatically persists changes to disk after update.
+#*
+#* @param parent_uuid:str* UUID of the parent account
+#* @param name:str* Name of the new account (must be unique under this parent)
+#* @param allocation:float* Allocation fraction between 0 and 1
+#* @param priority:int Optional priority weight (default: 0)
+#* @param fixed_amount:float Optional fixed amount (used only for grandchild)
+#* @param due_date:str Optional ISO-formatted due date
+#* @param account_type:str Optional account type (used for grandchild)
+#* @param freq:int Optional frequency (used for grandchild)
 #* @json
+
 add_child_account <- function(req, res,
                               parent_uuid,
                               name,
@@ -563,12 +581,20 @@ add_child_account <- function(req, res,
 
 # -------------- Set_child_allocation endpoint ---------------------------------
 
-#* Update a child account's allocation under a parent
+#* @tag accounts
 #* @post /set_child_allocation
-#* @param parent_uuid UUID of the parent account
-#* @param child_name Name of the child account
-#* @param allocation New allocation value (between 0 and 1)
+#* @summary Update a child account's allocation
+#* @description
+#* Updates the allocation percentage for a specific child account under a given
+#* parent account.
+#* The allocation must be a numeric value between 0 and 1.
+#*
+#* @param parent_uuid:str* UUID of the parent account
+#* @param child_name:str* Name of the child account
+#* @param allocation:float* New allocation value (between 0 and 1)
 #* @json
+
+
 set_child_allocation <- function(req, res,
                                  parent_uuid,
                                  child_name,
@@ -663,9 +689,14 @@ set_child_allocation <- function(req, res,
 
 # ------------------- get_balance endpoint -------------------------------------
 
-#* Get balance of an account
+#* @tag accounts
 #* @get /get_balance
-#* @param uuid UUID of the account
+#* @summary Get the current balance of an account
+#* @description
+#* Returns the current balance of an account specified by its UUID.
+#* The account must belong to the authenticated user or be accessible by an admin.
+#*
+#* @param uuid:str* UUID of the account to fetch balance for
 #* @json
 get_balance <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
@@ -716,10 +747,17 @@ get_balance <- function(req, res, uuid = NULL) {
 
 # ------------------- get_transactions endpoint --------------------------------
 
-#* Get transaction history of an account
+#* @tag accounts
 #* @get /get_transactions
-#* @param uuid UUID of the account
+#* @summary Get transaction history for an account
+#* @description
+#* Returns all past transactions (deposits, withdrawals, distributions, etc.)
+#* for a given account UUID.
+#* Only accessible by the account owner or an admin.
+#*
+#* @param uuid:str* UUID of the account whose transactions are requested
 #* @json
+
 get_transactions <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -771,10 +809,16 @@ get_transactions <- function(req, res, uuid = NULL) {
 
 # ------------------- list_child_accounts endpoint -----------------------------
 
-#* List child accounts under a parent
+#* @tag accounts
 #* @get /list_child_accounts
-#* @param uuid UUID of the parent account
+#* @summary List child accounts under a parent
+#* @description
+#* Retrieves the names of all child accounts directly under the specified parent account.
+#* Only accessible by the account owner or an admin.
+#*
+#* @param uuid:str* UUID of the parent account
 #* @json
+
 list_child_accounts <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -827,9 +871,15 @@ list_child_accounts <- function(req, res, uuid = NULL) {
 
 
 # ------------------- list_all_accounts endpoint -------------------------------
-#* List all accounts in the tree (both up and down)
+#* @tag accounts
 #* @get /list_all_accounts
-#* @param uuid UUID of the account (start point for traversal)
+#* @summary List all accounts in the tree (upward and downward)
+#* @description
+#* Retrieves all accounts in the tree that are either children or ancestors
+#* of the given UUID. Useful for complete hierarchical traversal starting at any node.
+#* Only accessible by the account owner or an admin.
+#*
+#* @param uuid:str* UUID of the account (starting point for traversal)
 #* @json
 list_all_accounts <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
@@ -881,10 +931,17 @@ list_all_accounts <- function(req, res, uuid = NULL) {
 }
 
 # ------------------- find_account_by_name endpoint ----------------------------
-#* Find accounts by name
+#* @tag accounts
 #* @get /find_account_by_name
-#* @param name Name of the account to search for
+#* @summary Search for accounts by name
+#* @description
+#* Returns a list of accounts matching a given name. Each result includes the UUID,
+#*  account name, and its path in the account tree.
+#* Accessible to the account owner or admin.
+#*
+#* @param name:str* Name of the account to search for
 #* @json
+
 find_account_by_name <- function(req, res, name = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -946,10 +1003,17 @@ find_account_by_name <- function(req, res, name = NULL) {
 
 
 # ------------------- find_account_by_uuid endpoint ----------------------------
-#* Find account by UUID
+#* @tag accounts
 #* @get /find_account_by_uuid
-#* @param uuid UUID of the account to find
+#* @summary Get detailed information of an account by UUID
+#* @description
+#* Returns detailed metadata about an account given its UUID. Includes account
+#* name, path, balance, total balance, allocation, and parent UUID.
+#* Accessible by the account owner or admin.
+#*
+#* @param uuid:str* UUID of the account to find
 #* @json
+
 find_account_by_uuid <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -1024,11 +1088,17 @@ find_account_by_uuid <- function(req, res, uuid = NULL) {
 
 # --------------------- move_balance endpoint ----------------------------------
 
-#* Move balance from one account to another
+#* @tag accounts
 #* @post /move_balance
-#* @param from_uuid UUID of the source account
-#* @param to_uuid UUID of the destination account
-#* @param amount Amount to move
+#* @summary Move balance between accounts
+#* @description
+#* Transfers funds from one account to another. Both accounts must exist in the
+#* tree and belong to the authenticated user (unless admin).
+#* Ensures the amount is positive and the source account has sufficient balance.
+#*
+#* @param from_uuid:str* UUID of the source account
+#* @param to_uuid:str* UUID of the destination account
+#* @param amount:num* Amount to transfer (must be positive)
 #* @json
 move_balance <- function(
   req,
@@ -1162,10 +1232,17 @@ move_balance <- function(
 }
 
 # --------------------- compute_total_balance endpoint -------------------------
-#* Compute total balance of an account (self + children)
+#* @tag accounts
 #* @get /compute_total_balance
-#* @param uuid UUID of the account to compute total balance for
+#* @summary Compute total balance of an account
+#* @description
+#* Calculates the total balance of an account including its own balance and all
+#* its descendants’ balances recursively.
+#* Useful for checking the full balance under a top-level account or category.
+#*
+#* @param uuid:str* UUID of the account to compute total balance for
 #* @json
+
 compute_total_balance <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -1225,9 +1302,14 @@ compute_total_balance <- function(req, res, uuid = NULL) {
 
 
 # --------------------- compute_total_due endpoint -----------------------------
-#* Compute total amount due for an account (including all children)
+#* @tag accounts
 #* @get /compute_total_due
-#* @param uuid UUID of the account
+#* @summary Compute total amount due for an account
+#* @description
+#* Calculates the total amount due for a given account and all its descendant accounts.
+#* Useful for understanding total obligations associated with a category or group.
+#*
+#* @param uuid:str* UUID of the account
 #* @json
 compute_total_due <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
@@ -1293,10 +1375,15 @@ compute_total_due <- function(req, res, uuid = NULL) {
 }
 
 # --------------------- compute_total_due_within_days endpoint -----------------
-#* Compute total due within next N days
+#* @tag accounts
 #* @get /compute_total_due_within_days
-#* @param uuid UUID of the account
-#* @param days Number of days to check due amounts within
+#* @summary Compute total due within the next N days
+#* @description
+#* Computes the total amount due for an account and its children that is expected
+#* within the next `N` days. Useful for forecasting upcoming obligations.
+#*
+#* @param uuid:str* UUID of the account
+#* @param days:int* Number of days to look ahead for due items
 #* @json
 compute_total_due_within_days <- function(req, res, uuid = NULL, days = NULL) {
   user_id <- req$user_id
@@ -1378,12 +1465,19 @@ compute_total_due_within_days <- function(req, res, uuid = NULL, days = NULL) {
 
 
 # ------------------------ spending endpoint -----------------------------------
-#* Compute total user spending (withdrawals) within date range
+#* @tag accounts
 #* @get /spending
-#* @param uuid UUID of the account to start the spending calculation
-#* @param from Start date (format: YYYY-MM-DD)
-#* @param to End date (format: YYYY-MM-DD)
+#* @summary Compute total user spending (withdrawals) within a date range
+#* @description
+#* Computes the total amount withdrawn (spent) from a specified account and its
+#* children
+#* within a specified date range. If no date range is given, defaults to all time.
+#*
+#* @param uuid:str* UUID of the account to start the spending calculation
+#* @param from:str  Start date (format: YYYY-MM-DD)
+#* @param to:str    End date (format: YYYY-MM-DD)
 #* @json
+
 spending <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -1464,12 +1558,20 @@ spending <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
 }
 
 # ------------------------ total_income endpoint -------------------------------
-#* Compute total income for an account and its children
+#* @tag accounts
 #* @get /total_income
-#* @param uuid UUID of the account
-#* @param from Start date (YYYY-MM-DD)
-#* @param to End date (YYYY-MM-DD)
+#* @summary Compute total income for an account and its children
+#* @description
+#* Calculates the total amount of income (deposits and credits) received by a
+#* given account
+#* and its children within a specified date range. Defaults to all time if no
+#* range is provided.
+#*
+#* @param uuid:str* UUID of the account
+#* @param from:str  Start date (format: YYYY-MM-DD)
+#* @param to:str    End date (format: YYYY-MM-DD)
 #* @json
+
 total_income <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -1547,12 +1649,18 @@ total_income <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
 }
 
 # ------------------------ allocated_amount endpoint ---------------------------
-#* Get total allocated amount (deposits + user deposits in children)
+#* @tag accounts
 #* @get /allocated_amount
-#* @param uuid UUID of the account
-#* @param from Start date (YYYY-MM-DD)
-#* @param to End date (YYYY-MM-DD)
+#* @summary Get total allocated amount for an account (including children)
+#* @description
+#* Returns the total allocated amount (deposits + user deposits in child accounts)
+#* within a specified date range. If no dates are given, it defaults to all-time allocation.
+#*
+#* @param uuid:str* UUID of the account
+#* @param from:str  Start date in format YYYY-MM-DD (optional)
+#* @param to:str    End date in format YYYY-MM-DD (optional)
 #* @json
+
 allocated_amount <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -1624,12 +1732,19 @@ allocated_amount <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
 
 # ------------------------ income_utilization endpoint -------------------------
 
-#* Compute income utilization of an account
+#* @tag accounts
 #* @get /income_utilization
-#* @param uuid UUID of the account
-#* @param from Optional start date (e.g. 2024-01-01)
-#* @param to Optional end date (e.g. 2024-12-31)
+#* @summary Compute income utilization of an account
+#* @description
+#* Returns the income utilization of an account and its children between the
+#* specified date range.
+#* Income utilization is computed as the ratio of total spending to total income.
+#*
+#* @param uuid:str* UUID of the account
+#* @param from:str  Optional start date (`YYYY-MM-DD`)
+#* @param to:str    Optional end date (`YYYY-MM-DD`)
 #* @json
+
 income_utilization <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -1710,9 +1825,21 @@ income_utilization <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
 
 # ------------------------ walking_amount endpoint -----------------------------
 
-#* Compute walking amount (amount_due or balance)
+#* @tag accounts
 #* @get /walking_amount
+#* @summary Compute walking amount (amount_due or balance)
+#* @description
+#* Computes the "walking amount" (e.g. `amount_due` or `balance`) for an account
+#*  and its children over a date range.
+#* Commonly used for visualizing cumulative growth of liabilities or funds over time.
+#*
+#* @param uuid:str* UUID of the account
+#* @param amt_type:str Type of amount to track: "amount_due" or "balance".
+#* Default is "amount_due".
+#* @param from:str Optional start date (`YYYY-MM-DD`)
+#* @param to:str Optional end date (`YYYY-MM-DD`)
 #* @json
+
 walking_amount <- function(req, res) {
   user_id <- req$user_id
   role <- req$role
@@ -1802,11 +1929,18 @@ walking_amount <- function(req, res) {
 
 # ------------------change_account_status endpoint -----------------------------
 
-#* Change account status (child and grandchild accounts only)
+#* @tag accounts
 #* @post /change_account_status
-#* @param uuid UUID of the account to update
-#* @param status New status to apply ("active", "inactive", "closed")
+#* @summary Change account status (child and grandchild accounts only)
+#* @description
+#* Change the status of a specific child or grandchild account. Valid statuses are
+#*  `"active"`, `"inactive"`, or `"closed"`.
+#* Only applicable to `ChildAccount` instances.
+#*
+#* @param uuid:str* UUID of the account to update
+#* @param status:str* New status to apply ("active", "inactive", "closed")
 #* @json
+
 change_account_status <- function(req, res, uuid = NULL, status = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -1921,9 +2055,14 @@ change_account_status <- function(req, res, uuid = NULL, status = NULL) {
 
 # ------------------get_account_status endpoint -----------------------------
 
-#* Get the status of a child or grandchild account
+#* @tag accounts
 #* @get /get_account_status
-#* @param uuid Account UUID
+#* @summary Get the status of a child or grandchild account
+#* @description
+#* Retrieves the current status of a specific child or grandchild account.
+#* Only applicable to accounts that inherit from `ChildAccount`.
+#*
+#* @param uuid:str* UUID of the account
 #* @json
 get_account_status <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
@@ -2006,11 +2145,18 @@ get_account_status <- function(req, res, uuid = NULL) {
 
 # ------------------set_priority endpoint -----------------------------
 
-#* Set priority for a child or grandchild account
+#* @tag accounts
 #* @post /set_priority
-#* @param uuid The UUID of the account
-#* @param priority The new priority value (can be string or number)
-#* @form
+#* @summary Set priority for a child or grandchild account
+#* @description
+#* Updates the priority of a child or grandchild account. This can be used to
+#* control allocation or ordering logic within parent accounts.
+#* Only applicable to accounts that inherit from `ChildAccount`.
+#*
+#* @param uuid:str* The UUID of the account
+#* @param priority:str* The new priority value (numeric or string label)
+#* @json
+
 set_priority <- function(req, res, uuid = NULL, priority = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -2112,9 +2258,17 @@ set_priority <- function(req, res, uuid = NULL, priority = NULL) {
 
 # ------------------get_priority endpoint -------------------------------------
 
-#* Get the priority of a child or grandchild account
+#* @tag accounts
 #* @get /get_priority
-#* @param uuid UUID of the account
+#* @summary Get the priority of a child or grandchild account
+#* @description
+#* Returns the current priority value of a child or grandchild account. This is useful
+#* for understanding ordering or allocation behavior within a parent account.
+#* Only applicable to accounts that inherit from `ChildAccount`.
+#*
+#* @param uuid:str* UUID of the account
+#* @json
+
 get_priority <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -2197,11 +2351,18 @@ get_priority <- function(req, res, uuid = NULL) {
 
 # ------------------set_due_date endpoint -------------------------------------
 
-#* Set due date for a grandchild account
+#* @tag accounts
 #* @post /set_due_date
-#* @param uuid UUID of the grandchild account
-#* @param due_date The due date (string in ISO format or date)
-#* @form
+#* @summary Set due date for a grandchild account
+#* @description
+#* Assigns or updates a due date for a grandchild account. The due date is typically used
+#* to determine when a financial obligation or allocation is expected. This operation is only
+#* valid for accounts inheriting from `GrandchildAccount`.
+#*
+#* @param uuid:str* UUID of the grandchild account
+#* @param due_date:str* The due date in ISO date-time format (e.g., "2025-08-15T00:00:00Z")
+#* @json
+
 set_due_date <- function(req, res, uuid = NULL, due_date = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -2304,9 +2465,15 @@ set_due_date <- function(req, res, uuid = NULL, due_date = NULL) {
 
 # ------------------get_due_date endpoint -------------------------------------
 
-#* Get the due date of a grandchild account
+#* @tag accounts
 #* @get /get_due_date
-#* @param uuid UUID of the grandchild account
+#* @summary Get due date of a grandchild account
+#* @description
+#* Retrieves the due date associated with a specific grandchild account.
+#* This can be used to check when the account's payment is expected.
+#* Only applicable to accounts that inherit from `GrandchildAccount`.
+#*
+#* @param uuid:str* UUID of the grandchild account
 #* @json
 get_due_date <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
@@ -2381,10 +2548,17 @@ get_due_date <- function(req, res, uuid = NULL) {
 
 # ------------------set_fixed_amount endpoint ----------------------------------
 
-#* Set the fixed amount and compute amount_due for a grandchild account
-#* @param uuid UUID of the grandchild account
-#* @param fixed_amount Numeric fixed amount per period
+#* @tag accounts
 #* @post /set_fixed_amount
+#* @summary Set fixed amount for a grandchild account
+#* @description
+#* Sets the fixed amount for a grandchild account. This value is used
+#* to compute the expected `amount_due` per period.
+#*
+#* Only applicable to accounts that inherit from `GrandchildAccount`.
+#*
+#* @param uuid:str* UUID of the grandchild account
+#* @param fixed_amount:num* Numeric fixed amount to set per period
 #* @json
 set_fixed_amount <- function(req, res, uuid = NULL, fixed_amount = NULL) {
   user_id <- req$user_id
@@ -2485,9 +2659,15 @@ set_fixed_amount <- function(req, res, uuid = NULL, fixed_amount = NULL) {
 
 # ------------------get_fixed_amount endpoint ----------------------------------
 
-#* Get the fixed amount for a grandchild account
+#* @tag accounts
 #* @get /get_fixed_amount
-#* @param uuid UUID of the account
+#* @summary Get fixed amount for a grandchild account
+#* @description
+#* Returns the currently set fixed amount for a grandchild account.
+#* This value determines the expected `amount_due` per period.
+#* Only applicable to accounts that inherit from `GrandchildAccount`.
+#*
+#* @param uuid:str* UUID of the grandchild account
 #* @json
 get_fixed_amount <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
@@ -2563,11 +2743,16 @@ get_fixed_amount <- function(req, res, uuid = NULL) {
 }
 
 # ------------------set_account_type endpoint ----------------------------------
-#* Set account type for a grandchild account
+#* @tag accounts
 #* @post /set_account_type
-#* @param uuid UUID of the grandchild account
-#* @param account_type The new account type to assign
-#* @form
+#* @summary Set account type for a grandchild account
+#* @description
+#* Updates the type/category of a grandchild account.
+#* Only applicable to accounts that inherit from `GrandchildAccount`.
+#*
+#* @param uuid:str* UUID of the grandchild account
+#* @param account_type:str* The new account type label or code
+#* @json
 set_account_type <- function(req, res, uuid = NULL, account_type = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -2663,9 +2848,14 @@ set_account_type <- function(req, res, uuid = NULL, account_type = NULL) {
 
 
 # -----------------get_account_type endpoint ----------------------------------
-#* Get the account type of a grandchild account
+#* @tag accounts
 #* @get /get_account_type
-#* @param uuid UUID of the account
+#* @summary Get the account type of a grandchild account
+#* @description
+#* Returns the account type of a grandchild account (e.g., "rent", "loan", "utility").
+#* Only applicable to accounts that inherit from `GrandchildAccount`.
+#*
+#* @param uuid:str* UUID of the grandchild account
 #* @json
 get_account_type <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
@@ -2738,11 +2928,16 @@ get_account_type <- function(req, res, uuid = NULL) {
 
 
 # -----------------set_account_freq endpoint ----------------------------------
-#* Set frequency for a grandchild account
+#* @tag accounts
 #* @post /set_account_freq
-#* @param uuid UUID of the grandchild account
-#* @param account_freq New frequency (e.g., "Monthly", "Weekly", etc.)
-#* @form
+#* @summary Set frequency for a grandchild account
+#* @description
+#* Updates the frequency of a grandchild account — useful for budgeting intervals like
+#* "Weekly", "Monthly", "Quarterly", etc. Only applies to accounts that inherit from `GrandchildAccount`.
+#*
+#* @param uuid:str* UUID of the grandchild account
+#* @param account_freq:str* New frequency (e.g., "Monthly", "Weekly")
+#* @json
 function(req, res, uuid = NULL, account_freq = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -2828,9 +3023,14 @@ function(req, res, uuid = NULL, account_freq = NULL) {
 
 
 # -----------------get_account_freq endpoint ----------------------------------
-#* Get the frequency of a grandchild account
+#* @tag accounts
 #* @get /get_account_freq
-#* @param uuid The UUID of the grandchild account
+#* @summary Get frequency of a grandchild account
+#* @description
+#* Retrieves the frequency (e.g., "Monthly", "Weekly") set for a grandchild account.
+#* Only works for accounts inheriting from `GrandchildAccount`.
+#*
+#* @param uuid:str* The UUID of the grandchild account
 #* @json
 get_account_freq <- function(req, res, uuid = NULL) {
   user_id <- req$user_id
@@ -2907,11 +3107,17 @@ get_account_freq <- function(req, res, uuid = NULL) {
 
 
 # ------------------set_account_periods endpoint -------------------------------
-#* Set number of periods for a grandchild account
-#* @param uuid UUID of the grandchild account
-#* @param periods Number of periods (positive integer)
+#* @tag accounts
 #* @post /set_account_periods
-#* @serializer json list(na = "string")
+#* @summary Set number of periods for a grandchild account
+#* @description
+#* Sets the number of budgeting or billing periods for a grandchild account.
+#* Only applicable to accounts that inherit from `GrandchildAccount`.
+#*
+#* @param uuid:str* The UUID of the grandchild account
+#* @param periods:int* Number of periods (positive integer)
+#* @json
+
 set_account_periods <- function(req, res, uuid = NULL, periods = NULL) {
   user_id <- req$user_id
   role <- req$role
@@ -2997,10 +3203,15 @@ set_account_periods <- function(req, res, uuid = NULL, periods = NULL) {
 }
 
 
-# ------------------set_account_periods endpoint -------------------------------
-#* Get number of periods for a grandchild account
+# ------------------get_account_periods endpoint -------------------------------
+#* @tag accounts
 #* @get /get_account_periods
-#* @param uuid UUID of the grandchild account
+#* @summary Get number of periods for a grandchild account
+#* @description
+#* Retrieves the number of budgeting or billing periods defined for a grandchild account.
+#* Only applicable to accounts that inherit from `GrandchildAccount`.
+#*
+#* @param uuid:str* The UUID of the grandchild account
 #* @json
 get_account_periods <- function(req, res, uuid = NULL) {
   user_id <- req$user_id

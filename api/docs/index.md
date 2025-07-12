@@ -6,12 +6,52 @@ Welcome to the documentation for the **Personal Finance Manager API** — a secu
 
 ## 📘 API Reference Index
 
+### Filters
+
 - [Auth Filter](auth-filter.md)
+
+### POST
+
 - [POST /register](register.md)
 - [POST /login](login.md)
 - [POST /deposit](deposit.md)
 - [POST /withdraw](withdraw.md)
-- [GET /accounts](accounts.md)
+- [POST /distribute](distribute.md)
+- [POST /set_child_allocations](set_child_allocations.md)
+- [POST /change_account_status](change_account_status.md)
+- [POST /set_priority](set_priority.md)
+- [POST /set_due_date](set_due_date.md)
+- [POST /set_fixed_amount](set_fixed_amount.md)
+- [POST /set_account_type](set_account_type.md)
+- [POST /set_account_freq](set_account_freq.md)
+- [POST /set_account_periods](set_account_periods.md)
+
+
+### GET
+
+- [GET /get_balance](get_balance.md)
+- [GET /get_transactions](get_transactions.md)
+- [GET /list_child_accounts](list_child_accounts.md)
+- [GET /list_all_accounts](list_all_accounts.md)
+- [GET /find_account_by_name](find_account_by_name.md)
+- [GET /find_account_by_uuid](find_account_by_uuid.md)
+- [GET /compute_total_balance](compute_total_balance.md)
+- [GET /move_balance](move_balance.md)
+- [GET /compute_total_due](compute_total_due.md)
+- [GET /compute_total_due_within_days](compute_total_due_within_days.md)
+- [GET /spending](spending.md)
+- [GET /total_income](total_income.md)
+- [GET /allocated_amount](allocated_amount.md)
+- [GET /income_utilization](income_utilization.md)
+- [GET /walking_amount](walking_amount.md)
+- [GET /get_account_status](get_account_status.md)
+- [GET /get_priority](get_priority.md)
+- [GET /get_due_date](get_due_date.md)
+- [GET /get_fixed_amount](get_fixed_amount.md)
+- [GET /get_account_type](get_account_type.md)
+- [GET /get_account_freq](get_account_freq.md)
+- [GET /get_account_periods](get_account_periods.md)
+
 
 ---
 
