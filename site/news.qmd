@@ -1,0 +1,16 @@
+---
+title: "📰 Project News"
+sidebar: true
+format:
+  html:
+    toc: false
+    page-layout: article
+    theme: cosmo
+    smooth-scroll: true
+
+---
+
+
+For release history, updates, and changelogs, please visit the [GitHub Releases](https://github.com/users/statisticsguru1/projects/7).
+
+_Initial public release: **July 2025**_

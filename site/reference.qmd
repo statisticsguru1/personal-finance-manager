@@ -1,0 +1,71 @@
+---
+title: "📚 Reference"
+sidebar: true
+format:
+  html:
+    toc: true
+    page-layout: article
+    theme: cosmo
+    smooth-scroll: true
+
+---
+
+
+This section provides quick access to in-depth technical documentation for developers and advanced users. If you're looking to build on top of the system, this is your starting point.
+
+---
+
+## 🔩 R Package Documentation
+
+The `finman` R package powers the finance logic of the app.
+
+- 📘 [Full Package Documentation](../finman/docs/index.html)
+- 📦 [Function Reference](../finman/docs/reference/index.html)
+- 🧪 [Test Coverage](../finman/docs/articles/test-coverage.html)
+- 📂 [Source Code (GitHub)](https://github.com/statisticsguru1/personal-finance-manager/tree/main/finman)
+
+---
+
+## 🌐 API Endpoints
+
+The `API` exposes all backend logic via REST using Plumber.
+
+- 📖 [API Documentation](../API/docs/index.html)
+- 🧪 Test locally using tools like [Postman](https://www.postman.com/) or `curl`
+- 🧾 Sample Endpoints:
+  - `POST /deposit`
+  - `POST /withdraw`
+  - `GET /get_due_date`
+  - `POST /set_account_type`
+
+---
+
+## 🖼 UI Interfaces
+
+- 📊 [Shiny UI Modules (Coming Soon)](../shiny/docs/index.html)
+- 💡 React documentation will live in a separate Docusaurus or VitePress site
+
+---
+
+## 🧠 Architecture & Design Docs
+
+> _(Coming soon)_
+
+- Class hierarchy and UMLs for the R6 design
+- API routing logic
+- Config file structure
+- Folder conventions
+
+---
+
+## 🔗 External References
+
+- [Plumber API Framework](https://www.rplumber.io/)
+- [Quarto Project](https://quarto.org/)
+- [Shiny Framework](https://shiny.posit.co/)
+- [R6 Classes in R](https://r6.r-lib.org/)
+- [React JS](https://reactjs.org/)
+
+---
+
+Want to contribute? See the [Contribution Guide](https://github.com/statisticsguru1/personal-finance-manager/blob/main/CONTRIBUTING.md).

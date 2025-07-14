@@ -1,0 +1,41 @@
+project:
+  type: website
+  output-dir: ../docs
+
+website:
+  title: "Finance Manager"
+  site-url: https://your-username.github.io/personal-finance-manager/
+
+  navbar:
+    left:
+      - text: "Home"
+        file: index.qmd
+      - text: "Modules"
+        file: modules.qmd
+      - text: "Reference"
+        file: reference.qmd
+      - text: "News"
+        file: news.qmd
+
+  sidebar:
+    style: "docked"
+    background: light
+    contents:
+      - section: "📌 Project Info"
+        contents:
+          - index.qmds
+      - section: "📦 Modules"
+        contents:
+          - modules.qmd
+          - reference.qmd
+      - section: "📰 Updates"
+        contents:
+          - news.qmd
+      - section: "🔗 External"
+        contents:
+          - text: "API Docs"
+            href: ../API/docs/index.html
+          - text: "R Package (finman)"
+            href: ../finman/docs/index.html
+          - text: "GitHub Repo"
+            href: https://github.com/statisticsguru1/personal-finance-manager
