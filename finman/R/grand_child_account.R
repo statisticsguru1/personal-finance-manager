@@ -148,7 +148,7 @@ GrandchildAccount <- R6Class(
       priority = 0,
       fixed_amount = 0,
       due_date = NULL,
-      account_type = "Expense",
+      account_type = "Bill",
       freq = NULL,
       status = "active"
     ) {
@@ -431,10 +431,16 @@ GrandchildAccount <- R6Class(
           # Move any extra amount to the parent account
           extra_amount <- amount - deposit_amount
           if (extra_amount > 0) {
+            if(by=="User"){
+              channel = "Returned Extra Allocation-up"
+            } else {
+              channel = "Returned Extra Allocation-down"
+            }
+
             self$parent$deposit(
               amount = extra_amount,
               by = "System",
-              channel = "Returned Extra Allocation"
+              channel = channel
             )
             cat(
               "Extra amount of", extra_amount,

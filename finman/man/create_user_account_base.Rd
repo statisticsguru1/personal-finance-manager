@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{create_user_account_base}
 \alias{create_user_account_base}
-\title{Create a New User Account Directory and Main Account Tree}
+\title{Create a New User Account.}
 \usage{
 create_user_account_base(
   user_id,

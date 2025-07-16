@@ -14,6 +14,51 @@ navbar:
 
 authors:
   Festus Nzuma:
-    href: https://github.com/festusnzuma
+    href: https://github.com/statisticsguru1
+    email: statisticsguru1@gmail.com
+    roles: [aut, cre]
+    orcid: 0009-0001-7640-4955
+    comment: "Creator and maintainer of the Personal Finance Manager project"
 
 
+reference:
+  - title: "💼 Account Classes"
+    desc: >
+      R6 classes for representing financial accounts: Main, Child, Grandchild.
+    contents:
+      - MainAccount
+      - ChildAccount
+      - GrandchildAccount
+
+  - title: "🔧 User Setup"
+    desc: >
+      Functions for initializing and managing user account structures.
+    contents:
+      - create_user_account_base
+      - is_valid_user_id
+
+  - title: "💾 File Helpers (Direct Filesystem)"
+    desc: >
+      Functions that interact directly with the filesystem (not via plugin).
+    contents:
+      - file_exists_file
+      - save_to_file
+      - load_from_file
+      - remove_from_file
+
+  - title: "🔌 Storage Plugin Interface"
+    desc: >
+      Plugin-based abstraction for reading and writing user files.
+    contents:
+      - build_plugin_args
+      - save_user_file
+      - load_user_file
+      - remove_user_file
+      - user_file_exists
+
+  - title: "🔐 Security & Locking"
+    desc: >
+      Token decoding and file-based locking for concurrency.
+    contents:
+      - verify_token
+      - with_account_lock

@@ -452,6 +452,9 @@ MainAccount <- R6Class(
     #'   main_acc$set_child_allocation("Emergency", 0.3)
     #' }
     set_child_allocation = function(child_account_name, new_allocation) {
+      if(!(child_account_name %in% self$list_child_accounts())){
+        stop(paste(child_account_name, "is not a child of",self$name))
+      }
       if (new_allocation < 0 || new_allocation > 1) {
         stop("Allocation must be between 0 and 1.")
       }
@@ -1243,13 +1246,21 @@ MainAccount <- R6Class(
               child_deposits <- if (!is.null(child$transactions)) {
                 child$transactions %>%
                   filter(
-                    Type == "Deposit" & By == "User" & between(
-                      Date,
-                      daterange[1],
-                      (daterange[2] + hours(23) + minutes(59) + seconds(59))
-                    )
-                  ) %>%
-                  pull(Amount) %>%
+                    Type == "Deposit" &
+                      (
+                        By == "User" |
+                          (By == "System" & grepl(
+                            "Returned Extra Allocation-up",
+                            Channel, ignore.case = TRUE
+                          ))
+                      ) &
+                      between(
+                        Date,
+                        daterange[1],
+                        daterange[2] + hours(23) + minutes(59) + seconds(59)
+                      )
+                  )%>%
+                  pull(Amount)%>%
                   sum(na.rm = TRUE)
               } else {
                 0

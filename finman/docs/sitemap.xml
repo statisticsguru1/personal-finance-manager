@@ -4,6 +4,12 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/articles/account_lifecycle.html</loc>
+  </url>
+  <url>
+    <loc>/articles/allocation_strategies.html</loc>
+  </url>
+  <url>
     <loc>/articles/finman-overview.html</loc>
   </url>
   <url>
@@ -20,6 +26,9 @@
   </url>
   <url>
     <loc>/LICENSE.html</loc>
+  </url>
+  <url>
+    <loc>/news/index.html</loc>
   </url>
   <url>
     <loc>/reference/build_plugin_args.html</loc>

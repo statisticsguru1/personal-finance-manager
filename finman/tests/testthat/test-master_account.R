@@ -444,6 +444,16 @@ test_that("set_child_allocation: throws error if total allocation exceeds 1", {
   )
 })
 
+test_that("set_child_allocation: throws error if name invalid", {
+  main_account <- MainAccount$new("Main")
+  child <- ChildAccount$new("Child1", allocation = 0.3, priority = 1)
+  main_account$add_child_account(child)
+  expect_error(
+    main_account$set_child_allocation("child1", 0.4),
+    "child1 is not a child of Main"
+  )
+})
+
 test_that(paste(
   "set_child_allocation: sets status",
   " to inactive when allocation is zero"
@@ -457,6 +467,7 @@ test_that(paste(
   expect_equal(main_account$child_accounts$ChildZero$status, "inactive")
   expect_equal(main_account$child_accounts$ChildZero$allocation, 0)
 })
+
 
 test_that("set_child_allocation: updates total_allocation correctly", {
   main_account <- MainAccount$new("Main")

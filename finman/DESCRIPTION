@@ -6,7 +6,7 @@ Authors@R:
     person("Festus", "Nzuma", 
            email = "mutindafestus27@gmail.com", 
            role = c("aut", "cre"), 
-           comment = c(GitHub = "statisticsguru1"))
+           comment = c(ORCID = "0009-0001-7640-4955", GitHub = "statisticsguru1"))
 Description: Core logic for managing master and child accounts recursively, including tracking balances, transactions, and dues across nested accounts.
 URL: https://github.com/statisticsguru1/personal-finance-manager/tree/refactor-main-account-docs, https://statisticsguru1.github.io/portfolio/
 BugReports: https://github.com/statisticsguru1/personal-finance-manager/issues

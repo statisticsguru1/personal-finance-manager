@@ -48,8 +48,13 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="articles/account_lifecycle.html">Account Lifecycle and Behavior</a>
+    <a class="dropdown-item" href="articles/allocation_strategies.html">Income Allocation Strategies</a>
     <a class="dropdown-item" href="articles/finman-overview.html">finman-overview</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="news/index.html">Changelog</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
@@ -119,7 +124,7 @@
 <h2 id="rocket-getting-started">🚀 Getting Started<a class="anchor" aria-label="anchor" href="#rocket-getting-started"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">finman</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/statisticsguru1/personal-finance-manager/tree/refactor-main-account-docs" class="external-link">finman</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">main</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/MainAccount.html">MainAccount</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Wallet"</span><span class="op">)</span></span>
 <span><span class="va">child</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/ChildAccount.html">ChildAccount</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Goals"</span>, allocation <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
@@ -144,40 +149,6 @@
 <li><p>Modular R6 class definitions allow you to extend or override behavior.</p></li>
 <li><p>All logic is pure R and does not depend on external DBs or systems.</p></li>
 </ul>
-<hr>
-<hr>
-</div>
-<div class="section level2">
-<h2 id="test_tube-development-metrics">🧪 Development Metrics<a class="anchor" aria-label="anchor" href="#test_tube-development-metrics"></a>
-</h2>
-<table class="table">
-<colgroup>
-<col width="59%">
-<col width="40%">
-</colgroup>
-<thead><tr>
-<th>Metric</th>
-<th>Status</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>R CMD Check</td>
-<td><img src="https://github.com/statisticsguru1/personal-finance-manager/actions/workflows/r-ci.yml/badge.svg?branch=refactor-main-account-docs" alt="R-CMD-check"></td>
-</tr>
-<tr>
-<td>Test Coverage</td>
-<td><a href="https://codecov.io/github/statisticsguru1/personal-finance-manager" class="external-link"><img src="https://codecov.io/github/statisticsguru1/personal-finance-manager/branch/refactor-main-account-docs/graph/badge.svg?token=O02A92ODYD" alt="codecov"></a></td>
-</tr>
-<tr>
-<td>License</td>
-<td><a href="LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-red.svg" alt="License: Proprietary"></a></td>
-</tr>
-<tr>
-<td>Lifecycle</td>
-<td><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle"></td>
-</tr>
-</tbody>
-</table>
 <hr>
 </div>
 <div class="section level2">
@@ -259,7 +230,7 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>
-<a href="https://github.com/festusnzuma" class="external-link">Festus Nzuma</a> <br><small class="roles"> Author, maintainer </small>  </li>
+<a href="https://github.com/statisticsguru1" class="external-link">Festus Nzuma</a> <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0009-0001-7640-4955" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
@@ -272,7 +243,7 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="https://github.com/festusnzuma" class="external-link">Festus Nzuma</a>.</p>
+<p>Developed by <a href="https://github.com/statisticsguru1" class="external-link">Festus Nzuma</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -23,7 +23,7 @@ website:
     contents:
       - section: "📌 Project Info"
         contents:
-          - index.qmds
+          - index.qmd
       - section: "📦 Modules"
         contents:
           - modules.qmd

@@ -198,7 +198,13 @@ test_that("deposit refunds extra to parent account", {
   # Step 5: Check refund to parent
   expect_equal(nrow(child$transactions), 1)
   expect_equal(child$transactions$Amount[1], 50)
-  expect_equal(child$transactions$Channel[1], "Returned Extra Allocation")
+  #expect_equal(child$transactions$Channel[1], "Returned Extra Allocation")
+  expect_match(
+    child$transactions$Channel[1],
+    "Returned Extra Allocation",
+    ignore.case = TRUE
+    )
+
   expect_equal(child$transactions$By[1], "System")
 })
 
