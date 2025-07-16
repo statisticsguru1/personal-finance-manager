@@ -156,8 +156,13 @@ jobs:
         shell: Rscript {0}
 
       - name: Build finman pkgdown site to docs/finman
-        run: pkgdown::build_site(pkg = "finman", path = "docs/finman")
+        run: pkgdown::build_site(pkg = "finman")
         shell: Rscript {0}
+
+      - name: Copy pkgdown site to docs/finman
+        run: |
+          mkdir -p docs/finman
+          cp -r finman/docs/* docs/finman/
 
       - name: Build API site to docs/api
         run: quarto render . --output-dir ../../docs/api
