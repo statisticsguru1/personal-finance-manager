@@ -160,7 +160,7 @@ acc$set_priority(5)
 \code{\link{MainAccount}}
 }
 \section{Super class}{
-\code{\link[finman:MainAccount]{finman::MainAccount}} -> \code{ChildAccount}
+\code{finman::MainAccount} -> \code{ChildAccount}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}

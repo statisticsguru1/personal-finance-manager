@@ -148,7 +148,7 @@ GrandchildAccount <- R6Class(
       priority = 0,
       fixed_amount = 0,
       due_date = NULL,
-      account_type = "Bill",
+      account_type = "Expense",
       freq = NULL,
       status = "active"
     ) {
