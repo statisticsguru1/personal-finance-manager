@@ -131,6 +131,65 @@ jobs:
     name: 🧱 Build and Deploy Documentation Sites
     runs-on: ubuntu-latest
     needs: [finman-build, api-tests]
+    if: github.ref == 'refs/heads/main'
+
+    env:
+      R_LIBS_USER: ${{ github.workspace }}/.Rlibrary
+      RENV_PATHS_LIBRARY: ${{ github.workspace }}/.Rlibrary
+      TZ: UTC
+      NOT_CRAN: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Restore cached R packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: r-${{ runner.os }}-${{ hashFiles('finman/DESCRIPTION') }}
+          restore-keys: r-${{ runner.os }}-
+
+      - name: Install R packages for site build
+        run: install.packages(c("pkgdown", "devtools", "quarto"))
+        shell: Rscript {0}
+
+      - name: Install Quarto CLI
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Install Pandoc (required for pkgdown)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
+      - name: Install local R package
+        run: devtools::install("finman", upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Build finman pkgdown site to docs/finman
+        run: pkgdown::build_site(pkg = "finman", path = "docs/finman")
+        shell: Rscript {0}
+
+      - name: Build API site to docs/api
+        run: quarto render . --output-dir ../../docs/api
+        working-directory: api/docs
+
+      - name: Build main site to docs/
+        run: quarto render site
+
+      - name: Deploy everything from docs/ to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+
+    name: 🧱 Build and Deploy Documentation Sites
+    runs-on: ubuntu-latest
+    needs: [finman-build, api-tests]
 
     env:
       R_LIBS_USER: ${{ github.workspace }}/.Rlibrary
