@@ -34,8 +34,9 @@ website:
       - section: "🔗 External"
         contents:
           - text: "API Docs"
-            href: ../API/docs/index.html
+            href: ./api/index.html
           - text: "R Package (finman)"
-            href: ../finman/docs/index.html
+            href: ./finman/index.html
           - text: "GitHub Repo"
             href: https://github.com/statisticsguru1/personal-finance-manager
+
