@@ -163,6 +163,11 @@ jobs:
         run: devtools::install("finman", upgrade = "never")
         shell: Rscript {0}
 
+      - name: Install Pandoc (required for pkgdown)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
       - name: Build finman pkgdown site
         run: pkgdown::build_site("finman")
         shell: Rscript {0}
