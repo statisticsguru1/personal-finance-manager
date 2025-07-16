@@ -1,0 +1,278 @@
+[
+  {
+    "objectID": "reference.html",
+    "href": "reference.html",
+    "title": "📚 Reference",
+    "section": "",
+    "text": "This section provides quick access to in-depth technical documentation for developers and advanced users. If you’re looking to build on top of the system, this is your starting point.",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "📚 Reference"
+    ]
+  },
+  {
+    "objectID": "reference.html#r-package-documentation",
+    "href": "reference.html#r-package-documentation",
+    "title": "📚 Reference",
+    "section": "🔩 R Package Documentation",
+    "text": "🔩 R Package Documentation\nThe finman R package powers the finance logic of the app.\n\n📘 Full Package Documentation\n📦 Function Reference\n🧪 Test Coverage\n📂 Source Code (GitHub)",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "📚 Reference"
+    ]
+  },
+  {
+    "objectID": "reference.html#api-endpoints",
+    "href": "reference.html#api-endpoints",
+    "title": "📚 Reference",
+    "section": "🌐 API Endpoints",
+    "text": "🌐 API Endpoints\nThe API exposes all backend logic via REST using Plumber.\n\n📖 API Documentation\n🧪 Test locally using tools like Postman or curl\n🧾 Sample Endpoints:\n\nPOST /deposit\nPOST /withdraw\nGET /get_due_date\nPOST /set_account_type",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "📚 Reference"
+    ]
+  },
+  {
+    "objectID": "reference.html#ui-interfaces",
+    "href": "reference.html#ui-interfaces",
+    "title": "📚 Reference",
+    "section": "🖼 UI Interfaces",
+    "text": "🖼 UI Interfaces\n\n📊 Shiny UI Modules (Coming Soon)\n💡 React documentation will live in a separate Docusaurus or VitePress site",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "📚 Reference"
+    ]
+  },
+  {
+    "objectID": "reference.html#architecture-design-docs",
+    "href": "reference.html#architecture-design-docs",
+    "title": "📚 Reference",
+    "section": "🧠 Architecture & Design Docs",
+    "text": "🧠 Architecture & Design Docs\n\n(Coming soon)\n\n\nClass hierarchy and UMLs for the R6 design\nAPI routing logic\nConfig file structure\nFolder conventions",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "📚 Reference"
+    ]
+  },
+  {
+    "objectID": "reference.html#external-references",
+    "href": "reference.html#external-references",
+    "title": "📚 Reference",
+    "section": "🔗 External References",
+    "text": "🔗 External References\n\nPlumber API Framework\nQuarto Project\nShiny Framework\nR6 Classes in R\nReact JS\n\n\nWant to contribute? See the Contribution Guide.",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "📚 Reference"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "💼 Finance Manager",
+    "section": "",
+    "text": "Welcome to Personal Finance Manager an open-source, modular platform designed to help individuals and investment groups manage money more intentionally. It provides a structured, rule-based approach to budgeting, saving, borrowing, and allocating income using a dynamic account system.",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "index.html#vision",
+    "href": "index.html#vision",
+    "title": "💼 Finance Manager",
+    "section": "🚀 Vision",
+    "text": "🚀 Vision\nTo build a transparent, accountable, and modular finance management system that empowers individuals to take control of their money with clarity and intention.\nCurrently, the focus is on personal finance, helping users to:\n\nAlign income with expenses through structured allocation strategies including sinking funds for upcoming bills and goal-based saving.\nReduce debt with disciplined repayment workflows sinking funds for upcoming bills and goal-based saving.\nTrack and grow savings goals with rule-based automation\n\nEncourage intentional spending and budgeting habits\n\nSupport for group-based finance — including shared accounts, rotating savings (merry-go-rounds), and member management — is planned for future releases.",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "index.html#why-this-project",
+    "href": "index.html#why-this-project",
+    "title": "💼 Finance Manager",
+    "section": "🔍 Why This Project?",
+    "text": "🔍 Why This Project?\nTraditional budgeting tools often fail to capture the complexity of real-world personal income - expediture balance or enforce discipline in individual saving behaviors. This project was built to:\n\nBring automation and control to personal/group finance tracking.\nOffer flexible allocation systems (like 50/30/20 budgeting).\nSupport goal-based saving, debt tracking, and scheduled obligations such as sinking funds.\nEnable modular customization through APIs, Shiny dashboards, and React apps.\nEnsure privacy and security even when integrating with partner services—authentication uses JWT tokens, sharing only user UUID and roles, maintaining anonymity and avoiding de-identification.",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "index.html#key-components",
+    "href": "index.html#key-components",
+    "title": "💼 Finance Manager",
+    "section": "🧩 Key Components",
+    "text": "🧩 Key Components\n\n\n\n\n\n\n\n\nModule\nTechnology\nPurpose\n\n\n\n\nR Package\nR + R6\nCore business logic, classes for account structure, data serialization\n\n\nAPI\nPlumber (R)\nREST API for account operations, transactions, automation\n\n\nShiny App\nShiny (R)\nAdmin and user interface for managing groups/accounts\n\n\nReact App\nReact.js\nMobile-friendly UI for day-to-day use, especially for group members",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "index.html#core-concepts",
+    "href": "index.html#core-concepts",
+    "title": "💼 Finance Manager",
+    "section": "🧠 Core Concepts",
+    "text": "🧠 Core Concepts\n\nMain, Child, and Grandchild Accounts: Funds flow hierarchically with automatic allocation rules, mimicking real-world budgeting structures.\nDynamic Setup: Users can configure accounts based on their financial goals—whether it’s debt mitigation, savings, or managing irregular or low income. The system adapts to your strategy.\nFixed Obligations: Define recurring payments with due dates and frequency (e.g., rent, subscriptions).\nSinking Funds: Support for gradual saving toward future large expenses (e.g., annual insurance, school fees).\nGreedy Account Logic: Once an account is fully funded, it is automatically deactivated, and excess funds are redistributed intelligently to remaining active siblings.\nAccount Reactivation: Inactive periodic accounts (e.g., monthly, yearly) are automatically reactivated after their due dates to resume funding.\nRecursive Account Nesting: Users can attach multiple child and grandchild accounts to mirror their actual expense structure with deep nesting flexibility.\nCustom Fields: Admins can define custom registration or account creation fields, supporting diverse setups.",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "index.html#use-cases",
+    "href": "index.html#use-cases",
+    "title": "💼 Finance Manager",
+    "section": "🌐 Use Cases",
+    "text": "🌐 Use Cases\nCurrent focus:\n\n✅ Personal budgeting and savings\n✅ Goal-oriented saving (e.g., rent, subscriptions, emergency funds)\n✅ Debt tracking and repayment strategies\n✅ Sinking funds and structured allocation planning\n\nPlanned for future releases:\n\n🔄 Group-based savings (e.g., chamas, merry-go-rounds)\n💸 Micro-loans and internal lending frameworks\n🏢 Custom financial apps for organizations or cooperatives",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "index.html#project-modules",
+    "href": "index.html#project-modules",
+    "title": "💼 Finance Manager",
+    "section": "📚 Project Modules",
+    "text": "📚 Project Modules\nTo dive deeper into individual modules and their documentation:\n👉 See Modules\nOr explore full API docs:\n\nAPI (Plumber)\nR Package (finman)",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "index.html#authors-contributors",
+    "href": "index.html#authors-contributors",
+    "title": "💼 Finance Manager",
+    "section": "👨‍💻 Authors & Contributors",
+    "text": "👨‍💻 Authors & Contributors\n\nFestus Nzuma (Author, Maintainer)\n📧 mutindafestus27@gmail.com\n🐙 GitHub",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "index.html#license",
+    "href": "index.html#license",
+    "title": "💼 Finance Manager",
+    "section": "📜 License",
+    "text": "📜 License\nProprietary License. See LICENSE for details.",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "modules.html",
+    "href": "modules.html",
+    "title": "Modules",
+    "section": "",
+    "text": "Personal Finance Manager is organized into modular components. Each module handles specific responsibilities and can be extended independently. This page gives an overview of all major modules and their scopes.",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "Modules"
+    ]
+  },
+  {
+    "objectID": "modules.html#core-backend-finman",
+    "href": "modules.html#core-backend-finman",
+    "title": "Modules",
+    "section": "🧠 Core Backend (finman/)",
+    "text": "🧠 Core Backend (finman/)\nThis is the brain of the system — an R package that handles:\n\nAccount Hierarchy: Main, Child, and Grandchild accounts using R6 classes.\nTransactions: Deposit, withdrawal, transfer, allocation, and repayments.\nRules Engine: Allocation rules, due date handling, loan repayment priority.\nPersistence: User-specific account trees saved as RDS files.\n\n🔗 See detailed docs: finman site",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "Modules"
+    ]
+  },
+  {
+    "objectID": "modules.html#api-layer-api",
+    "href": "modules.html#api-layer-api",
+    "title": "Modules",
+    "section": "🌐 API Layer (API/)",
+    "text": "🌐 API Layer (API/)\nA RESTful interface built with Plumber. It exposes the backend functionalities over HTTP to power both the web app and mobile app.\n\nKey Features\n\nAuthentication via token.\nEndpoints for:\n\nUser registration and account creation.\nDeposits and withdrawals.\nGetting/setting fixed amounts, frequencies, periods, etc.\nManaging account types and due dates.\n\nAdmin tools for dynamic configuration.\n\n🔗 See full reference: API site",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "Modules"
+    ]
+  },
+  {
+    "objectID": "modules.html#web-dashboard-shiny-app",
+    "href": "modules.html#web-dashboard-shiny-app",
+    "title": "Modules",
+    "section": "📊 Web Dashboard (Shiny App/)",
+    "text": "📊 Web Dashboard (Shiny App/)\nThe Shiny app offers a rich UI for admins and users. It includes:\n\nDashboard: Overview of balances, allocations, due amounts.\nAccounts Page: View/edit account details, visualize hierarchies.\nRegistration Module: Dynamically generated form based on admin config.\nTransactions Page: History and audit of operations.\n\nPlanned features: - Report generation. - Exportable statements.",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "Modules"
+    ]
+  },
+  {
+    "objectID": "modules.html#react-frontend-react",
+    "href": "modules.html#react-frontend-react",
+    "title": "Modules",
+    "section": "📱 React Frontend (React/)",
+    "text": "📱 React Frontend (React/)\nA modern React-based interface that will serve both:\n\nMobile users (via PWA or app wrapper).\nWeb users who prefer a fast, responsive UI.\n\nPlanned functionality: - Real-time balance updates. - Form-based account interactions (add/edit/close). - Admin access with scoped permissions.",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "Modules"
+    ]
+  },
+  {
+    "objectID": "modules.html#extensibility",
+    "href": "modules.html#extensibility",
+    "title": "Modules",
+    "section": "🧩 Extensibility",
+    "text": "🧩 Extensibility\nEach module is built to support:\n\nCustom extensions (e.g., add new account types).\nInter-module communication (API talks to finman, Shiny consumes both).\nUser-specific state via persistent user data.",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "Modules"
+    ]
+  },
+  {
+    "objectID": "modules.html#coming-soon",
+    "href": "modules.html#coming-soon",
+    "title": "Modules",
+    "section": "📌 Coming Soon",
+    "text": "📌 Coming Soon\n\nNotifications system.\nAudit logs and activity summaries.\nRole-based access control (RBAC) refinements.\n\n\n\n🚀 This modular design allows the system to evolve independently while staying coherent.",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "Modules"
+    ]
+  },
+  {
+    "objectID": "news.html",
+    "href": "news.html",
+    "title": "📰 Project News",
+    "section": "",
+    "text": "For release history, updates, and changelogs, please visit the GitHub Releases.\nInitial public release: July 2025",
+    "crumbs": [
+      "Home",
+      "📰 Updates",
+      "📰 Project News"
+    ]
+  }
+]
