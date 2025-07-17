@@ -85,12 +85,12 @@ Traditional budgeting tools often fail to capture the complexity of real-world p
 
 To dive deeper into individual modules and their documentation:
 
-👉 See [Modules](modules.qmd)
+👉 See [Modules](https://statisticsguru1.github.io/personal-finance-manager/modules.html)
 
 Or explore full API docs:
 
-- [API (Plumber)](./api/index.html)
-- [R Package (`finman`)](./finman/index.html)
+- [API (Plumber)](https://statisticsguru1.github.io/personal-finance-manager/api/)
+- [R Package (`finman`)](https://statisticsguru1.github.io/personal-finance-manager/finman/)
 
 ## 👨‍💻 Authors & Contributors
 
