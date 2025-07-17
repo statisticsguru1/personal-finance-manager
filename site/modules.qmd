@@ -34,11 +34,9 @@ This is the brain of the system — an R package that handles:
 - **Rules Engine**: Allocation rules, due date handling, loan repayment priority.
 - **Persistence**: User-specific account trees saved as RDS files.
 
-🔗 See detailed docs: [finman site](../finman/docs/index.html)
+🔗 See detailed docs: [finman site](./finman/index.html)
 
 ---
-
-## 🌐 API Layer (`API/`)
 
 A RESTful interface built with **Plumber**. It exposes the backend functionalities over HTTP to power both the web app and mobile app.
 
@@ -52,7 +50,7 @@ A RESTful interface built with **Plumber**. It exposes the backend functionaliti
   - Managing account types and due dates.
 - Admin tools for dynamic configuration.
 
-🔗 See full reference: [API site](../API/docs/index.html)
+🔗 See full reference: [API site](./api/index.html)
 
 ---
 

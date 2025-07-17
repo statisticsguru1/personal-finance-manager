@@ -4,7 +4,7 @@
     "href": "withdraw.html",
     "title": "💸 POST /withdraw",
     "section": "",
-    "text": "Withdraws funds from a user’s account. Requires a valid JWT token and a UUID identifying the account. Updates balances and persists changes securely.\n\n\n\n\nMethod: POST\nURL: /withdraw\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to withdraw from\n\n\namount\nfloat\n✅\nAmount to withdraw\n\n\nchannel\nstring\n✅\nWithdrawal channel (e.g., mpesa, bank)\n\n\ntransaction_number\nstring\n❌\nOptional reference number\n\n\nby\nstring\n❌\nWho initiated the withdrawal (default = “User”)\n\n\ndate\nstring\n❌\nTimestamp of withdrawal (default = now)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1000,\n  \"channel\": \"bank\",\n  \"transaction_number\": \"BANK54321\",\n  \"by\": \"User\"\n}\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"account_uuid\": \"acc-2023-savings-abc123\",\n  \"balance\": 2300,\n  \"start_time\": \"2025-07-10T09:30:00.123Z\",\n  \"end_time\": \"2025-07-10T09:30:00.180Z\",\n  \"execution_time\": 0.057\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nInvalid withdrawal amount\n\n\n403\nNot authorized for this account\n\n\n404\nAccount not found\n\n\n500\nServer error / internal failure\n\n\n\n\n\n\n\n\nWithdrawals use with_account_lock() to ensure safe concurrency.\nErrors are structured with timestamps for traceability.\nYou must have sufficient permissions for the account.",
+    "text": "Withdraws funds from a user’s account. Requires a valid JWT token and a UUID identifying the account. Updates balances and persists changes securely.\n\n\n\n\nMethod: POST\nURL: /withdraw\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to withdraw from\n\n\namount\nfloat\n✅\nAmount to withdraw\n\n\nchannel\nstring\n✅\nWithdrawal channel (e.g., mpesa, bank)\n\n\ntransaction_number\nstring\n❌\nOptional reference number\n\n\nby\nstring\n❌\nWho initiated the withdrawal (default = “User”)\n\n\ndate\nstring\n❌\nTimestamp of withdrawal (default = now)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1000,\n  \"channel\": \"bank\",\n  \"transaction_number\": \"BANK54321\",\n  \"by\": \"User\"\n}\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"account_uuid\": \"acc-2023-savings-abc123\",\n  \"balance\": 2300,\n  \"start_time\": \"2025-07-10T09:30:00.123Z\",\n  \"end_time\": \"2025-07-10T09:30:00.180Z\",\n  \"execution_time\": 0.057\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nInvalid withdrawal amount\n\n\n403\nNot authorized for this account\n\n\n404\nAccount not found\n\n\n500\nServer error / internal failure\n\n\n\n\n\n\n\n\nWithdrawals use with_account_lock() to ensure safe concurrency.\nErrors are structured with timestamps for traceability.\nYou must have sufficient permissions for the account.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -96,11 +96,23 @@
     ]
   },
   {
+    "objectID": "withdraw.html#sponsors",
+    "href": "withdraw.html#sponsors",
+    "title": "💸 POST /withdraw",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Withdraw"
+    ]
+  },
+  {
     "objectID": "total_income.html",
     "href": "total_income.html",
     "title": "💰 GET /total_income",
     "section": "",
-    "text": "Returns the total income (deposits/credits) received by an account and its sub-accounts over a specified date range.\n\n\n\n\nMethod: GET\nURL: /total_income\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to compute income for\n\n\nfrom\nstring\n❌\nStart date (YYYY-MM-DD). Defaults to earliest\n\n\nto\nstring\n❌\nEnd date (YYYY-MM-DD). Defaults to today\n\n\n\n\n\n\n\nGET /total_income?uuid=acc-2024-001&from=2025-01-01&to=2025-07-01\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-001\",\n  \"from\": \"2025-01-01\",\n  \"to\": \"2025-07-01\",\n  \"total_income\": 37500,\n  \"start_time\": \"2025-07-10T14:17:11.125Z\",\n  \"end_time\": \"2025-07-10T14:17:11.174Z\",\n  \"execution_time\": 0.049\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID not provided or invalid date\n\n\n403\nUnauthorized access\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nInternally uses account$total_income(date_range) method.\nIf from or to are not provided, defaults to entire history.\nIncome includes deposit-type transactions across the entire subtree.",
+    "text": "Returns the total income (deposits/credits) received by an account and its sub-accounts over a specified date range.\n\n\n\n\nMethod: GET\nURL: /total_income\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to compute income for\n\n\nfrom\nstring\n❌\nStart date (YYYY-MM-DD). Defaults to earliest\n\n\nto\nstring\n❌\nEnd date (YYYY-MM-DD). Defaults to today\n\n\n\n\n\n\n\nGET /total_income?uuid=acc-2024-001&from=2025-01-01&to=2025-07-01\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-001\",\n  \"from\": \"2025-01-01\",\n  \"to\": \"2025-07-01\",\n  \"total_income\": 37500,\n  \"start_time\": \"2025-07-10T14:17:11.125Z\",\n  \"end_time\": \"2025-07-10T14:17:11.174Z\",\n  \"execution_time\": 0.049\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID not provided or invalid date\n\n\n403\nUnauthorized access\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nInternally uses account$total_income(date_range) method.\nIf from or to are not provided, defaults to entire history.\nIncome includes deposit-type transactions across the entire subtree.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -192,11 +204,23 @@
     ]
   },
   {
+    "objectID": "total_income.html#sponsors",
+    "href": "total_income.html#sponsors",
+    "title": "💰 GET /total_income",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Total Income"
+    ]
+  },
+  {
     "objectID": "set_priority.html",
     "href": "set_priority.html",
     "title": "🔧 POST /set_priority",
     "section": "",
-    "text": "Sets or updates the priority of a child or grandchild account. This affects ordering and potentially allocation rules if implemented.\n\n\n\n\nMethod: POST\nURL: /set_priority\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/x-www-form-urlencoded\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the child or grandchild account\n\n\npriority\nstring/number\n✅\nNew priority value (can be numeric or labeled)\n\n\n\n\n\n\n\n\n{\n  \"uuid\": \"abc\",\n  \"priority\": 1\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Priority set to 1\",\n  \"uuid\": \"acc-12345\",\n  \"priority\": \"1\",\n  \"start_time\": \"2025-07-10T08:02:01.473Z\",\n  \"end_time\": \"2025-07-10T08:02:01.490Z\",\n  \"execution_time\": 0.017\n}\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing parameters or invalid priority format\n\n\n403\nAccount is not a child/grandchild or unauthorized access\n\n\n404\nAccount tree or account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nThis endpoint will only work for accounts that inherit from ChildAccount.\nPriority can be a number (e.g., 1, 2) or a string (e.g., “high”, “low”), depending on your implementation logic.\nUsed alongside account auto-allocation or sorting behavior.",
+    "text": "Sets or updates the priority of a child or grandchild account. This affects ordering and potentially allocation rules if implemented.\n\n\n\n\nMethod: POST\nURL: /set_priority\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/x-www-form-urlencoded\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the child or grandchild account\n\n\npriority\nstring/number\n✅\nNew priority value (can be numeric or labeled)\n\n\n\n\n\n\n\n\n{\n  \"uuid\": \"abc\",\n  \"priority\": 1\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Priority set to 1\",\n  \"uuid\": \"acc-12345\",\n  \"priority\": \"1\",\n  \"start_time\": \"2025-07-10T08:02:01.473Z\",\n  \"end_time\": \"2025-07-10T08:02:01.490Z\",\n  \"execution_time\": 0.017\n}\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing parameters or invalid priority format\n\n\n403\nAccount is not a child/grandchild or unauthorized access\n\n\n404\nAccount tree or account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nThis endpoint will only work for accounts that inherit from ChildAccount.\nPriority can be a number (e.g., 1, 2) or a string (e.g., “high”, “low”), depending on your implementation logic.\nUsed alongside account auto-allocation or sorting behavior.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -276,11 +300,23 @@
     ]
   },
   {
+    "objectID": "set_priority.html#sponsors",
+    "href": "set_priority.html#sponsors",
+    "title": "🔧 POST /set_priority",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Set Priority"
+    ]
+  },
+  {
     "objectID": "set_due_date.html",
     "href": "set_due_date.html",
     "title": "📅 POST /set_due_date",
     "section": "",
-    "text": "Assigns or updates the due date of a grandchild account. Useful for managing financial obligations such as rent, loan payments, or bill deadlines.\n\n\n\n\nMethod: POST\n\nURL: /set_due_date\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/x-www-form-urlencoded\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\ndue_date\nstring\n✅\nDue date in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-5678\",\n  \"due_date\": \"2025-08-15T00:00:00Z\"\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Due date set for Internet\",\n  \"uuid\": \"acc-5678\",\n  \"due_date\": \"2025-08-15 00:00:00\",\n  \"start_time\": \"2025-07-10T10:45:15.001Z\",\n  \"end_time\": \"2025-07-10T10:45:15.020Z\",\n  \"execution_time\": 0.019\n}\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nUUID or due date missing, or due date has invalid format\n\n\n403\nNot a grandchild account or unauthorized access\n\n\n404\nAccount tree not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint only works on accounts inheriting from GrandchildAccount.\n\nThe due date must be a valid date string, preferably in ISO format (e.g., \"2025-08-01\" or \"2025-08-01T00:00:00Z\").\n\nUse in conjunction with scheduled alerts, arrears tracking, or automated reminders.",
+    "text": "Assigns or updates the due date of a grandchild account. Useful for managing financial obligations such as rent, loan payments, or bill deadlines.\n\n\n\n\nMethod: POST\n\nURL: /set_due_date\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/x-www-form-urlencoded\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\ndue_date\nstring\n✅\nDue date in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-5678\",\n  \"due_date\": \"2025-08-15T00:00:00Z\"\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Due date set for Internet\",\n  \"uuid\": \"acc-5678\",\n  \"due_date\": \"2025-08-15 00:00:00\",\n  \"start_time\": \"2025-07-10T10:45:15.001Z\",\n  \"end_time\": \"2025-07-10T10:45:15.020Z\",\n  \"execution_time\": 0.019\n}\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nUUID or due date missing, or due date has invalid format\n\n\n403\nNot a grandchild account or unauthorized access\n\n\n404\nAccount tree not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint only works on accounts inheriting from GrandchildAccount.\n\nThe due date must be a valid date string, preferably in ISO format (e.g., \"2025-08-01\" or \"2025-08-01T00:00:00Z\").\n\nUse in conjunction with scheduled alerts, arrears tracking, or automated reminders.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -360,11 +396,23 @@
     ]
   },
   {
+    "objectID": "set_due_date.html#sponsors",
+    "href": "set_due_date.html#sponsors",
+    "title": "📅 POST /set_due_date",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Set Due Date"
+    ]
+  },
+  {
     "objectID": "set_account_type.html",
     "href": "set_account_type.html",
     "title": "🏷️ POST /set_account_type",
     "section": "",
-    "text": "Updates the account type of a grandchild account. Account types can represent categories such as “utility”, “subscription”, “loan”, etc.\n\n\n\n\nMethod: POST\n\nURL: /set_account_type\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/x-www-form-urlencoded\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\naccount_type\nstring\n✅\nNew account type label or identifier (e.g. “rent”)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-3245\",\n  \"account_type\": \"loan\"\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Account type updated to loan\",\n  \"uuid\": \"acc-3245\",\n  \"account_type\": \"loan\",\n  \"start_time\": \"2025-07-10T12:44:22.300Z\",\n  \"end_time\": \"2025-07-10T12:44:22.314Z\",\n  \"execution_time\": 0.014\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing parameters or invalid format\n\n\n403\nNot a grandchild account or unauthorized access\n\n\n404\nAccount tree or account not found\n\n\n500\nInternal server error during update\n\n\n\n\n\n\n\n\nOnly valid for accounts that inherit from GrandchildAccount.\nYou can use account_type for filtering, reporting, or logic grouping.",
+    "text": "Updates the account type of a grandchild account. Account types can represent categories such as “utility”, “subscription”, “loan”, etc.\n\n\n\n\nMethod: POST\n\nURL: /set_account_type\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/x-www-form-urlencoded\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\naccount_type\nstring\n✅\nNew account type label or identifier (e.g. “rent”)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-3245\",\n  \"account_type\": \"loan\"\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Account type updated to loan\",\n  \"uuid\": \"acc-3245\",\n  \"account_type\": \"loan\",\n  \"start_time\": \"2025-07-10T12:44:22.300Z\",\n  \"end_time\": \"2025-07-10T12:44:22.314Z\",\n  \"execution_time\": 0.014\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing parameters or invalid format\n\n\n403\nNot a grandchild account or unauthorized access\n\n\n404\nAccount tree or account not found\n\n\n500\nInternal server error during update\n\n\n\n\n\n\n\n\nOnly valid for accounts that inherit from GrandchildAccount.\nYou can use account_type for filtering, reporting, or logic grouping.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -444,11 +492,23 @@
     ]
   },
   {
+    "objectID": "set_account_type.html#sponsors",
+    "href": "set_account_type.html#sponsors",
+    "title": "🏷️ POST /set_account_type",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Set Account Type"
+    ]
+  },
+  {
     "objectID": "set_account_freq.html",
     "href": "set_account_freq.html",
     "title": "🔁 POST /set_account_freq",
     "section": "",
-    "text": "Sets or updates the frequency of a grandchild account, which controls the budgeting or due cycle of the account.\n\n\n\n\nMethod: POST\n\nURL: /set_account_freq\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/x-www-form-urlencoded\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\naccount_freq\nstring\n✅\nFrequency to assign (e.g., “Monthly”, “Biweekly”)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-7890\",\n  \"account_freq\": 30\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Frequency for Internet set to Monthly\",\n  \"uuid\": \"acc-7890\",\n  \"freq\": 30,\n  \"start_time\": \"2025-07-10T15:21:12.003Z\",\n  \"end_time\": \"2025-07-10T15:21:12.020Z\",\n  \"execution_time\": 0.017\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing uuid or account_freq\n\n\n403\nAccount not found or not a grandchild account\n\n\n404\nUser not found or unauthorized access\n\n\n500\nInternal server error or failed to update account\n\n\n\n\n\n\n\n\nThis endpoint only applies to accounts that inherit from GrandchildAccount.\nFrequency is useful when calculating periodic due amounts or expected contributions.\nValid values depend on how your logic is implemented: e.g., 30, 7, 1, etc.",
+    "text": "Sets or updates the frequency of a grandchild account, which controls the budgeting or due cycle of the account.\n\n\n\n\nMethod: POST\n\nURL: /set_account_freq\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/x-www-form-urlencoded\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\naccount_freq\nstring\n✅\nFrequency to assign (e.g., “Monthly”, “Biweekly”)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-7890\",\n  \"account_freq\": 30\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Frequency for Internet set to Monthly\",\n  \"uuid\": \"acc-7890\",\n  \"freq\": 30,\n  \"start_time\": \"2025-07-10T15:21:12.003Z\",\n  \"end_time\": \"2025-07-10T15:21:12.020Z\",\n  \"execution_time\": 0.017\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing uuid or account_freq\n\n\n403\nAccount not found or not a grandchild account\n\n\n404\nUser not found or unauthorized access\n\n\n500\nInternal server error or failed to update account\n\n\n\n\n\n\n\n\nThis endpoint only applies to accounts that inherit from GrandchildAccount.\nFrequency is useful when calculating periodic due amounts or expected contributions.\nValid values depend on how your logic is implemented: e.g., 30, 7, 1, etc.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -528,11 +588,23 @@
     ]
   },
   {
+    "objectID": "set_account_freq.html#sponsors",
+    "href": "set_account_freq.html#sponsors",
+    "title": "🔁 POST /set_account_freq",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Set Frequency"
+    ]
+  },
+  {
     "objectID": "move_balance.html",
     "href": "move_balance.html",
     "title": "🔁 POST /move_balance",
     "section": "",
-    "text": "Transfers a specified amount from one account to another.\n\n\n\n\nMethod: POST\nURL: /move_balance\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nfrom_uuid\nstring\n✅\nUUID of the source account\n\n\nto_uuid\nstring\n✅\nUUID of the destination account\n\n\namount\nnumber\n✅\nAmount to transfer (must be &gt; 0)\n\n\n\n\n\n\n\n{\n  \"from_uuid\": \"acc-2024-abc\",\n  \"to_uuid\": \"acc-2024-def\",\n  \"amount\": 2500\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Moved 2500 from Emergency to Farming\",\n  \"from_uuid\": \"acc-2024-abc\",\n  \"to_uuid\": \"acc-2024-def\",\n  \"amount\": 2500,\n  \"start_time\": \"2025-07-10T12:42:15.155Z\",\n  \"end_time\": \"2025-07-10T12:42:15.190Z\",\n  \"execution_time\": 0.035\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing or invalid amount\n\n\n400\nMissing from_uuid or to_uuid\n\n\n404\nSource or target account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nThis action internally calls from_account$move_balance().\nThe operation is atomic and wrapped in a file lock for consistency.\nWill fail if source or target account doesn’t exist, or if balance is insufficient.",
+    "text": "Transfers a specified amount from one account to another.\n\n\n\n\nMethod: POST\nURL: /move_balance\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nfrom_uuid\nstring\n✅\nUUID of the source account\n\n\nto_uuid\nstring\n✅\nUUID of the destination account\n\n\namount\nnumber\n✅\nAmount to transfer (must be &gt; 0)\n\n\n\n\n\n\n\n{\n  \"from_uuid\": \"acc-2024-abc\",\n  \"to_uuid\": \"acc-2024-def\",\n  \"amount\": 2500\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Moved 2500 from Emergency to Farming\",\n  \"from_uuid\": \"acc-2024-abc\",\n  \"to_uuid\": \"acc-2024-def\",\n  \"amount\": 2500,\n  \"start_time\": \"2025-07-10T12:42:15.155Z\",\n  \"end_time\": \"2025-07-10T12:42:15.190Z\",\n  \"execution_time\": 0.035\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing or invalid amount\n\n\n400\nMissing from_uuid or to_uuid\n\n\n404\nSource or target account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nThis action internally calls from_account$move_balance().\nThe operation is atomic and wrapped in a file lock for consistency.\nWill fail if source or target account doesn’t exist, or if balance is insufficient.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -624,11 +696,23 @@
     ]
   },
   {
+    "objectID": "move_balance.html#sponsors",
+    "href": "move_balance.html#sponsors",
+    "title": "🔁 POST /move_balance",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Move Balance"
+    ]
+  },
+  {
     "objectID": "list_child_accounts.html",
     "href": "list_child_accounts.html",
     "title": "🧾 GET /list_child_accounts",
     "section": "",
-    "text": "Retrieves all child account names under a specified parent account.\n\n\n\n\nMethod: GET\n\nURL: /list_child_accounts\n\nAuth: Required\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the parent account\n\n\n\n\n\n\n\nGET /list_child_accounts?uuid=parent-acc-2024-001\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"parent-acc-2024-001\",\n  \"account_name\": \"Goals\",\n  \"child_account_names\": [\"Farming\", \"Education\"],\n  \"child_count\": 2,\n  \"start_time\": \"2025-07-10T10:40:12.004Z\",\n  \"end_time\": \"2025-07-10T10:40:12.029Z\",\n  \"execution_time\": 0.025\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized to access the account\n\n\n404\nParent account not found\n\n\n500\nInternal error\n\n\n\n\n\n\n\nThis is a read-only operation — no lock is acquired.\nThe list only includes direct children, not grandchildren.\nUsed for account navigation, visualization, and hierarchy management.",
+    "text": "Retrieves all child account names under a specified parent account.\n\n\n\n\nMethod: GET\n\nURL: /list_child_accounts\n\nAuth: Required\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the parent account\n\n\n\n\n\n\n\nGET /list_child_accounts?uuid=parent-acc-2024-001\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"parent-acc-2024-001\",\n  \"account_name\": \"Goals\",\n  \"child_account_names\": [\"Farming\", \"Education\"],\n  \"child_count\": 2,\n  \"start_time\": \"2025-07-10T10:40:12.004Z\",\n  \"end_time\": \"2025-07-10T10:40:12.029Z\",\n  \"execution_time\": 0.025\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized to access the account\n\n\n404\nParent account not found\n\n\n500\nInternal error\n\n\n\n\n\n\n\nThis is a read-only operation — no lock is acquired.\nThe list only includes direct children, not grandchildren.\nUsed for account navigation, visualization, and hierarchy management.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -720,11 +804,23 @@
     ]
   },
   {
+    "objectID": "list_child_accounts.html#sponsors",
+    "href": "list_child_accounts.html#sponsors",
+    "title": "🧾 GET /list_child_accounts",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "List Child Accounts"
+    ]
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "📡 Personal Finance Manager API",
     "section": "",
-    "text": "Welcome to the documentation for the Personal Finance Manager API — a secure backend built with Plumber in R for managing user account trees, transactions, and personal finances.\n\n\n\n\n\n\nAuth Filter\n\n\n\n\n\nPOST /register\nPOST /login\nPOST /deposit\nPOST /withdraw\nPOST /distribute\nPOST /set_child_allocations\nPOST /change_account_status\nPOST /set_priority\nPOST /set_due_date\nPOST /set_fixed_amount\nPOST /set_account_type\nPOST /set_account_freq\nPOST /set_account_periods\n\n\n\n\n\nGET /get_balance\nGET /get_transactions\nGET /list_child_accounts\nGET /list_all_accounts\nGET /find_account_by_name\nGET /find_account_by_uuid\nGET /compute_total_balance\nGET /move_balance\nGET /compute_total_due\nGET /compute_total_due_within_days\nGET /spending\nGET /total_income\nGET /allocated_amount\nGET /income_utilization\nGET /walking_amount\nGET /get_account_status\nGET /get_priority\nGET /get_due_date\nGET /get_fixed_amount\nGET /get_account_type\nGET /get_account_freq\nGET /get_account_periods\n\n\n\n\n\n\nMost endpoints require a valid Bearer JWT token in the Authorization header. Auth and rate limiting are enforced globally via a request filter.\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n\n\nAccount creation and persistent storage (per user)\nDeposits, withdrawals, transfers, and account hierarchy logic\nFully modular backend logic powered by the finman R package\nWorks with Shiny, React, or any frontend via HTTP\n\n\n\n\n\n\nRegister a user (/register)\nLogin to receive token (/login)\nUse your token to make authenticated requests (e.g., /deposit, /accounts)\nEach request is validated and tracked for rate limits\n\nNeed help? Contact: mutindafestus27@gmail.com",
+    "text": "Welcome to the documentation for the Personal Finance Manager API — a secure backend built with Plumber in R for managing user account trees, transactions, and personal finances.\n\n\n\n\n\n\nAuth Filter\n\n\n\n\n\nPOST /register\nPOST /login\nPOST /deposit\nPOST /withdraw\nPOST /distribute\nPOST /set_child_allocations\nPOST /change_account_status\nPOST /set_priority\nPOST /set_due_date\nPOST /set_fixed_amount\nPOST /set_account_type\nPOST /set_account_freq\nPOST /set_account_periods\n\n\n\n\n\nGET /get_balance\nGET /get_transactions\nGET /list_child_accounts\nGET /list_all_accounts\nGET /find_account_by_name\nGET /find_account_by_uuid\nGET /compute_total_balance\nGET /move_balance\nGET /compute_total_due\nGET /compute_total_due_within_days\nGET /spending\nGET /total_income\nGET /allocated_amount\nGET /income_utilization\nGET /walking_amount\nGET /get_account_status\nGET /get_priority\nGET /get_due_date\nGET /get_fixed_amount\nGET /get_account_type\nGET /get_account_freq\nGET /get_account_periods\n\n\n\n\n\n\nMost endpoints require a valid Bearer JWT token in the Authorization header. Auth and rate limiting are enforced globally via a request filter.\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n\n\nAccount creation and persistent storage (per user)\nDeposits, withdrawals, transfers, and account hierarchy logic\nFully modular backend logic powered by the finman R package\nWorks with Shiny, React, or any frontend via HTTP\n\n\n\n\n\n\nRegister a user (/register)\nLogin to receive token (/login)\nUse your token to make authenticated requests (e.g., /deposit, /accounts)\nEach request is validated and tracked for rate limits\n\nNeed help? Contact: mutindafestus27@gmail.com\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📡 Personal Finance Manager API"
@@ -775,11 +871,22 @@
     ]
   },
   {
+    "objectID": "index.html#sponsors",
+    "href": "index.html#sponsors",
+    "title": "📡 Personal Finance Manager API",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📡 Personal Finance Manager API"
+    ]
+  },
+  {
     "objectID": "get_transactions.html",
     "href": "get_transactions.html",
     "title": "📄 GET /get_transactions",
     "section": "",
-    "text": "Retrieves the full transaction history (deposits, withdrawals, distributions, etc.) for a given account. Requires authentication and the user must be either the account owner or an admin.\n\n\n\n\nMethod: GET\nURL: /get_transactions\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to inspect\n\n\n\n\n\n\n\nGET /get_transactions?uuid=acc-2024-123\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-123\",\n  \"transaction_count\": 3,\n  \"transactions\": [\n    {\n      \"type\": \"deposit\",\n      \"amount\": 1000,\n      \"channel\": \"mpesa\",\n      \"by\": \"User\",\n      \"timestamp\": \"2025-07-10 08:00:00\"\n    },\n    {\n      \"type\": \"withdraw\",\n      \"amount\": 400,\n      \"channel\": \"bank\",\n      \"by\": \"User\",\n      \"timestamp\": \"2025-07-11 10:15:00\"\n    },\n    {\n      \"type\": \"distribute\",\n      \"amount\": 600,\n      \"by\": \"System\",\n      \"timestamp\": \"2025-07-12 09:00:00\"\n    }\n  ],\n  \"start_time\": \"2025-07-10T10:01:15.120Z\",\n  \"end_time\": \"2025-07-10T10:01:15.150Z\",\n  \"execution_time\": 0.03\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nServer-side or internal error\n\n\n\n\n\n\n\nReturns an array of transactions sorted chronologically (if implemented in your backend).\nYou must include a valid Bearer token to access this endpoint.\nReturns an appropriate error if the account does not exist or is not accessible by the caller.\nAccount locking is not required since this is a read-only operation.",
+    "text": "Retrieves the full transaction history (deposits, withdrawals, distributions, etc.) for a given account. Requires authentication and the user must be either the account owner or an admin.\n\n\n\n\nMethod: GET\nURL: /get_transactions\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to inspect\n\n\n\n\n\n\n\nGET /get_transactions?uuid=acc-2024-123\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-123\",\n  \"transaction_count\": 3,\n  \"transactions\": [\n    {\n      \"type\": \"deposit\",\n      \"amount\": 1000,\n      \"channel\": \"mpesa\",\n      \"by\": \"User\",\n      \"timestamp\": \"2025-07-10 08:00:00\"\n    },\n    {\n      \"type\": \"withdraw\",\n      \"amount\": 400,\n      \"channel\": \"bank\",\n      \"by\": \"User\",\n      \"timestamp\": \"2025-07-11 10:15:00\"\n    },\n    {\n      \"type\": \"distribute\",\n      \"amount\": 600,\n      \"by\": \"System\",\n      \"timestamp\": \"2025-07-12 09:00:00\"\n    }\n  ],\n  \"start_time\": \"2025-07-10T10:01:15.120Z\",\n  \"end_time\": \"2025-07-10T10:01:15.150Z\",\n  \"execution_time\": 0.03\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nServer-side or internal error\n\n\n\n\n\n\n\nReturns an array of transactions sorted chronologically (if implemented in your backend).\nYou must include a valid Bearer token to access this endpoint.\nReturns an appropriate error if the account does not exist or is not accessible by the caller.\nAccount locking is not required since this is a read-only operation.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -871,11 +978,23 @@
     ]
   },
   {
+    "objectID": "get_transactions.html#sponsors",
+    "href": "get_transactions.html#sponsors",
+    "title": "📄 GET /get_transactions",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Get Transactions"
+    ]
+  },
+  {
     "objectID": "get_fixed_amount.html",
     "href": "get_fixed_amount.html",
     "title": "💰 GET /get_fixed_amount",
     "section": "",
-    "text": "Retrieves the fixed amount currently assigned to a grandchild account. This amount is used to compute the expected amount_due.\n\n\n\n\nMethod: GET\n\nURL: /get_fixed_amount\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account to retrieve\n\n\n\n\n\n\n\nGET /get_fixed_amount?uuid=acc-12345 HTTP/1.1\nAuthorization: Bearer your-token\nContent-Type: application/json\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-12345\",\n  \"fixed_amount\": 1500,\n  \"start_time\": \"2025-07-10T12:15:42.101Z\",\n  \"end_time\": \"2025-07-10T12:15:42.116Z\",\n  \"execution_time\": 0.015\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing UUID or invalid query parameter\n\n\n403\nNot a grandchild account or unauthorized access\n\n\n404\nAccount tree or account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint is strictly for accounts inheriting from GrandchildAccount.\nIt does not set or change the value — use /set_fixed_amount to update it.",
+    "text": "Retrieves the fixed amount currently assigned to a grandchild account. This amount is used to compute the expected amount_due.\n\n\n\n\nMethod: GET\n\nURL: /get_fixed_amount\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account to retrieve\n\n\n\n\n\n\n\nGET /get_fixed_amount?uuid=acc-12345 HTTP/1.1\nAuthorization: Bearer your-token\nContent-Type: application/json\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-12345\",\n  \"fixed_amount\": 1500,\n  \"start_time\": \"2025-07-10T12:15:42.101Z\",\n  \"end_time\": \"2025-07-10T12:15:42.116Z\",\n  \"execution_time\": 0.015\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing UUID or invalid query parameter\n\n\n403\nNot a grandchild account or unauthorized access\n\n\n404\nAccount tree or account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint is strictly for accounts inheriting from GrandchildAccount.\nIt does not set or change the value — use /set_fixed_amount to update it.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -955,11 +1074,23 @@
     ]
   },
   {
+    "objectID": "get_fixed_amount.html#sponsors",
+    "href": "get_fixed_amount.html#sponsors",
+    "title": "💰 GET /get_fixed_amount",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Get Fixed Amount"
+    ]
+  },
+  {
     "objectID": "get_balance.html",
     "href": "get_balance.html",
     "title": "💰 GET /get_balance",
     "section": "",
-    "text": "Retrieve the current balance of a specified account by UUID.\n\n\n\n\nMethod: GET\nURL: /get_balance\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to check\n\n\n\n\n\n\n\nGET /get_balance?uuid=main-2023-001\nAuthorization: Bearer eyJhbGciOiJIUzI1...\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"main-2023-001\",\n  \"balance\": 5120,\n  \"start_time\": \"2025-07-10T11:25:14.110Z\",\n  \"end_time\": \"2025-07-10T11:25:14.118Z\",\n  \"execution_time\": 0.008\n}\n\n\n\n\n\n\nStatus\nError Message\n\n\n\n\n403\nAccount not found or unauthorized\n\n\n404\nAccount not found (admin access)\n\n\n500\nServer-side error\n\n\n\n\n\n\n\nThis is a read-only operation and doesn’t require account locking.\nIf the account is not found or the user lacks permissions, appropriate error responses are returned.\nInternally uses account$get_balance().",
+    "text": "Retrieve the current balance of a specified account by UUID.\n\n\n\n\nMethod: GET\nURL: /get_balance\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to check\n\n\n\n\n\n\n\nGET /get_balance?uuid=main-2023-001\nAuthorization: Bearer eyJhbGciOiJIUzI1...\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"main-2023-001\",\n  \"balance\": 5120,\n  \"start_time\": \"2025-07-10T11:25:14.110Z\",\n  \"end_time\": \"2025-07-10T11:25:14.118Z\",\n  \"execution_time\": 0.008\n}\n\n\n\n\n\n\nStatus\nError Message\n\n\n\n\n403\nAccount not found or unauthorized\n\n\n404\nAccount not found (admin access)\n\n\n500\nServer-side error\n\n\n\n\n\n\n\nThis is a read-only operation and doesn’t require account locking.\nIf the account is not found or the user lacks permissions, appropriate error responses are returned.\nInternally uses account$get_balance().\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -1044,6 +1175,18 @@
     "title": "💰 GET /get_balance",
     "section": "",
     "text": "This is a read-only operation and doesn’t require account locking.\nIf the account is not found or the user lacks permissions, appropriate error responses are returned.\nInternally uses account$get_balance().",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Get Balance"
+    ]
+  },
+  {
+    "objectID": "get_balance.html#sponsors",
+    "href": "get_balance.html#sponsors",
+    "title": "💰 GET /get_balance",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -1151,7 +1294,7 @@
     "href": "get_account_freq.html",
     "title": "🔁 GET /get_account_freq",
     "section": "",
-    "text": "Returns the frequency (such as Monthly, Weekly, etc.) currently assigned to a grandchild account.\n\n\n\n\nMethod: GET\n\nURL: /get_account_freq\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\n\n\n\n\n\nGET /get_account_freq?uuid=acc-7890 HTTP/1.1\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-7890\",\n  \"freq\": 30,\n  \"start_time\": \"2025-07-10T16:05:12.003Z\",\n  \"end_time\": \"2025-07-10T16:05:12.020Z\",\n  \"execution_time\": 0.017\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing uuid\n\n\n403\nAccount not found or not a grandchild account\n\n\n404\nAccount tree not found or unauthorized access\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint is limited to accounts inheriting from GrandchildAccount.\nThe returned frequency is expected to be a predefined label (e.g., 7, 30, 14) based on your internal logic.",
+    "text": "Returns the frequency (such as Monthly, Weekly, etc.) currently assigned to a grandchild account.\n\n\n\n\nMethod: GET\n\nURL: /get_account_freq\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\n\n\n\n\n\nGET /get_account_freq?uuid=acc-7890 HTTP/1.1\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-7890\",\n  \"freq\": 30,\n  \"start_time\": \"2025-07-10T16:05:12.003Z\",\n  \"end_time\": \"2025-07-10T16:05:12.020Z\",\n  \"execution_time\": 0.017\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing uuid\n\n\n403\nAccount not found or not a grandchild account\n\n\n404\nAccount tree not found or unauthorized access\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint is limited to accounts inheriting from GrandchildAccount.\nThe returned frequency is expected to be a predefined label (e.g., 7, 30, 14) based on your internal logic.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -1231,11 +1374,23 @@
     ]
   },
   {
+    "objectID": "get_account_freq.html#sponsors",
+    "href": "get_account_freq.html#sponsors",
+    "title": "🔁 GET /get_account_freq",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Get Frequency"
+    ]
+  },
+  {
     "objectID": "find_account_by_name.html",
     "href": "find_account_by_name.html",
     "title": "🔍 GET /find_account_by_name",
     "section": "",
-    "text": "Searches for accounts in the user’s account tree that match a given name. Useful for quickly locating accounts without needing their UUID.\n\n\n\n\nMethod: GET\nURL: /find_account_by_name\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nname\nstring\n✅\nName of the account to look up\n\n\n\n\n\n\n\nGET /find_account_by_name?name=Rent\n\n\n\n\n```json { “success”: true, “status”: 200, “search_name”: “Rent”, “total_matches”: 2, “matches”: [ { “uuid”: “acc-234”, “name”: “Rent”, “path”: “Main &gt; Needs &gt; Rent” }, { “uuid”: “acc-987”, “name”: “Rent”, “path”: “Main &gt; Rentals &gt; Rent” } ], “start_time”: “2025-07-10T11:20:10.050Z”, “end_time”: “2025-07-10T11:20:10.061Z”, “execution_time”: 0.011 }\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized or tree not found\n\n\n500\nMissing argument name or server error\n\n\n\n\n\n\n\nMatching is case-sensitive unless your backend handles normalization.\nReturns all matches if the name appears more than once.\nUse uuid from results for further operations (e.g., get balance, transactions).",
+    "text": "Searches for accounts in the user’s account tree that match a given name. Useful for quickly locating accounts without needing their UUID.\n\n\n\n\nMethod: GET\nURL: /find_account_by_name\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nname\nstring\n✅\nName of the account to look up\n\n\n\n\n\n\n\nGET /find_account_by_name?name=Rent\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"search_name\": \"Rent\",\n  \"total_matches\": 2,\n  \"matches\": [\n    {\n      \"uuid\": \"acc-234\",\n      \"name\": \"Rent\",\n      \"path\": \"Main &gt; Needs &gt; Rent\"\n    },\n    {\n      \"uuid\": \"acc-987\",\n      \"name\": \"Rent\",\n      \"path\": \"Main &gt; Rentals &gt; Rent\"\n    }\n  ],\n  \"start_time\": \"2025-07-10T11:20:10.050Z\",\n  \"end_time\": \"2025-07-10T11:20:10.061Z\",\n  \"execution_time\": 0.011\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized or tree not found\n\n\n500\nMissing argument name or server error\n\n\n\n\n\n\n\n\nMatching is case-sensitive unless your backend handles normalization.\nReturns all matches if the name appears more than once.\nUse uuid from results for further operations (e.g., get balance, transactions).\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -1295,7 +1450,7 @@
     "href": "find_account_by_name.html#success-response",
     "title": "🔍 GET /find_account_by_name",
     "section": "",
-    "text": "```json { “success”: true, “status”: 200, “search_name”: “Rent”, “total_matches”: 2, “matches”: [ { “uuid”: “acc-234”, “name”: “Rent”, “path”: “Main &gt; Needs &gt; Rent” }, { “uuid”: “acc-987”, “name”: “Rent”, “path”: “Main &gt; Rentals &gt; Rent” } ], “start_time”: “2025-07-10T11:20:10.050Z”, “end_time”: “2025-07-10T11:20:10.061Z”, “execution_time”: 0.011 }",
+    "text": "{\n  \"success\": true,\n  \"status\": 200,\n  \"search_name\": \"Rent\",\n  \"total_matches\": 2,\n  \"matches\": [\n    {\n      \"uuid\": \"acc-234\",\n      \"name\": \"Rent\",\n      \"path\": \"Main &gt; Needs &gt; Rent\"\n    },\n    {\n      \"uuid\": \"acc-987\",\n      \"name\": \"Rent\",\n      \"path\": \"Main &gt; Rentals &gt; Rent\"\n    }\n  ],\n  \"start_time\": \"2025-07-10T11:20:10.050Z\",\n  \"end_time\": \"2025-07-10T11:20:10.061Z\",\n  \"execution_time\": 0.011\n}",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -1327,11 +1482,23 @@
     ]
   },
   {
+    "objectID": "find_account_by_name.html#sponsors",
+    "href": "find_account_by_name.html#sponsors",
+    "title": "🔍 GET /find_account_by_name",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Find Account by Name"
+    ]
+  },
+  {
     "objectID": "deposit.html",
     "href": "deposit.html",
     "title": "💰 POST /deposit",
     "section": "",
-    "text": "Deposits funds into a user’s account. Requires a valid JWT token and a UUID identifying the account. Updates balances and persists changes securely.\n\n\n\n\nMethod: POST\nURL: /deposit\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to deposit into\n\n\namount\nfloat\n✅\nAmount to deposit\n\n\nchannel\nstring\n✅\nDeposit channel (e.g., M-Pesa, Bank)\n\n\ntransaction_number\nstring\n❌\nOptional reference number\n\n\nby\nstring\n❌\nWho performed the deposit (default = User)\n\n\ndate\nstring\n❌\nDeposit timestamp (default = now)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1500,\n  \"channel\": \"mpesa\",\n  \"transaction_number\": \"MPESA123456\",\n  \"by\": \"User\"\n}\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"account_uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1500,\n  \"balance\": 3300,\n  \"start_time\": \"2025-07-10T08:50:15.123Z\",\n  \"end_time\": \"2025-07-10T08:50:15.200Z\",\n  \"execution_time\": 0.077\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized for this account\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nUses a lock mechanism to ensure safe concurrent writes.\nReturns structured timing for performance tracking.\nMust be called after auth (JWT must be valid).",
+    "text": "Deposits funds into a user’s account. Requires a valid JWT token and a UUID identifying the account. Updates balances and persists changes securely.\n\n\n\n\nMethod: POST\nURL: /deposit\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to deposit into\n\n\namount\nfloat\n✅\nAmount to deposit\n\n\nchannel\nstring\n✅\nDeposit channel (e.g., M-Pesa, Bank)\n\n\ntransaction_number\nstring\n❌\nOptional reference number\n\n\nby\nstring\n❌\nWho performed the deposit (default = User)\n\n\ndate\nstring\n❌\nDeposit timestamp (default = now)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1500,\n  \"channel\": \"mpesa\",\n  \"transaction_number\": \"MPESA123456\",\n  \"by\": \"User\"\n}\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"account_uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1500,\n  \"balance\": 3300,\n  \"start_time\": \"2025-07-10T08:50:15.123Z\",\n  \"end_time\": \"2025-07-10T08:50:15.200Z\",\n  \"execution_time\": 0.077\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized for this account\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nUses a lock mechanism to ensure safe concurrent writes.\nReturns structured timing for performance tracking.\nMust be called after auth (JWT must be valid).\n\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -1423,11 +1590,23 @@
     ]
   },
   {
+    "objectID": "deposit.html#sponsors",
+    "href": "deposit.html#sponsors",
+    "title": "💰 POST /deposit",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Deposit"
+    ]
+  },
+  {
     "objectID": "compute_total_due.html",
     "href": "compute_total_due.html",
     "title": "💰 GET /compute_total_due",
     "section": "",
-    "text": "Returns the total amount due for a given account including its children and descendants.\n\n\n\n\nMethod: GET\nURL: /compute_total_due\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to evaluate due for\n\n\n\n\n\n\n\nGET /compute_total_due?uuid=acc-2024-456\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-456\",\n  \"total_due\": 3400.50,\n  \"start_time\": \"2025-07-10T13:11:05.123Z\",\n  \"end_time\": \"2025-07-10T13:11:05.189Z\",\n  \"execution_time\": 0.07\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing or invalid UUID\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nInternally calls account$compute_total_due(), which traverses down the account hierarchy.\nThis endpoint is useful for summarizing all upcoming obligations related to a specific category like “Utilities” or “Loans”.\nIt performs a read-only operation — no locking needed.",
+    "text": "Returns the total amount due for a given account including its children and descendants.\n\n\n\n\nMethod: GET\nURL: /compute_total_due\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to evaluate due for\n\n\n\n\n\n\n\nGET /compute_total_due?uuid=acc-2024-456\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-456\",\n  \"total_due\": 3400.50,\n  \"start_time\": \"2025-07-10T13:11:05.123Z\",\n  \"end_time\": \"2025-07-10T13:11:05.189Z\",\n  \"execution_time\": 0.07\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing or invalid UUID\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nInternally calls account$compute_total_due(), which traverses down the account hierarchy.\nThis endpoint is useful for summarizing all upcoming obligations related to a specific category like “Utilities” or “Loans”.\nIt performs a read-only operation — no locking needed.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -1512,6 +1691,18 @@
     "title": "💰 GET /compute_total_due",
     "section": "",
     "text": "Internally calls account$compute_total_due(), which traverses down the account hierarchy.\nThis endpoint is useful for summarizing all upcoming obligations related to a specific category like “Utilities” or “Loans”.\nIt performs a read-only operation — no locking needed.",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Compute Total Due"
+    ]
+  },
+  {
+    "objectID": "compute_total_due.html#sponsors",
+    "href": "compute_total_due.html#sponsors",
+    "title": "💰 GET /compute_total_due",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -1771,7 +1962,7 @@
     "href": "auth-filter.html",
     "title": "🔐 Auth Filter",
     "section": "",
-    "text": "Scope: All protected endpoints\nRoute Type: Global filter (@filter auth)\nTag: auth\n\n\n\nThe auth filter is applied to all incoming requests except: - /register - /login - /__ping__\nIt performs these responsibilities:\n\n🔑 Verifies Bearer token from the Authorization header\n🧾 Decodes token and attaches user_id and role to the request\n📊 Enforces rate limiting using MAX_REQUESTS per WINDOW_SIZE\n⏳ Applies exponential backoff for repeated failed logins\n\n\n\n\n\nAuthorization: Bearer eyJhbGciOiJIUzI1...\n\n\n\n\n\n\n\n\n\n\n\n\nCondition\nStatus\nExample Error\n\n\n\n\nMissing or malformed token\n401\n{ \"error\": \"Missing or invalid token\" }\n\n\nInvalid or expired token\n401\n{ \"error\": \"Invalid or expired token\" }\n\n\nToo many failed attempts\n429\n{ \"error\": \"Too many failed attempts. Wait 8s.\" }\n\n\nRate limit exceeded\n429\n{ \"error\": \"Rate limit exceeded. Try later.\" }\n\n\nMisconfigured secret\n500\n{ \"error\": \"Server misconfigured (missing JWT_SECRET)\" }\n\n\n\n\n\n\n\nIf the token is valid, your endpoint functions will have:\nreq$user_id  # Unique user ID\nreq$role     # Role, e.g., \"user\", \"admin\"\nThe filter logic is defined in plumber.R using @filter auth.\n\n\n\n\n\n\n\n\n\n\n\n\nEnv Variable\nPurpose\nDefault\n\n\n\n\nJWT_SECRET\nSecret key for decoding JWT\n(required)\n\n\nMAX_REQUESTS\nMax allowed requests in the window\n1000\n\n\nWINDOW_SIZE\nRate limit window duration in seconds\n3600",
+    "text": "Scope: All protected endpoints\nRoute Type: Global filter (@filter auth)\nTag: auth\n\n\n\nThe auth filter is applied to all incoming requests except: - /register - /login - /__ping__\nIt performs these responsibilities:\n\n🔑 Verifies Bearer token from the Authorization header\n🧾 Decodes token and attaches user_id and role to the request\n📊 Enforces rate limiting using MAX_REQUESTS per WINDOW_SIZE\n⏳ Applies exponential backoff for repeated failed logins\n\n\n\n\n\nAuthorization: Bearer eyJhbGciOiJIUzI1...\n\n\n\n\n\n\n\n\n\n\n\n\nCondition\nStatus\nExample Error\n\n\n\n\nMissing or malformed token\n401\n{ \"error\": \"Missing or invalid token\" }\n\n\nInvalid or expired token\n401\n{ \"error\": \"Invalid or expired token\" }\n\n\nToo many failed attempts\n429\n{ \"error\": \"Too many failed attempts. Wait 8s.\" }\n\n\nRate limit exceeded\n429\n{ \"error\": \"Rate limit exceeded. Try later.\" }\n\n\nMisconfigured secret\n500\n{ \"error\": \"Server misconfigured (missing JWT_SECRET)\" }\n\n\n\n\n\n\n\nIf the token is valid, your endpoint functions will have:\nreq$user_id  # Unique user ID\nreq$role     # Role, e.g., \"user\", \"admin\"\nThe filter logic is defined in plumber.R using @filter auth.\n\n\n\n\n\n\n\n\n\n\n\n\nEnv Variable\nPurpose\nDefault\n\n\n\n\nJWT_SECRET\nSecret key for decoding JWT\n(required)\n\n\nMAX_REQUESTS\nMax allowed requests in the window\n1000\n\n\nWINDOW_SIZE\nRate limit window duration in seconds\n3600\n\n\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "🔐 Auth",
@@ -1832,6 +2023,18 @@
     "title": "🔐 Auth Filter",
     "section": "",
     "text": "Env Variable\nPurpose\nDefault\n\n\n\n\nJWT_SECRET\nSecret key for decoding JWT\n(required)\n\n\nMAX_REQUESTS\nMax allowed requests in the window\n1000\n\n\nWINDOW_SIZE\nRate limit window duration in seconds\n3600",
+    "crumbs": [
+      "Home",
+      "🔐 Auth",
+      "Auth filter"
+    ]
+  },
+  {
+    "objectID": "auth-filter.html#sponsors",
+    "href": "auth-filter.html#sponsors",
+    "title": "🔐 Auth Filter",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "🔐 Auth",
@@ -1939,7 +2142,7 @@
     "href": "compute_total_due_within_days.html",
     "title": "⏳ GET /compute_total_due_within_days",
     "section": "",
-    "text": "Returns the total amount due for a given account (and its children) within the next specified number of days.\n\n\n\n\nMethod: GET\nURL: /compute_total_due_within_days\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to evaluate\n\n\ndays\nnumber\n✅\nNumber of days to look ahead when summing due amounts\n\n\n\n\n\n\n\nGET /compute_total_due_within_days?uuid=acc-2024-456&days=30\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-456\",\n  \"total_due\": 1700.25,\n  \"within_days\": 30,\n  \"start_time\": \"2025-07-10T13:25:14.882Z\",\n  \"end_time\": \"2025-07-10T13:25:14.944Z\",\n  \"execution_time\": 0.06\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID or days parameter missing\n\n\n400\nInvalid value for days (e.g. negative)\n\n\n403\nUnauthorized\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n🧠 Notes - Internally uses account$compute_total_due_within_n_days(days). - days = 0 means today only. - Useful for dashboards and forecasting panels showing “Amount Due in Next 7, 14, or 30 Days”.",
+    "text": "Returns the total amount due for a given account (and its children) within the next specified number of days.\n\n\n\n\nMethod: GET\nURL: /compute_total_due_within_days\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to evaluate\n\n\ndays\nnumber\n✅\nNumber of days to look ahead when summing due amounts\n\n\n\n\n\n\n\nGET /compute_total_due_within_days?uuid=acc-2024-456&days=30\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-456\",\n  \"total_due\": 1700.25,\n  \"within_days\": 30,\n  \"start_time\": \"2025-07-10T13:25:14.882Z\",\n  \"end_time\": \"2025-07-10T13:25:14.944Z\",\n  \"execution_time\": 0.06\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID or days parameter missing\n\n\n400\nInvalid value for days (e.g. negative)\n\n\n403\nUnauthorized\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n🧠 Notes - Internally uses account$compute_total_due_within_n_days(days). - days = 0 means today only. - Useful for dashboards and forecasting panels showing “Amount Due in Next 7, 14, or 30 Days”.\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -2019,11 +2222,23 @@
     ]
   },
   {
+    "objectID": "compute_total_due_within_days.html#sponsors",
+    "href": "compute_total_due_within_days.html#sponsors",
+    "title": "⏳ GET /compute_total_due_within_days",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Due Within Days"
+    ]
+  },
+  {
     "objectID": "distribute.html",
     "href": "distribute.html",
     "title": "🔁 POST /distribute",
     "section": "",
-    "text": "Distributes a specified amount from a parent account to its child accounts according to their allocation rules.\n\n\n\n\nMethod: POST\nURL: /distribute\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the parent account\n\n\namount\nfloat\n✅\nAmount to distribute (must be &gt; 0)\n\n\ntransaction\nstring\n❌\nOptional transaction reference (autogenerated if NULL)\n\n\nby\nstring\n❌\nWho performed the distribution (default = “System”)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"parent-acc-2023-001\",\n  \"amount\": 5000,\n  \"transaction\": \"dist-INV004\",\n  \"by\": \"System\"\n}\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Distributed 5000 from Needs\",\n  \"uuid\": \"parent-acc-2023-001\",\n  \"start_time\": \"2025-07-10T10:01:15.120Z\",\n  \"end_time\": \"2025-07-10T10:01:15.180Z\",\n  \"execution_time\": 0.06\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nInvalid amount, zero, negative, or missing account\n\n\n\n\n\n\n\n\nAutomatically uses account$distribute_to_children() internally.\nLocks the account tree for safe concurrent execution.\nWill fail if amount is missing, zero, or negative.\nIf transaction reference is missing, one is auto-generated.",
+    "text": "Distributes a specified amount from a parent account to its child accounts according to their allocation rules.\n\n\n\n\nMethod: POST\nURL: /distribute\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the parent account\n\n\namount\nfloat\n✅\nAmount to distribute (must be &gt; 0)\n\n\ntransaction\nstring\n❌\nOptional transaction reference (autogenerated if NULL)\n\n\nby\nstring\n❌\nWho performed the distribution (default = “System”)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"parent-acc-2023-001\",\n  \"amount\": 5000,\n  \"transaction\": \"dist-INV004\",\n  \"by\": \"System\"\n}\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Distributed 5000 from Needs\",\n  \"uuid\": \"parent-acc-2023-001\",\n  \"start_time\": \"2025-07-10T10:01:15.120Z\",\n  \"end_time\": \"2025-07-10T10:01:15.180Z\",\n  \"execution_time\": 0.06\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nInvalid amount, zero, negative, or missing account\n\n\n\n\n\n\n\n\nAutomatically uses account$distribute_to_children() internally.\nLocks the account tree for safe concurrent execution.\nWill fail if amount is missing, zero, or negative.\nIf transaction reference is missing, one is auto-generated.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -2115,11 +2330,23 @@
     ]
   },
   {
+    "objectID": "distribute.html#sponsors",
+    "href": "distribute.html#sponsors",
+    "title": "🔁 POST /distribute",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Distribute Funds"
+    ]
+  },
+  {
     "objectID": "find_account_by_uuid.html",
     "href": "find_account_by_uuid.html",
     "title": "🆔 GET /find_account_by_uuid",
     "section": "",
-    "text": "Returns detailed information about a specific account using its UUID.\n\n\n\n\nMethod: GET\nURL: /find_account_by_uuid\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to lookup\n\n\n\n\n\n\n\nGET /find_account_by_uuid?uuid=acc-2024-001\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-001\",\n  \"name\": \"Internet\",\n  \"path\": \"Main &gt; Needs &gt; Internet\",\n  \"type\": \"GrandchildAccount\",\n  \"balance\": 4200,\n  \"total_balance\": 4200,\n  \"amount_due\": 0,\n  \"total_amount_due\": 0,\n  \"allocation\": 0.15,\n  \"parent_uuid\": \"acc-2024-000\",\n  \"start_time\": \"2025-07-10T11:55:10.215Z\",\n  \"end_time\": \"2025-07-10T11:55:10.228Z\",\n  \"execution_time\": 0.013\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID is missing in the request\n\n\n403\nUnauthorized access to the account\n\n\n404\nAccount not found\n\n\n500\nAccount tree file not available or error\n\n\n\n\n\n\n\nThe endpoint retrieves all core metadata for an account.\nIf the account has no parent, parent_uuid will be null.\nThis endpoint can help render full account detail views or support downstream actions.",
+    "text": "Returns detailed information about a specific account using its UUID.\n\n\n\n\nMethod: GET\nURL: /find_account_by_uuid\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to lookup\n\n\n\n\n\n\n\nGET /find_account_by_uuid?uuid=acc-2024-001\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-001\",\n  \"name\": \"Internet\",\n  \"path\": \"Main &gt; Needs &gt; Internet\",\n  \"type\": \"GrandchildAccount\",\n  \"balance\": 4200,\n  \"total_balance\": 4200,\n  \"amount_due\": 0,\n  \"total_amount_due\": 0,\n  \"allocation\": 0.15,\n  \"parent_uuid\": \"acc-2024-000\",\n  \"start_time\": \"2025-07-10T11:55:10.215Z\",\n  \"end_time\": \"2025-07-10T11:55:10.228Z\",\n  \"execution_time\": 0.013\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID is missing in the request\n\n\n403\nUnauthorized access to the account\n\n\n404\nAccount not found\n\n\n500\nAccount tree file not available or error\n\n\n\n\n\n\n\nThe endpoint retrieves all core metadata for an account.\nIf the account has no parent, parent_uuid will be null.\nThis endpoint can help render full account detail views or support downstream actions.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -2211,11 +2438,23 @@
     ]
   },
   {
+    "objectID": "find_account_by_uuid.html#sponsors",
+    "href": "find_account_by_uuid.html#sponsors",
+    "title": "🆔 GET /find_account_by_uuid",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Find Account by UUID"
+    ]
+  },
+  {
     "objectID": "get_account_periods.html",
     "href": "get_account_periods.html",
     "title": "📅 GET /get_account_periods",
     "section": "",
-    "text": "Fetches the configured number of periods for a grandchild account. This is useful for understanding budgeting cycles such as monthly, quarterly, or custom-defined durations.\n\n\n\n\nMethod: GET\n\nURL: /get_account_periods\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\n\n\n\n\n\nGET /get_account_periods?uuid=acc-12345\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-12345\",\n  \"periods\": 12,\n  \"start_time\": \"2025-07-10T17:10:15.422Z\",\n  \"end_time\": \"2025-07-10T17:10:15.438Z\",\n  \"execution_time\": 0.016\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing or invalid uuid parameter\n\n\n403\nAccount not found or not a GrandchildAccount\n\n\n404\nUser not found or unauthorized access\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint is strictly applicable to grandchild accounts.\nPeriods may correspond to budgeting periods or billing cycles, depending on your app logic.",
+    "text": "Fetches the configured number of periods for a grandchild account. This is useful for understanding budgeting cycles such as monthly, quarterly, or custom-defined durations.\n\n\n\n\nMethod: GET\n\nURL: /get_account_periods\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\n\n\n\n\n\nGET /get_account_periods?uuid=acc-12345\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-12345\",\n  \"periods\": 12,\n  \"start_time\": \"2025-07-10T17:10:15.422Z\",\n  \"end_time\": \"2025-07-10T17:10:15.438Z\",\n  \"execution_time\": 0.016\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing or invalid uuid parameter\n\n\n403\nAccount not found or not a GrandchildAccount\n\n\n404\nUser not found or unauthorized access\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint is strictly applicable to grandchild accounts.\nPeriods may correspond to budgeting periods or billing cycles, depending on your app logic.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -2295,11 +2534,23 @@
     ]
   },
   {
+    "objectID": "get_account_periods.html#sponsors",
+    "href": "get_account_periods.html#sponsors",
+    "title": "📅 GET /get_account_periods",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Get Periods"
+    ]
+  },
+  {
     "objectID": "get_account_type.html",
     "href": "get_account_type.html",
     "title": "🔍 GET /get_account_type",
     "section": "",
-    "text": "Retrieves the account type (label or identifier) of a grandchild account.\n\n\n\n\nMethod: GET\n\nURL: /get_account_type\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\n\n\n\n\n\nGET /get_account_type?uuid=acc-3245\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-3245\",\n  \"account_type\": \"loan\",\n  \"start_time\": \"2025-07-10T13:12:45.210Z\",\n  \"end_time\": \"2025-07-10T13:12:45.226Z\",\n  \"execution_time\": 0.016\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing or invalid UUID\n\n\n403\nAccount not found or not a grandchild account\n\n\n404\nUser tree not found or unauthorized access\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint is restricted to accounts that inherit from GrandchildAccount.\nThe returned account_type may be used for UI grouping, sorting, or business rules.",
+    "text": "Retrieves the account type (label or identifier) of a grandchild account.\n\n\n\n\nMethod: GET\n\nURL: /get_account_type\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\n\n\n\n\n\nGET /get_account_type?uuid=acc-3245\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-3245\",\n  \"account_type\": \"loan\",\n  \"start_time\": \"2025-07-10T13:12:45.210Z\",\n  \"end_time\": \"2025-07-10T13:12:45.226Z\",\n  \"execution_time\": 0.016\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing or invalid UUID\n\n\n403\nAccount not found or not a grandchild account\n\n\n404\nUser tree not found or unauthorized access\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint is restricted to accounts that inherit from GrandchildAccount.\nThe returned account_type may be used for UI grouping, sorting, or business rules.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -2379,11 +2630,23 @@
     ]
   },
   {
+    "objectID": "get_account_type.html#sponsors",
+    "href": "get_account_type.html#sponsors",
+    "title": "🔍 GET /get_account_type",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Get Account Type"
+    ]
+  },
+  {
     "objectID": "get_due_date.html",
     "href": "get_due_date.html",
     "title": "📅 GET /get_due_date",
     "section": "",
-    "text": "Retrieves the due date set for a grandchild account. This is useful for determining deadlines such as rent, bills, or recurring payments.\n\n\n\n\nMethod: GET\n\nURL: /get_due_date\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\n\n\n\n\n\nGET /get_due_date?uuid=acc-5678\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-5678\",\n  \"due_date\": \"2025-08-15 00:00:00\",\n  \"start_time\": \"2025-07-10T11:00:00.012Z\",\n  \"end_time\": \"2025-07-10T11:00:00.020Z\",\n  \"execution_time\": 0.008\n}\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nUUID is missing\n\n\n403\nAccount is not a grandchild or unauthorized access\n\n\n404\nAccount tree or account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nOnly accounts that inherit from GrandchildAccount will return a valid due date.\nThe due date is returned as a string in standard POSIX format.",
+    "text": "Retrieves the due date set for a grandchild account. This is useful for determining deadlines such as rent, bills, or recurring payments.\n\n\n\n\nMethod: GET\n\nURL: /get_due_date\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\n\n\n\n\n\nGET /get_due_date?uuid=acc-5678\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-5678\",\n  \"due_date\": \"2025-08-15 00:00:00\",\n  \"start_time\": \"2025-07-10T11:00:00.012Z\",\n  \"end_time\": \"2025-07-10T11:00:00.020Z\",\n  \"execution_time\": 0.008\n}\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nUUID is missing\n\n\n403\nAccount is not a grandchild or unauthorized access\n\n\n404\nAccount tree or account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nOnly accounts that inherit from GrandchildAccount will return a valid due date.\nThe due date is returned as a string in standard POSIX format.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -2463,11 +2726,23 @@
     ]
   },
   {
+    "objectID": "get_due_date.html#sponsors",
+    "href": "get_due_date.html#sponsors",
+    "title": "📅 GET /get_due_date",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Get Due Date"
+    ]
+  },
+  {
     "objectID": "get_priority.html",
     "href": "get_priority.html",
     "title": "🔍 GET /get_priority",
     "section": "",
-    "text": "Returns the priority value of a child or grandchild account.\n\n\n\nMethod: GET\nURL: /get_priority\nAuth: Required\nTag: accounts\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the child or grandchild account\n\n\n\n\n\n\nGET /get_priority?uuid=acc-12345\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nUUID not provided\n\n\n403\nAccount not found or not a child/grandchild account\n\n\n404\nAccount tree not found for the user\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nThis endpoint is valid only for accounts that inherit from ChildAccount.\nThe returned priority can be numeric or a string (e.g., “high”, “low”), depending on your implementation.\nTo set or change a priority, use the POST /set_priority endpoint.",
+    "text": "Returns the priority value of a child or grandchild account.\n\n\n\nMethod: GET\nURL: /get_priority\nAuth: Required\nTag: accounts\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the child or grandchild account\n\n\n\n\n\n\nGET /get_priority?uuid=acc-12345\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nUUID not provided\n\n\n403\nAccount not found or not a child/grandchild account\n\n\n404\nAccount tree not found for the user\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nThis endpoint is valid only for accounts that inherit from ChildAccount.\nThe returned priority can be numeric or a string (e.g., “high”, “low”), depending on your implementation.\nTo set or change a priority, use the POST /set_priority endpoint.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -2535,11 +2810,23 @@
     ]
   },
   {
+    "objectID": "get_priority.html#sponsors",
+    "href": "get_priority.html#sponsors",
+    "title": "🔍 GET /get_priority",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Get Priority"
+    ]
+  },
+  {
     "objectID": "income_utilization.html",
     "href": "income_utilization.html",
     "title": "📊 GET /income_utilization",
     "section": "",
-    "text": "Computes how much of the income was spent within a given date range for a specific account and its children.\n\n\n\n\nMethod: GET\nURL: /income_utilization\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account\n\n\nfrom\nstring\n❌\nStart date (YYYY-MM-DD). Defaults to earliest date\n\n\nto\nstring\n❌\nEnd date (YYYY-MM-DD). Defaults to today\n\n\n\n\n\n\n\nGET /income_utilization?uuid=acc-2024-001&from=2024-01-01&to=2024-12-31\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-001\",\n  \"from\": \"2024-01-01\",\n  \"to\": \"2024-12-31\",\n  \"utilization\": 0.82,\n  \"start_time\": \"2025-07-10T16:00:15.012Z\",\n  \"end_time\": \"2025-07-10T16:00:15.061Z\",\n  \"execution_time\": 0.049\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID is missing or invalid\n\n\n403\nUnauthorized access\n\n\n404\nAccount or tree not found\n\n\n500\nInternal server error or date parsing\n\n\n\n\n\n\n\nInternally uses account$income_utilization(date_range).\nUtilization = spending / income, typically between 0 and 1.\nReturns 0 if no income is recorded during the range.\nAccepts optional from and to parameters for flexible filtering.",
+    "text": "Computes how much of the income was spent within a given date range for a specific account and its children.\n\n\n\n\nMethod: GET\nURL: /income_utilization\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account\n\n\nfrom\nstring\n❌\nStart date (YYYY-MM-DD). Defaults to earliest date\n\n\nto\nstring\n❌\nEnd date (YYYY-MM-DD). Defaults to today\n\n\n\n\n\n\n\nGET /income_utilization?uuid=acc-2024-001&from=2024-01-01&to=2024-12-31\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-001\",\n  \"from\": \"2024-01-01\",\n  \"to\": \"2024-12-31\",\n  \"utilization\": 0.82,\n  \"start_time\": \"2025-07-10T16:00:15.012Z\",\n  \"end_time\": \"2025-07-10T16:00:15.061Z\",\n  \"execution_time\": 0.049\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID is missing or invalid\n\n\n403\nUnauthorized access\n\n\n404\nAccount or tree not found\n\n\n500\nInternal server error or date parsing\n\n\n\n\n\n\n\nInternally uses account$income_utilization(date_range).\nUtilization = spending / income, typically between 0 and 1.\nReturns 0 if no income is recorded during the range.\nAccepts optional from and to parameters for flexible filtering.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -2631,11 +2918,23 @@
     ]
   },
   {
+    "objectID": "income_utilization.html#sponsors",
+    "href": "income_utilization.html#sponsors",
+    "title": "📊 GET /income_utilization",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Income Utilization"
+    ]
+  },
+  {
     "objectID": "list_all_accounts.html",
     "href": "list_all_accounts.html",
     "title": "🌲 GET /list_all_accounts",
     "section": "",
-    "text": "Lists all accounts in the tree rooted at a specified account, including both children and parents (if implemented to allow upward tracing).\n\n\n\n\nMethod: GET\nURL: /list_all_accounts\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to start traversal from\n\n\n\n\n\n\n\nGET /list_all_accounts?uuid=goals-acc-2023-02\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"goals-acc-2023-02\",\n  \"total_accounts\": 4,\n  \"account_names\": [\n    \"Goals\",\n    \"Farming\",\n    \"Business\",\n    \"Emergency Fund\"\n  ],\n  \"start_time\": \"2025-07-10T10:51:22.015Z\",\n  \"end_time\": \"2025-07-10T10:51:22.030Z\",\n  \"execution_time\": 0.015\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nInternal error\n\n\n\n\n\n\n\nThis is a read-only endpoint.\nInternally calls account$list_all_accounts() which traverses children recursively.\nDoes not include sibling accounts unless connected via hierarchy.\nCan be used for diagnostics, audit, or hierarchical views.",
+    "text": "Lists all accounts in the tree rooted at a specified account, including both children and parents (if implemented to allow upward tracing).\n\n\n\n\nMethod: GET\nURL: /list_all_accounts\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to start traversal from\n\n\n\n\n\n\n\nGET /list_all_accounts?uuid=goals-acc-2023-02\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"goals-acc-2023-02\",\n  \"total_accounts\": 4,\n  \"account_names\": [\n    \"Goals\",\n    \"Farming\",\n    \"Business\",\n    \"Emergency Fund\"\n  ],\n  \"start_time\": \"2025-07-10T10:51:22.015Z\",\n  \"end_time\": \"2025-07-10T10:51:22.030Z\",\n  \"execution_time\": 0.015\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nInternal error\n\n\n\n\n\n\n\nThis is a read-only endpoint.\nInternally calls account$list_all_accounts() which traverses children recursively.\nDoes not include sibling accounts unless connected via hierarchy.\nCan be used for diagnostics, audit, or hierarchical views.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -2727,11 +3026,47 @@
     ]
   },
   {
+    "objectID": "list_all_accounts.html#sponsors",
+    "href": "list_all_accounts.html#sponsors",
+    "title": "🌲 GET /list_all_accounts",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "List All Accounts"
+    ]
+  },
+  {
+    "objectID": "login.html#sponsors",
+    "href": "login.html#sponsors",
+    "title": "Finance Manager API",
+    "section": "💖 Sponsors",
+    "text": "💖 Sponsors\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "🔐 Auth",
+      "Login"
+    ]
+  },
+  {
+    "objectID": "register.html#sponsors",
+    "href": "register.html#sponsors",
+    "title": "Finance Manager API",
+    "section": "💖 Sponsors",
+    "text": "💖 Sponsors\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "🔐 Auth",
+      "Register"
+    ]
+  },
+  {
     "objectID": "set_account_periods.html",
     "href": "set_account_periods.html",
     "title": "📅 POST /set_account_periods",
     "section": "",
-    "text": "Sets the number of periods for a grandchild account. Useful for budgeting logic that depends on period breakdown (e.g., 12 months, 4 quarters).\n\n\n\n\nMethod: POST\n\nURL: /set_account_periods\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\nperiods\ninteger\n✅\nNumber of periods (must be a positive integer)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-3487\",\n  \"periods\": 12\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-3487\",\n  \"periods\": 12,\n  \"message\": \"Number of periods set to 12\",\n  \"start_time\": \"2025-07-10T16:03:01.120Z\",\n  \"end_time\": \"2025-07-10T16:03:01.136Z\",\n  \"execution_time\": 0.016\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing or invalid parameters (e.g., uuid, periods)\n\n\n403\nAccount not found or not a grandchild account\n\n\n404\nUser not found or unauthorized access\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint only works for accounts that inherit from GrandchildAccount.\nThe periods value should be a positive whole number.",
+    "text": "Sets the number of periods for a grandchild account. Useful for budgeting logic that depends on period breakdown (e.g., 12 months, 4 quarters).\n\n\n\n\nMethod: POST\n\nURL: /set_account_periods\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\nperiods\ninteger\n✅\nNumber of periods (must be a positive integer)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-3487\",\n  \"periods\": 12\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-3487\",\n  \"periods\": 12,\n  \"message\": \"Number of periods set to 12\",\n  \"start_time\": \"2025-07-10T16:03:01.120Z\",\n  \"end_time\": \"2025-07-10T16:03:01.136Z\",\n  \"execution_time\": 0.016\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing or invalid parameters (e.g., uuid, periods)\n\n\n403\nAccount not found or not a grandchild account\n\n\n404\nUser not found or unauthorized access\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint only works for accounts that inherit from GrandchildAccount.\nThe periods value should be a positive whole number.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -2811,11 +3146,23 @@
     ]
   },
   {
+    "objectID": "set_account_periods.html#sponsors",
+    "href": "set_account_periods.html#sponsors",
+    "title": "📅 POST /set_account_periods",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Set Periods"
+    ]
+  },
+  {
     "objectID": "set_child_allocation.html",
     "href": "set_child_allocation.html",
     "title": "🧩 POST /set_child_allocation",
     "section": "",
-    "text": "Update the allocation assigned to a child account under a parent.\n\n\n\n\nMethod: POST\nURL: /set_child_allocation\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nparent_uuid\nstring\n✅\nUUID of the parent account\n\n\nchild_name\nstring\n✅\nName of the child account\n\n\nallocation\nfloat\n✅\nNew allocation value (must be between 0 and 1)\n\n\n\n\n\n\n\n{\n  \"parent_uuid\": \"main-2023-001\",\n  \"child_name\": \"Goals\",\n  \"allocation\": 0.35\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Allocation for Goals updated to 0.35\",\n  \"total_allocation\": 1,\n  \"start_time\": \"2025-07-10T11:01:14.120Z\",\n  \"end_time\": \"2025-07-10T11:01:14.215Z\",\n  \"execution_time\": 0.095\n}\n\n\n\n\n\n\nStatus\nError Reason\n\n\n\n\n400\nAllocation missing or invalid\n\n\n404\nParent or child account not found\n\n\n500\nServer-side exception occurred\n\n\n\n\n\n\n\nThe parent account must already exist and contain the named child.\nThe total allocation across all children may be validated depending on internal logic.\nSafely locked and persisted to account_tree.Rds.",
+    "text": "Update the allocation assigned to a child account under a parent.\n\n\n\n\nMethod: POST\nURL: /set_child_allocation\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nparent_uuid\nstring\n✅\nUUID of the parent account\n\n\nchild_name\nstring\n✅\nName of the child account\n\n\nallocation\nfloat\n✅\nNew allocation value (must be between 0 and 1)\n\n\n\n\n\n\n\n{\n  \"parent_uuid\": \"main-2023-001\",\n  \"child_name\": \"Goals\",\n  \"allocation\": 0.35\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Allocation for Goals updated to 0.35\",\n  \"total_allocation\": 1,\n  \"start_time\": \"2025-07-10T11:01:14.120Z\",\n  \"end_time\": \"2025-07-10T11:01:14.215Z\",\n  \"execution_time\": 0.095\n}\n\n\n\n\n\n\nStatus\nError Reason\n\n\n\n\n400\nAllocation missing or invalid\n\n\n404\nParent or child account not found\n\n\n500\nServer-side exception occurred\n\n\n\n\n\n\n\nThe parent account must already exist and contain the named child.\nThe total allocation across all children may be validated depending on internal logic.\nSafely locked and persisted to account_tree.Rds.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -2907,11 +3254,23 @@
     ]
   },
   {
+    "objectID": "set_child_allocation.html#sponsors",
+    "href": "set_child_allocation.html#sponsors",
+    "title": "🧩 POST /set_child_allocation",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Set Child Allocations"
+    ]
+  },
+  {
     "objectID": "set_fixed_amount.html",
     "href": "set_fixed_amount.html",
     "title": "💵 POST /set_fixed_amount",
     "section": "",
-    "text": "Sets a fixed amount for a grandchild account, which is used to calculate the amount_due for the current or future periods.\n\n\n\n\nMethod: POST\n\nURL: /set_fixed_amount\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\nfixed_amount\nnumber\n✅\nFixed amount per period (must be non-negative number)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-9999\",\n  \"fixed_amount\": 1500\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-9999\",\n  \"fixed_amount\": 1500,\n  \"amount_due\": 1500,\n  \"start_time\": \"2025-07-10T11:42:11.112Z\",\n  \"end_time\": \"2025-07-10T11:42:11.130Z\",\n  \"execution_time\": 0.018\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing or invalid parameters (e.g., empty UUID or amount)\n\n\n403\nAccount is not a grandchild or access not permitted\n\n\n404\nAccount tree or specific account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint applies only to accounts inheriting from GrandchildAccount.\nfixed_amount must be a numeric value ≥ 0.\nOnce set, amount_due will be automatically updated based on the new amount.",
+    "text": "Sets a fixed amount for a grandchild account, which is used to calculate the amount_due for the current or future periods.\n\n\n\n\nMethod: POST\n\nURL: /set_fixed_amount\n\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the grandchild account\n\n\nfixed_amount\nnumber\n✅\nFixed amount per period (must be non-negative number)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-9999\",\n  \"fixed_amount\": 1500\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-9999\",\n  \"fixed_amount\": 1500,\n  \"amount_due\": 1500,\n  \"start_time\": \"2025-07-10T11:42:11.112Z\",\n  \"end_time\": \"2025-07-10T11:42:11.130Z\",\n  \"execution_time\": 0.018\n}\n\n\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing or invalid parameters (e.g., empty UUID or amount)\n\n\n403\nAccount is not a grandchild or access not permitted\n\n\n404\nAccount tree or specific account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nThis endpoint applies only to accounts inheriting from GrandchildAccount.\nfixed_amount must be a numeric value ≥ 0.\nOnce set, amount_due will be automatically updated based on the new amount.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -2991,11 +3350,23 @@
     ]
   },
   {
+    "objectID": "set_fixed_amount.html#sponsors",
+    "href": "set_fixed_amount.html#sponsors",
+    "title": "💵 POST /set_fixed_amount",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Set Fixed Amount"
+    ]
+  },
+  {
     "objectID": "spending.html",
     "href": "spending.html",
     "title": "💸 GET /spending",
     "section": "",
-    "text": "Calculates the total amount withdrawn (spent) from a given account (and its sub-accounts) within a specified date range.\n\n\n\n\nMethod: GET\nURL: /spending\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to evaluate\n\n\nfrom\nstring\n❌\nStart date (YYYY-MM-DD). Defaults to oldest date\n\n\nto\nstring\n❌\nEnd date (YYYY-MM-DD). Defaults to today\n\n\n\n\n\n\n\nGET /spending?uuid=acc-2024-001&from=2025-01-01&to=2025-07-01\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-001\",\n  \"from\": \"2025-01-01\",\n  \"to\": \"2025-07-01\",\n  \"total_spending\": 24950,\n  \"start_time\": \"2025-07-10T14:01:02.830Z\",\n  \"end_time\": \"2025-07-10T14:01:02.884Z\",\n  \"execution_time\": 0.054\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing UUID or invalid date\n\n\n403\nUnauthorized access\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nInternally uses account$spending(daterange) method.\nIf no from or to is specified, defaults to entire available history.\nSpending only includes withdrawal-type transactions.",
+    "text": "Calculates the total amount withdrawn (spent) from a given account (and its sub-accounts) within a specified date range.\n\n\n\n\nMethod: GET\nURL: /spending\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to evaluate\n\n\nfrom\nstring\n❌\nStart date (YYYY-MM-DD). Defaults to oldest date\n\n\nto\nstring\n❌\nEnd date (YYYY-MM-DD). Defaults to today\n\n\n\n\n\n\n\nGET /spending?uuid=acc-2024-001&from=2025-01-01&to=2025-07-01\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-001\",\n  \"from\": \"2025-01-01\",\n  \"to\": \"2025-07-01\",\n  \"total_spending\": 24950,\n  \"start_time\": \"2025-07-10T14:01:02.830Z\",\n  \"end_time\": \"2025-07-10T14:01:02.884Z\",\n  \"execution_time\": 0.054\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing UUID or invalid date\n\n\n403\nUnauthorized access\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nInternally uses account$spending(daterange) method.\nIf no from or to is specified, defaults to entire available history.\nSpending only includes withdrawal-type transactions.\n\n\n\n\n## 💖 Sponsors\n\n\nSupport my work through GitHub Sponsors!\n\n\n\n\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -3079,7 +3450,19 @@
     "href": "spending.html#notes",
     "title": "💸 GET /spending",
     "section": "",
-    "text": "Internally uses account$spending(daterange) method.\nIf no from or to is specified, defaults to entire available history.\nSpending only includes withdrawal-type transactions.",
+    "text": "Internally uses account$spending(daterange) method.\nIf no from or to is specified, defaults to entire available history.\nSpending only includes withdrawal-type transactions.\n\n\n\n\n## 💖 Sponsors\n\n\nSupport my work through GitHub Sponsors!",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Spending Overview"
+    ]
+  },
+  {
+    "objectID": "spending.html#sponsors",
+    "href": "spending.html#sponsors",
+    "title": "💸 GET /spending",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -3091,7 +3474,7 @@
     "href": "walking_amount.html",
     "title": "📈 GET /walking_amount",
     "section": "",
-    "text": "Returns the “walking amount” (cumulative total) of either amount_due or balance for a given account and its children across a date range.\n\n\n\n\nMethod: GET\nURL: /walking_amount\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account\n\n\namt_type\nstring\n❌\nType of amount to walk: \"amount_due\" or \"balance\" (default: \"amount_due\")\n\n\nfrom\nstring\n❌\nStart date in YYYY-MM-DD format (default: very early date)\n\n\nto\nstring\n❌\nEnd date in YYYY-MM-DD format (default: today)\n\n\n\n\n\n\n\nGET /walking_amount?uuid=acc-2024-xyz&amt_type=balance&from=2024-01-01&to=2024-12-31\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-xyz\",\n  \"amt_type\": \"balance\",\n  \"from\": \"2024-01-01\",\n  \"to\": \"2024-12-31\",\n  \"walking_amount\": [\n    {\n      \"date\": \"2024-01-01\",\n      \"value\": 0\n    },\n    {\n      \"date\": \"2024-01-15\",\n      \"value\": 1200\n    },\n    {\n      \"date\": \"2024-02-01\",\n      \"value\": 2000\n    }\n    // ...\n  ],\n  \"start_time\": \"2025-07-10T07:00:01.003Z\",\n  \"end_time\": \"2025-07-10T07:00:01.023Z\",\n  \"execution_time\": 0.02\n}\n\n\n\n\n\n\nStatus\nCause\n\n\n\n\n400\nUUID or date params are missing/invalid\n\n\n403\nAccount not found or unauthorized\n\n\n404\nTree or user not found\n\n\n500\nInternal processing error\n\n\n\n\n\n\n\nUse amt_type = “amount_due” to get cumulative liabilities (default).\nUse amt_type = “balance” to visualize asset accumulation.\nUnder the hood, uses account$walking_amount(amt_type, daterange).",
+    "text": "Returns the “walking amount” (cumulative total) of either amount_due or balance for a given account and its children across a date range.\n\n\n\n\nMethod: GET\nURL: /walking_amount\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account\n\n\namt_type\nstring\n❌\nType of amount to walk: \"amount_due\" or \"balance\" (default: \"amount_due\")\n\n\nfrom\nstring\n❌\nStart date in YYYY-MM-DD format (default: very early date)\n\n\nto\nstring\n❌\nEnd date in YYYY-MM-DD format (default: today)\n\n\n\n\n\n\n\nGET /walking_amount?uuid=acc-2024-xyz&amt_type=balance&from=2024-01-01&to=2024-12-31\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-xyz\",\n  \"amt_type\": \"balance\",\n  \"from\": \"2024-01-01\",\n  \"to\": \"2024-12-31\",\n  \"walking_amount\": [\n    {\n      \"date\": \"2024-01-01\",\n      \"value\": 0\n    },\n    {\n      \"date\": \"2024-01-15\",\n      \"value\": 1200\n    },\n    {\n      \"date\": \"2024-02-01\",\n      \"value\": 2000\n    }\n    // ...\n  ],\n  \"start_time\": \"2025-07-10T07:00:01.003Z\",\n  \"end_time\": \"2025-07-10T07:00:01.023Z\",\n  \"execution_time\": 0.02\n}\n\n\n\n\n\n\nStatus\nCause\n\n\n\n\n400\nUUID or date params are missing/invalid\n\n\n403\nAccount not found or unauthorized\n\n\n404\nTree or user not found\n\n\n500\nInternal processing error\n\n\n\n\n\n\n\nUse amt_type = “amount_due” to get cumulative liabilities (default).\nUse amt_type = “balance” to visualize asset accumulation.\nUnder the hood, uses account$walking_amount(amt_type, daterange).\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -3176,6 +3559,18 @@
     "title": "📈 GET /walking_amount",
     "section": "",
     "text": "Use amt_type = “amount_due” to get cumulative liabilities (default).\nUse amt_type = “balance” to visualize asset accumulation.\nUnder the hood, uses account$walking_amount(amt_type, daterange).",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Walking Amount"
+    ]
+  },
+  {
+    "objectID": "walking_amount.html#sponsors",
+    "href": "walking_amount.html#sponsors",
+    "title": "📈 GET /walking_amount",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",

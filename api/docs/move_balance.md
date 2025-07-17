@@ -72,3 +72,10 @@ Content-Type: application/json
 - This action internally calls from_account$move_balance().
 - The operation is atomic and wrapped in a file lock for consistency.
 - Will fail if source or target account doesn’t exist, or if balance is insufficient.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

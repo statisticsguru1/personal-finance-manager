@@ -64,6 +64,7 @@ GET /find_account_by_name?name=Rent
   "end_time": "2025-07-10T11:20:10.061Z",
   "execution_time": 0.011
 }
+```
 
 ## ❌ Failure Response Examples
 
@@ -72,7 +73,16 @@ GET /find_account_by_name?name=Rent
 | `403`  | Unauthorized or tree not found          |
 | `500`  | Missing argument `name` or server error |
 
+---
+
 ## 🧠 Notes
 - Matching is case-sensitive unless your backend handles normalization.
 - Returns all matches if the name appears more than once.
 - Use uuid from results for further operations (e.g., get balance, transactions).
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

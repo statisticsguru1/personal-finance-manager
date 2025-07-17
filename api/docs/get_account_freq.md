@@ -69,3 +69,11 @@ Authorization: Bearer <your-token>
 
 - This endpoint is limited to accounts inheriting from `GrandchildAccount`.
 - The returned frequency is expected to be a predefined label (e.g., 7, 30, 14) based on your internal logic.
+
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

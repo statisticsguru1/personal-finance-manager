@@ -67,3 +67,17 @@ GET /spending?uuid=acc-2024-001&from=2025-01-01&to=2025-07-01
 - Internally uses account$spending(daterange) method.
 - If no from or to is specified, defaults to entire available history.
 - Spending only includes withdrawal-type transactions.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

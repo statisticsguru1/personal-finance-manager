@@ -68,3 +68,10 @@ GET /get_account_periods?uuid=acc-12345
 
 - This endpoint is strictly applicable to grandchild accounts.
 - Periods may correspond to budgeting periods or billing cycles, depending on your app logic.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

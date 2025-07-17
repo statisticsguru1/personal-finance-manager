@@ -65,3 +65,10 @@ GET /compute_total_due_within_days?uuid=acc-2024-456&days=30
 - Internally uses account$compute_total_due_within_n_days(days).
 - days = 0 means today only.
 - Useful for dashboards and forecasting panels showing "Amount Due in Next 7, 14, or 30 Days".
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

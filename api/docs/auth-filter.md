@@ -62,3 +62,10 @@ The filter logic is defined in `plumber.R` using `@filter auth`.
 | `JWT_SECRET`   | Secret key for decoding JWT                    | _(required)_ |
 | `MAX_REQUESTS` | Max allowed requests in the window             | `1000`  |
 | `WINDOW_SIZE`  | Rate limit window duration in seconds          | `3600`  |
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

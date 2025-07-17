@@ -69,3 +69,9 @@ Content-Type: application/json
 - The total allocation across all children may be validated depending on internal logic.
 - Safely locked and persisted to account_tree.Rds.
 
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

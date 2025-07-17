@@ -74,3 +74,10 @@ Content-Type: application/x-www-form-urlencoded
 - This endpoint only applies to accounts that inherit from `GrandchildAccount`.
 - Frequency is useful when calculating periodic due amounts or expected contributions.
 - Valid values depend on how your logic is implemented: e.g., `30`, `7`, `1`, etc.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

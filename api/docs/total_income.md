@@ -67,3 +67,10 @@ GET /total_income?uuid=acc-2024-001&from=2025-01-01&to=2025-07-01
 
 - If from or to are not provided, defaults to entire history.
 - Income includes deposit-type transactions across the entire subtree.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

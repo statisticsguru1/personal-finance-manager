@@ -72,3 +72,10 @@ GET /income_utilization?uuid=acc-2024-001&from=2024-01-01&to=2024-12-31
 - Returns 0 if no income is recorded during the range.
 
 - Accepts optional from and to parameters for flexible filtering.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

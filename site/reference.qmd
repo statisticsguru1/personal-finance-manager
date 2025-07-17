@@ -19,10 +19,11 @@ This section provides quick access to in-depth technical documentation for devel
 
 The `finman` R package powers the finance logic of the app.
 
-- 📘 [Full Package Documentation](../finman/docs/index.html)
-- 📦 [Function Reference](../finman/docs/reference/index.html)
-- 🧪 [Test Coverage](../finman/docs/articles/test-coverage.html)
-- 📂 [Source Code (GitHub)](https://github.com/statisticsguru1/personal-finance-manager/tree/main/finman)
+- 📘 [Full Package Documentation](./finman/index.html)
+- 📦 [Function Reference](./finman/reference.html)
+- 🧪 [Test Coverage](https://app.codecov.io/github/statisticsguru1/personal-finance-manager/tree/refactor-main-account-docs)
+- 📂 [Source Code (GitHub)](https://github.com/statisticsguru1/personal-finance-manager/finman)
+
 
 ---
 
@@ -30,7 +31,7 @@ The `finman` R package powers the finance logic of the app.
 
 The `API` exposes all backend logic via REST using Plumber.
 
-- 📖 [API Documentation](../API/docs/index.html)
+- 📖 [API Documentation](./api/index.html)
 - 🧪 Test locally using tools like [Postman](https://www.postman.com/) or `curl`
 - 🧾 Sample Endpoints:
   - `POST /deposit`
@@ -67,5 +68,9 @@ The `API` exposes all backend logic via REST using Plumber.
 - [React JS](https://reactjs.org/)
 
 ---
+## 💖 Sponsors
 
-Want to contribute? See the [Contribution Guide](https://github.com/statisticsguru1/personal-finance-manager/blob/main/CONTRIBUTING.md).
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)
+

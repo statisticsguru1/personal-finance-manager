@@ -74,3 +74,10 @@ Content-Type: application/x-www-form-urlencoded
 - This endpoint **only works** on accounts inheriting from `GrandchildAccount`.  
 - The due date must be a valid date string, preferably in ISO format (e.g., `"2025-08-01"` or `"2025-08-01T00:00:00Z"`).  
 - Use in conjunction with scheduled alerts, arrears tracking, or automated reminders.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

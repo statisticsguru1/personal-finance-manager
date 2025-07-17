@@ -5,8 +5,7 @@
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![License: Proprietary](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 ![Last Commit](https://img.shields.io/github/last-commit/statisticsguru1/personal-finance-manager)
-
-
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)
 ---
 
 > The **Finman** package provides a robust, extensible framework for modeling personal
@@ -60,7 +59,7 @@ including REST APIs (via Plumber) and dashboards (Shiny/React).
 install.packages("devtools")
 
 # Install the package from GitHub
-devtools::install_github("festusnzuma/personal-finance-manager/finman")
+devtools::install_github("statisticsguru1/personal-finance-manager/finman")
 ```
 
 ---
@@ -87,7 +86,7 @@ child$get_balance()  # 500 (50% allocation)
 
 Visit the full documentation site at:
 
-➡️ [https://festusnzuma.github.io/personal-finance-manager](https://festusnzuma.github.io/personal-finance-manager)
+➡️ [https://statisticsguru1.github.io/personal-finance-manager/](https://statisticsguru1.github.io/personal-finance-manager/)
 
 ## Developer Notes
 - Modular R6 class definitions allow you to extend or override behavior.
@@ -99,7 +98,7 @@ Visit the full documentation site at:
 
 ## 🔒 License
 
-This software is licensed on a **proprietary, source-available** basis.
+This software is licensed on a **MIT** basis.
 
 You **may not**:
 - Copy, redistribute, or modify the code
@@ -154,4 +153,8 @@ personal-finance-manager/
 
 ---
 
-Built with ❤️ using R6, testthat, and tidyverse.
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

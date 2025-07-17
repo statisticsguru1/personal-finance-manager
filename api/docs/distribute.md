@@ -79,3 +79,9 @@ Content-Type: application/json
 - Will fail if amount is missing, zero, or negative.
 - If transaction reference is missing, one is auto-generated.
 
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

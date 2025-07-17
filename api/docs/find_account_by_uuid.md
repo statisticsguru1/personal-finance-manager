@@ -75,3 +75,10 @@ GET /find_account_by_uuid?uuid=acc-2024-001
 - The endpoint retrieves all core metadata for an account.
 - If the account has no parent, parent_uuid will be null.
 - This endpoint can help render full account detail views or support  downstream actions.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

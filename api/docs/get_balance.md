@@ -67,3 +67,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1...
 - This is a read-only operation and doesn't require account locking.
 - If the account is not found or the user lacks permissions, appropriate error responses are returned.
 - Internally uses account$get_balance().
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

@@ -87,3 +87,10 @@ GET /get_transactions?uuid=acc-2024-123
 - You must include a valid Bearer token to access this endpoint.
 - Returns an appropriate error if the account does not exist or is not accessible by the caller.
 - Account locking is not required since this is a read-only operation.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

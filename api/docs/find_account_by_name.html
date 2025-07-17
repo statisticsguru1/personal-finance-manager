@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -397,6 +432,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#success-response" id="toc-success-response" class="nav-link" data-scroll-target="#success-response">✅ Success Response</a></li>
   <li><a href="#failure-response-examples" id="toc-failure-response-examples" class="nav-link" data-scroll-target="#failure-response-examples">❌ Failure Response Examples</a></li>
   <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">🧠 Notes</a></li>
+  <li><a href="#sponsors" id="toc-sponsors" class="nav-link" data-scroll-target="#sponsors">💖 Sponsors</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -456,7 +492,27 @@ Content-Type: application/json</code></pre>
 </section>
 <section id="success-response" class="level2">
 <h2 class="anchored" data-anchor-id="success-response">✅ Success Response</h2>
-<p>```json { “success”: true, “status”: 200, “search_name”: “Rent”, “total_matches”: 2, “matches”: [ { “uuid”: “acc-234”, “name”: “Rent”, “path”: “Main &gt; Needs &gt; Rent” }, { “uuid”: “acc-987”, “name”: “Rent”, “path”: “Main &gt; Rentals &gt; Rent” } ], “start_time”: “2025-07-10T11:20:10.050Z”, “end_time”: “2025-07-10T11:20:10.061Z”, “execution_time”: 0.011 }</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"success"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"status"</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"search_name"</span><span class="fu">:</span> <span class="st">"Rent"</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"total_matches"</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"matches"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"uuid"</span><span class="fu">:</span> <span class="st">"acc-234"</span><span class="fu">,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"Rent"</span><span class="fu">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"path"</span><span class="fu">:</span> <span class="st">"Main &gt; Needs &gt; Rent"</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"uuid"</span><span class="fu">:</span> <span class="st">"acc-987"</span><span class="fu">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"Rent"</span><span class="fu">,</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"path"</span><span class="fu">:</span> <span class="st">"Main &gt; Rentals &gt; Rent"</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"start_time"</span><span class="fu">:</span> <span class="st">"2025-07-10T11:20:10.050Z"</span><span class="fu">,</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"end_time"</span><span class="fu">:</span> <span class="st">"2025-07-10T11:20:10.061Z"</span><span class="fu">,</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"execution_time"</span><span class="fu">:</span> <span class="fl">0.011</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="failure-response-examples" class="level2">
 <h2 class="anchored" data-anchor-id="failure-response-examples">❌ Failure Response Examples</h2>
@@ -478,6 +534,7 @@ Content-Type: application/json</code></pre>
 </tr>
 </tbody>
 </table>
+<hr>
 </section>
 <section id="notes" class="level2">
 <h2 class="anchored" data-anchor-id="notes">🧠 Notes</h2>
@@ -486,6 +543,17 @@ Content-Type: application/json</code></pre>
 <li>Returns all matches if the name appears more than once.</li>
 <li>Use uuid from results for further operations (e.g., get balance, transactions).</li>
 </ul>
+<hr>
+</section>
+<section id="sponsors" class="level2">
+<h2 class="anchored" data-anchor-id="sponsors">💖 Sponsors</h2>
+<p>Support my work through <a href="https://github.com/sponsors/statisticsguru1">GitHub Sponsors</a>!</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="https://github.com/sponsors/statisticsguru1"><img src="https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square.png" class="img-fluid figure-img"></a></p>
+<figcaption>GitHub Sponsors</figcaption>
+</figure>
+</div>
 
 
 </section>

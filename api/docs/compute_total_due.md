@@ -64,3 +64,10 @@ GET /compute_total_due?uuid=acc-2024-456
 - Internally calls account$compute_total_due(), which traverses down the account hierarchy.
 - This endpoint is useful for summarizing all upcoming obligations related to a specific category like “Utilities” or “Loans”.
 - It performs a read-only operation — no locking needed.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

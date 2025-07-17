@@ -83,3 +83,10 @@ GET /walking_amount?uuid=acc-2024-xyz&amt_type=balance&from=2024-01-01&to=2024-1
 - Use amt_type = "balance" to visualize asset accumulation.
 
 - Under the hood, uses account$walking_amount(amt_type, daterange).
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

@@ -74,3 +74,10 @@ GET /list_all_accounts?uuid=goals-acc-2023-02
 - Does not include sibling accounts unless connected via hierarchy.
 
 - Can be used for diagnostics, audit, or hierarchical views.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

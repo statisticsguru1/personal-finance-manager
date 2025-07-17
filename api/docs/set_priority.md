@@ -69,3 +69,10 @@ Content-Type: application/x-www-form-urlencoded
 - Priority can be a number (e.g., 1, 2) or a string (e.g., "high", "low"), depending on your implementation logic.
 
 - Used alongside account auto-allocation or sorting behavior.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

@@ -74,3 +74,10 @@ Content-Type: application/json
 - This endpoint applies only to accounts inheriting from `GrandchildAccount`.
 - `fixed_amount` must be a numeric value ≥ 0.
 - Once set, `amount_due` will be automatically updated based on the new amount.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

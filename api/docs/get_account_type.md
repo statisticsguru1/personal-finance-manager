@@ -69,3 +69,11 @@ Authorization: Bearer <your-token>
 
 - This endpoint is restricted to accounts that inherit from `GrandchildAccount`.
 - The returned `account_type` may be used for UI grouping, sorting, or business rules.
+
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

@@ -90,11 +90,11 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
+    <a class="nav-link active" href="./index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./modules.html" aria-current="page"> 
+    <a class="nav-link" href="./modules.html"> 
 <span class="menu-text">Modules</span></a>
   </li>  
   <li class="nav-item">
@@ -138,8 +138,11 @@ ul.task-list li input[type="checkbox"] {
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
- <span class="menu-text">index.qmds</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">💼 Finance Manager</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -193,13 +196,13 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./../API/docs/index.html" class="sidebar-item-text sidebar-link">
+  <a href="././api/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">API Docs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./../finman/docs/index.html" class="sidebar-item-text sidebar-link">
+  <a href="././finman/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">R Package (finman)</span></a>
   </div>
 </li>
@@ -221,8 +224,7 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#core-backend-finman" id="toc-core-backend-finman" class="nav-link active" data-scroll-target="#core-backend-finman">🧠 Core Backend (<code>finman/</code>)</a></li>
-  <li><a href="#api-layer-api" id="toc-api-layer-api" class="nav-link" data-scroll-target="#api-layer-api">🌐 API Layer (<code>API/</code>)</a>
+  <li><a href="#core-backend-finman" id="toc-core-backend-finman" class="nav-link active" data-scroll-target="#core-backend-finman">🧠 Core Backend (<code>finman/</code>)</a>
   <ul class="collapse">
   <li><a href="#key-features" id="toc-key-features" class="nav-link" data-scroll-target="#key-features">Key Features</a></li>
   </ul></li>
@@ -266,11 +268,8 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>Rules Engine</strong>: Allocation rules, due date handling, loan repayment priority.</li>
 <li><strong>Persistence</strong>: User-specific account trees saved as RDS files.</li>
 </ul>
-<p>🔗 See detailed docs: <a href="../finman/docs/index.html">finman site</a></p>
+<p>🔗 See detailed docs: <a href="./finman/index.html">finman site</a></p>
 <hr>
-</section>
-<section id="api-layer-api" class="level2">
-<h2 class="anchored" data-anchor-id="api-layer-api">🌐 API Layer (<code>API/</code>)</h2>
 <p>A RESTful interface built with <strong>Plumber</strong>. It exposes the backend functionalities over HTTP to power both the web app and mobile app.</p>
 <section id="key-features" class="level3">
 <h3 class="anchored" data-anchor-id="key-features">Key Features</h3>
@@ -285,7 +284,7 @@ ul.task-list li input[type="checkbox"] {
 </ul></li>
 <li>Admin tools for dynamic configuration.</li>
 </ul>
-<p>🔗 See full reference: <a href="../API/docs/index.html">API site</a></p>
+<p>🔗 See full reference: <a href="./api/index.html">API site</a></p>
 <hr>
 </section>
 </section>
