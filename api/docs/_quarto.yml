@@ -17,7 +17,7 @@ website:
       - text: "Main Docs"
         href: ../
       - text: "finman"
-        href: ../finman/
+        href: ../finman/index.html
 
   sidebar:
     style: docked
