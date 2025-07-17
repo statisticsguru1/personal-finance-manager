@@ -607,7 +607,7 @@
     "text": "Transfers a specified amount from one account to another.\n\n\n\n\nMethod: POST\nURL: /move_balance\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nfrom_uuid\nstring\n✅\nUUID of the source account\n\n\nto_uuid\nstring\n✅\nUUID of the destination account\n\n\namount\nnumber\n✅\nAmount to transfer (must be &gt; 0)\n\n\n\n\n\n\n\n{\n  \"from_uuid\": \"acc-2024-abc\",\n  \"to_uuid\": \"acc-2024-def\",\n  \"amount\": 2500\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Moved 2500 from Emergency to Farming\",\n  \"from_uuid\": \"acc-2024-abc\",\n  \"to_uuid\": \"acc-2024-def\",\n  \"amount\": 2500,\n  \"start_time\": \"2025-07-10T12:42:15.155Z\",\n  \"end_time\": \"2025-07-10T12:42:15.190Z\",\n  \"execution_time\": 0.035\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing or invalid amount\n\n\n400\nMissing from_uuid or to_uuid\n\n\n404\nSource or target account not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nThis action internally calls from_account$move_balance().\nThe operation is atomic and wrapped in a file lock for consistency.\nWill fail if source or target account doesn’t exist, or if balance is insufficient.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
-      "📥 GET Endpoints",
+      "📤 POST Endpoints",
       "Move Balance"
     ]
   },
@@ -619,7 +619,7 @@
     "text": "Method: POST\nURL: /move_balance\nAuth: Required\nTag: accounts",
     "crumbs": [
       "Home",
-      "📥 GET Endpoints",
+      "📤 POST Endpoints",
       "Move Balance"
     ]
   },
@@ -631,7 +631,7 @@
     "text": "Authorization: Bearer &lt;your-token&gt;\nContent-Type: application/json",
     "crumbs": [
       "Home",
-      "📥 GET Endpoints",
+      "📤 POST Endpoints",
       "Move Balance"
     ]
   },
@@ -643,7 +643,7 @@
     "text": "Name\nType\nRequired\nDescription\n\n\n\n\nfrom_uuid\nstring\n✅\nUUID of the source account\n\n\nto_uuid\nstring\n✅\nUUID of the destination account\n\n\namount\nnumber\n✅\nAmount to transfer (must be &gt; 0)",
     "crumbs": [
       "Home",
-      "📥 GET Endpoints",
+      "📤 POST Endpoints",
       "Move Balance"
     ]
   },
@@ -655,7 +655,7 @@
     "text": "{\n  \"from_uuid\": \"acc-2024-abc\",\n  \"to_uuid\": \"acc-2024-def\",\n  \"amount\": 2500\n}",
     "crumbs": [
       "Home",
-      "📥 GET Endpoints",
+      "📤 POST Endpoints",
       "Move Balance"
     ]
   },
@@ -667,7 +667,7 @@
     "text": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Moved 2500 from Emergency to Farming\",\n  \"from_uuid\": \"acc-2024-abc\",\n  \"to_uuid\": \"acc-2024-def\",\n  \"amount\": 2500,\n  \"start_time\": \"2025-07-10T12:42:15.155Z\",\n  \"end_time\": \"2025-07-10T12:42:15.190Z\",\n  \"execution_time\": 0.035\n}",
     "crumbs": [
       "Home",
-      "📥 GET Endpoints",
+      "📤 POST Endpoints",
       "Move Balance"
     ]
   },
@@ -679,7 +679,7 @@
     "text": "Status\nReason\n\n\n\n\n400\nMissing or invalid amount\n\n\n400\nMissing from_uuid or to_uuid\n\n\n404\nSource or target account not found\n\n\n500\nInternal server error",
     "crumbs": [
       "Home",
-      "📥 GET Endpoints",
+      "📤 POST Endpoints",
       "Move Balance"
     ]
   },
@@ -691,7 +691,7 @@
     "text": "This action internally calls from_account$move_balance().\nThe operation is atomic and wrapped in a file lock for consistency.\nWill fail if source or target account doesn’t exist, or if balance is insufficient.",
     "crumbs": [
       "Home",
-      "📥 GET Endpoints",
+      "📤 POST Endpoints",
       "Move Balance"
     ]
   },
@@ -703,7 +703,7 @@
     "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
-      "📥 GET Endpoints",
+      "📤 POST Endpoints",
       "Move Balance"
     ]
   },
@@ -820,7 +820,7 @@
     "href": "index.html",
     "title": "📡 Personal Finance Manager API",
     "section": "",
-    "text": "Welcome to the documentation for the Personal Finance Manager API — a secure backend built with Plumber in R for managing user account trees, transactions, and personal finances.\n\n\n\n\n\n\nAuth Filter\n\n\n\n\n\nPOST /register\nPOST /login\nPOST /deposit\nPOST /withdraw\nPOST /distribute\nPOST /set_child_allocations\nPOST /change_account_status\nPOST /set_priority\nPOST /set_due_date\nPOST /set_fixed_amount\nPOST /set_account_type\nPOST /set_account_freq\nPOST /set_account_periods\n\n\n\n\n\nGET /get_balance\nGET /get_transactions\nGET /list_child_accounts\nGET /list_all_accounts\nGET /find_account_by_name\nGET /find_account_by_uuid\nGET /compute_total_balance\nGET /move_balance\nGET /compute_total_due\nGET /compute_total_due_within_days\nGET /spending\nGET /total_income\nGET /allocated_amount\nGET /income_utilization\nGET /walking_amount\nGET /get_account_status\nGET /get_priority\nGET /get_due_date\nGET /get_fixed_amount\nGET /get_account_type\nGET /get_account_freq\nGET /get_account_periods\n\n\n\n\n\n\nMost endpoints require a valid Bearer JWT token in the Authorization header. Auth and rate limiting are enforced globally via a request filter.\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n\n\nAccount creation and persistent storage (per user)\nDeposits, withdrawals, transfers, and account hierarchy logic\nFully modular backend logic powered by the finman R package\nWorks with Shiny, React, or any frontend via HTTP\n\n\n\n\n\n\nRegister a user (/register)\nLogin to receive token (/login)\nUse your token to make authenticated requests (e.g., /deposit, /accounts)\nEach request is validated and tracked for rate limits\n\nNeed help? Contact: mutindafestus27@gmail.com\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "text": "Welcome to the documentation for the Personal Finance Manager API — a secure backend built with Plumber in R for managing user account trees, transactions, and personal finances.\n\n\n\n\n\n\nAuth Filter\n\n\n\n\n\nPOST /register\nPOST /login\nPOST /deposit\nPOST /withdraw\nPOST /distribute\nPOST /set_child_allocations\nPOST /move_balance\nPOST /change_account_status\nPOST /set_priority\nPOST /set_due_date\nPOST /set_fixed_amount\nPOST /set_account_type\nPOST /set_account_freq\nPOST /set_account_periods\n\n\n\n\n\nGET /get_balance\nGET /get_transactions\nGET /list_child_accounts\nGET /list_all_accounts\nGET /find_account_by_name\nGET /find_account_by_uuid\nGET /compute_total_balance\nGET /compute_total_due\nGET /compute_total_due_within_days\nGET /spending\nGET /total_income\nGET /allocated_amount\nGET /income_utilization\nGET /walking_amount\nGET /get_account_status\nGET /get_priority\nGET /get_due_date\nGET /get_fixed_amount\nGET /get_account_type\nGET /get_account_freq\nGET /get_account_periods\n\n\n\n\n\n\nMost endpoints require a valid Bearer JWT token in the Authorization header. Auth and rate limiting are enforced globally via a request filter.\nAuthorization: Bearer &lt;your-token&gt;\n\n\n\n\n\nAccount creation and persistent storage (per user)\nDeposits, withdrawals, transfers, and account hierarchy logic\nFully modular backend logic powered by the finman R package\nWorks with Shiny, React, or any frontend via HTTP\n\n\n\n\n\n\nRegister a user (/register)\nLogin to receive token (/login)\nUse your token to make authenticated requests (e.g., /deposit, /accounts)\nEach request is validated and tracked for rate limits\n\nNeed help? Contact: mutindafestus27@gmail.com\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📡 Personal Finance Manager API"
@@ -831,7 +831,7 @@
     "href": "index.html#api-reference-index",
     "title": "📡 Personal Finance Manager API",
     "section": "",
-    "text": "Auth Filter\n\n\n\n\n\nPOST /register\nPOST /login\nPOST /deposit\nPOST /withdraw\nPOST /distribute\nPOST /set_child_allocations\nPOST /change_account_status\nPOST /set_priority\nPOST /set_due_date\nPOST /set_fixed_amount\nPOST /set_account_type\nPOST /set_account_freq\nPOST /set_account_periods\n\n\n\n\n\nGET /get_balance\nGET /get_transactions\nGET /list_child_accounts\nGET /list_all_accounts\nGET /find_account_by_name\nGET /find_account_by_uuid\nGET /compute_total_balance\nGET /move_balance\nGET /compute_total_due\nGET /compute_total_due_within_days\nGET /spending\nGET /total_income\nGET /allocated_amount\nGET /income_utilization\nGET /walking_amount\nGET /get_account_status\nGET /get_priority\nGET /get_due_date\nGET /get_fixed_amount\nGET /get_account_type\nGET /get_account_freq\nGET /get_account_periods",
+    "text": "Auth Filter\n\n\n\n\n\nPOST /register\nPOST /login\nPOST /deposit\nPOST /withdraw\nPOST /distribute\nPOST /set_child_allocations\nPOST /move_balance\nPOST /change_account_status\nPOST /set_priority\nPOST /set_due_date\nPOST /set_fixed_amount\nPOST /set_account_type\nPOST /set_account_freq\nPOST /set_account_periods\n\n\n\n\n\nGET /get_balance\nGET /get_transactions\nGET /list_child_accounts\nGET /list_all_accounts\nGET /find_account_by_name\nGET /find_account_by_uuid\nGET /compute_total_balance\nGET /compute_total_due\nGET /compute_total_due_within_days\nGET /spending\nGET /total_income\nGET /allocated_amount\nGET /income_utilization\nGET /walking_amount\nGET /get_account_status\nGET /get_priority\nGET /get_due_date\nGET /get_fixed_amount\nGET /get_account_type\nGET /get_account_freq\nGET /get_account_periods",
     "crumbs": [
       "Home",
       "📡 Personal Finance Manager API"

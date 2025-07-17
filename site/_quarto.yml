@@ -16,6 +16,10 @@ website:
         file: reference.qmd
       - text: "News"
         file: news.qmd
+      - text: "R Package (finman)"
+        href: ./finman/index.html
+      - text: "API"
+        href: ./api/index.html
 
   sidebar:
     style: "docked"

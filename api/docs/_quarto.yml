@@ -8,6 +8,17 @@ website:
     left:
       - text: "Home"
         file: index.md
+      - text: "Articles"
+        menu:
+          - text: "Using the API"
+            file: articles/using-api.qmd
+          - text: "Account Lifecycle"
+            file: articles/account-lifecycle.qmd
+      - text: "Main Docs"
+        href: ../
+      - text: "finman"
+        href: ../finman/
+
   sidebar:
     style: docked
     collapse-level: 1
@@ -36,6 +47,8 @@ website:
             text: "Set Child Allocations"
           - file: change_account_status.md
             text: "Change Account Status"
+          - file: move_balance.md
+            text: "Move Balance"
           - file: set_priority.md
             text: "Set Priority"
           - file: set_due_date.md
@@ -65,8 +78,6 @@ website:
             text: "Find Account by UUID"
           - file: compute_total_balance.md
             text: "Compute Total Balance"
-          - file: move_balance.md
-            text: "Move Balance"
           - file: compute_total_due.md
             text: "Compute Total Due"
           - file: compute_total_due_within_days.md

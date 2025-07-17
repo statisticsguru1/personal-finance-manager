@@ -92,6 +92,29 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link active" href="./index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-articles" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Articles</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-articles">    
+        <li>
+    <a class="dropdown-item" href="./articles/using-api.qmd">
+ <span class="dropdown-text">Using the API</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./articles/account-lifecycle.qmd">
+ <span class="dropdown-text">Account Lifecycle</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./../"> 
+<span class="menu-text">Main Docs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./../finman/"> 
+<span class="menu-text">finman</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -199,6 +222,12 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./move_balance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Move Balance</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./set_priority.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Set Priority</span></a>
   </div>
@@ -284,12 +313,6 @@ ul.task-list li input[type="checkbox"] {
   <div class="sidebar-item-container"> 
   <a href="./compute_total_balance.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Compute Total Balance</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./move_balance.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Move Balance</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -431,6 +454,7 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="./withdraw.html">POST /withdraw</a></li>
 <li><a href="./distribute.html">POST /distribute</a></li>
 <li><a href="set_child_allocations.md">POST /set_child_allocations</a></li>
+<li><a href="./move_balance.html">POST /move_balance</a></li>
 <li><a href="./change_account_status.html">POST /change_account_status</a></li>
 <li><a href="./set_priority.html">POST /set_priority</a></li>
 <li><a href="./set_due_date.html">POST /set_due_date</a></li>
@@ -450,7 +474,6 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="./find_account_by_name.html">GET /find_account_by_name</a></li>
 <li><a href="./find_account_by_uuid.html">GET /find_account_by_uuid</a></li>
 <li><a href="./compute_total_balance.html">GET /compute_total_balance</a></li>
-<li><a href="./move_balance.html">GET /move_balance</a></li>
 <li><a href="./compute_total_due.html">GET /compute_total_due</a></li>
 <li><a href="./compute_total_due_within_days.html">GET /compute_total_due_within_days</a></li>
 <li><a href="./spending.html">GET /spending</a></li>

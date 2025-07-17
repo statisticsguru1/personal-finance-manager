@@ -18,6 +18,7 @@ Welcome to the documentation for the **Personal Finance Manager API** — a secu
 - [POST /withdraw](withdraw.md)
 - [POST /distribute](distribute.md)
 - [POST /set_child_allocations](set_child_allocations.md)
+- [POST /move_balance](move_balance.md)
 - [POST /change_account_status](change_account_status.md)
 - [POST /set_priority](set_priority.md)
 - [POST /set_due_date](set_due_date.md)
@@ -36,7 +37,6 @@ Welcome to the documentation for the **Personal Finance Manager API** — a secu
 - [GET /find_account_by_name](find_account_by_name.md)
 - [GET /find_account_by_uuid](find_account_by_uuid.md)
 - [GET /compute_total_balance](compute_total_balance.md)
-- [GET /move_balance](move_balance.md)
 - [GET /compute_total_due](compute_total_due.md)
 - [GET /compute_total_due_within_days](compute_total_due_within_days.md)
 - [GET /spending](spending.md)
@@ -90,3 +90,4 @@ Need help? Contact: [mutindafestus27@gmail.com](mailto:mutindafestus27@gmail.com
 Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
 
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)
+

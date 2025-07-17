@@ -10,6 +10,16 @@ navbar:
       - reference
       - articles
       - news
+    right:
+      - main-docs
+      - api-docs
+  components:
+    main-docs:
+      text: "Main Docs"
+      href: ../
+    api-docs:
+      text: "API"
+      href: ../api/
   fixed: false
 
 authors:
