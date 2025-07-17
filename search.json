@@ -64,7 +64,19 @@
     "href": "reference.html#external-references",
     "title": "📚 Reference",
     "section": "🔗 External References",
-    "text": "🔗 External References\n\nPlumber API Framework\nQuarto Project\nShiny Framework\nR6 Classes in R\nReact JS\n\n\nWant to contribute? See the Contribution Guide.",
+    "text": "🔗 External References\n\nPlumber API Framework\nQuarto Project\nShiny Framework\nR6 Classes in R\nReact JS",
+    "crumbs": [
+      "Home",
+      "📦 Modules",
+      "📚 Reference"
+    ]
+  },
+  {
+    "objectID": "reference.html#sponsors",
+    "href": "reference.html#sponsors",
+    "title": "📚 Reference",
+    "section": "💖 Sponsors",
+    "text": "💖 Sponsors\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📦 Modules",
@@ -172,7 +184,19 @@
     "href": "index.html#license",
     "title": "💼 Finance Manager",
     "section": "📜 License",
-    "text": "📜 License\nProprietary License. See LICENSE for details.",
+    "text": "📜 License\nMIT. See LICENSE for details.",
+    "crumbs": [
+      "Home",
+      "📌 Project Info",
+      "💼 Finance Manager"
+    ]
+  },
+  {
+    "objectID": "index.html#sponsors",
+    "href": "index.html#sponsors",
+    "title": "💼 Finance Manager",
+    "section": "💖 Sponsors",
+    "text": "💖 Sponsors\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📌 Project Info",
@@ -196,19 +220,7 @@
     "href": "modules.html#core-backend-finman",
     "title": "Modules",
     "section": "🧠 Core Backend (finman/)",
-    "text": "🧠 Core Backend (finman/)\nThis is the brain of the system — an R package that handles:\n\nAccount Hierarchy: Main, Child, and Grandchild accounts using R6 classes.\nTransactions: Deposit, withdrawal, transfer, allocation, and repayments.\nRules Engine: Allocation rules, due date handling, loan repayment priority.\nPersistence: User-specific account trees saved as RDS files.\n\n🔗 See detailed docs: finman site",
-    "crumbs": [
-      "Home",
-      "📦 Modules",
-      "Modules"
-    ]
-  },
-  {
-    "objectID": "modules.html#api-layer-api",
-    "href": "modules.html#api-layer-api",
-    "title": "Modules",
-    "section": "🌐 API Layer (API/)",
-    "text": "🌐 API Layer (API/)\nA RESTful interface built with Plumber. It exposes the backend functionalities over HTTP to power both the web app and mobile app.\n\nKey Features\n\nAuthentication via token.\nEndpoints for:\n\nUser registration and account creation.\nDeposits and withdrawals.\nGetting/setting fixed amounts, frequencies, periods, etc.\nManaging account types and due dates.\n\nAdmin tools for dynamic configuration.\n\n🔗 See full reference: API site",
+    "text": "🧠 Core Backend (finman/)\nThis is the brain of the system — an R package that handles:\n\nAccount Hierarchy: Main, Child, and Grandchild accounts using R6 classes.\nTransactions: Deposit, withdrawal, transfer, allocation, and repayments.\nRules Engine: Allocation rules, due date handling, loan repayment priority.\nPersistence: User-specific account trees saved as RDS files.\n\n🔗 See detailed docs: finman site\n\nA RESTful interface built with Plumber. It exposes the backend functionalities over HTTP to power both the web app and mobile app.\n\nKey Features\n\nAuthentication via token.\nEndpoints for:\n\nUser registration and account creation.\nDeposits and withdrawals.\nGetting/setting fixed amounts, frequencies, periods, etc.\nManaging account types and due dates.\n\nAdmin tools for dynamic configuration.\n\n🔗 See full reference: API site",
     "crumbs": [
       "Home",
       "📦 Modules",
@@ -269,6 +281,18 @@
     "title": "📰 Project News",
     "section": "",
     "text": "For release history, updates, and changelogs, please visit the GitHub Releases.\nInitial public release: July 2025",
+    "crumbs": [
+      "Home",
+      "📰 Updates",
+      "📰 Project News"
+    ]
+  },
+  {
+    "objectID": "news.html#sponsors",
+    "href": "news.html#sponsors",
+    "title": "📰 Project News",
+    "section": "💖 Sponsors",
+    "text": "💖 Sponsors\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📰 Updates",
