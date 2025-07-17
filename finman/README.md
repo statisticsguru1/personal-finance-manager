@@ -6,7 +6,7 @@
 [![License: Proprietary](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 ![Last Commit](https://img.shields.io/github/last-commit/statisticsguru1/personal-finance-manager)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)
----
+
 
 > The **Finman** package provides a robust, extensible framework for modeling personal
 and group financial systems using hierarchical accounts. Built with R6,
