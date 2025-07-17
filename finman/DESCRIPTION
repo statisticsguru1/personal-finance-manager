@@ -1,0 +1,35 @@
+Package: finman
+Type: Package
+Title: Finance Account Management
+Version: 0.0.1
+Authors@R: 
+    person("Festus", "Nzuma", 
+           email = "mutindafestus27@gmail.com", 
+           role = c("aut", "cre"), 
+           comment = c(ORCID = "0009-0001-7640-4955", GitHub = "statisticsguru1"))
+Description: Core logic for managing master and child accounts recursively, including tracking balances, transactions, and dues across nested accounts.
+URL: https://github.com/statisticsguru1/personal-finance-manager/tree/refactor-main-account-docs, https://statisticsguru1.github.io/portfolio/
+BugReports: https://github.com/statisticsguru1/personal-finance-manager/issues
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+Imports:
+    R6,
+    tidyverse,
+    uuid,
+    lubridate,
+    jose,
+    filelock,
+    withr,
+    jsonlite,
+    rlang
+Suggests: 
+    testthat (>= 3.0.0),
+    covr,
+    lintr,
+    pkgdown,
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+License: file LICENSE
+VignetteBuilder: knitr

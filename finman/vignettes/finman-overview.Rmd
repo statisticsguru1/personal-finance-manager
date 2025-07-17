@@ -1,0 +1,255 @@
+---
+title: "finman-overview"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{finman-overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tidyverse)
+library(finman)
+```
+
+# 📦 What is `finman`?
+
+The `finman` package powers the logic of the Finance Manager system. It defines core account types (Main, Child, Grandchild), allocation rules, transaction tracking, and file-based persistence.
+
+# 🧠 Key Concepts
+
+**Account Hierarchy**
+
+- `MainAccount`: Receives income and distributes it.
+- `ChildAccount`: Receives allocations and may hold rules.
+- `GrandchildAccount`: Tracks obligations (e.g., rent, school fees).
+
+**Account Behavior**
+
+- Accounts deactivate when fully funded.
+- They reactivate based on periodic due dates.
+- Loan accounts can pull funds automatically from the main account.
+
+**Persistence**
+
+- Accounts and their states are stored with `save_user_file()` and loaded using `load_user_file()`.
+
+# 🚀 Creating an Account Tree
+
+```{r create_tree}
+main <- MainAccount$new("Main")
+needs <- ChildAccount$new("Needs", allocation = 0.5)
+savings <- ChildAccount$new("Savings", allocation = 0.3)
+debt <- ChildAccount$new("Debt", allocation = 0.2)
+
+main$add_child_account(needs)
+main$add_child_account(savings)
+main$add_child_account(debt)
+
+rent <- GrandchildAccount$new(
+  "Rent", freq = 30, due_date = today() + 5, fixed_amount = 5000
+)
+needs$add_child_account(rent)
+```
+
+# 💸 Allocation and Transactions
+
+Accounts can be allocated funds in several ways:
+
+- **Percentage Allocation**  
+  Child and grandchild accounts receive money from their parent based on predefined percentages. Depositing into a parent triggers automatic distribution. Parent balances remain zero unless children are fully funded.
+
+- **Direct Deposits**  
+  Depositing directly into a lower-level account is treated as allocation to that account.
+
+- **Refunds**  
+  If a child account receives more than it needs, the extra amount is refunded to the parent. The parent redistributes this unless all child accounts are inactive.
+
+**Example:**
+
+```{r allocate_money}
+# Deposit income (in other words allocate money to main account)
+main$deposit(20000, channel = "ABSA")
+```
+
+# 📊 Viewing Allocation Results
+
+This is how money trickled down.
+
+```{r allocation_results}
+# balance
+main$get_balance()              # balance in main account
+needs$get_balance()             # balance in needs account
+savings$get_balance()           # balance in savings account
+debt$get_balance()              # balance in debt account
+rent$get_balance()              # balance in rent account
+
+# Total balance
+main$compute_total_balance()    # total balance in main account+its children
+                                # this is literary the accumulated money in your
+                                # bank account
+
+needs$compute_total_balance()   # total balance in needs account+ its children
+                                # what amount in your bank account is there to 
+                                # cover needs
+
+savings$compute_total_balance()   # total balance in savings account+ its children
+                                  # what amount in your bank account is there to 
+                                  # cover savings
+
+debt$compute_total_balance()   # total balance in debt account+ its children
+                                  # what amount in your bank account is there to 
+                                  # cover debt
+
+rent$compute_total_balance()   # total balance in rent(it has no children)
+                               # what amount in your bank account is there to 
+                               # cover rent (a sinking fund)
+                            
+
+# amount due 
+main$compute_total_due()        # Total amount of debt(current+longterm)
+
+needs$compute_total_due()       # Total amount of debt from needs (current+longterm)
+
+savings$compute_total_due()     # Total amount of debt from savings (current+longterm)
+                                # thes are unmet fixed savings etc.
+
+rent$compute_total_due()     # Total amount of debt from rent (current+longterm)
+                             # this is what you need to pay from the sinking fund
+                             # for rent
+```
+
+
+### ❓ Why is Rent’s balance zero?
+
+```{r rent details}
+rent$status
+```
+
+**Answer:** The `Rent` account is inactive.
+
+When it was created, we didn't assign it an allocation percentage, so it defaulted to zero. Accounts with zero allocation are considered inactive — this tells the system not to fund them.
+
+Let’s fix that:
+
+```{r activate_rent}
+needs$set_child_allocation("Rent", 0.5)
+rent$change_status("active")
+```
+
+# 💸 Direct Deposits to Grandchild Accounts
+
+You can also allocate funds by depositing directly into a grandchild account.
+
+```{r allocate_to_low_level}
+rent$deposit(20000, channel = "Barclays")
+```
+
+Since Rent is now fully funded, it becomes inactive and stops drawing from `Needs`. If there were other active siblings, they would receive future allocations. Over time, this behavior self-corrects over- or under-funding.
+
+```{r see_status}
+rent$get_account_status()
+```
+
+```{r see stats}
+# balance
+rent$get_balance()    # get rent balance
+needs$get_balance()   # needs(parent) balance has increased by the refund amount
+
+# overall balance
+needs$compute_total_balance()  # need account has more money
+needs$compute_total_due()  # need total due has decreased
+main$compute_total_due()   # even on the whole tree there is decrease
+                           # you have reduced total payable.  
+```
+
+# 📊 Advanced Metrics
+
+**Spending** tracks actual payments (withdrawals).  
+**Allocated Amount** is the total amount directed to an account and its descendants.  
+**Income Utilization** shows how much of that allocation has been spent.
+
+If utilization is 0%, it means you’ve saved for obligations but haven’t actually spent the money.
+
+```{r advanced_stats}
+main$allocated_amount() # total income allocated
+main$spending()         # total spend
+main$income_utilization() # utilization of allocated amount?
+
+needs$allocated_amount() # total income allocated to needs
+needs$spending()         # how much of the allocation is spend
+needs$income_utilization() # utilization level
+
+
+savings$allocated_amount() # total income allocated to savings
+savings$spending()         # how much of the allocation is spend
+savings$income_utilization() # utilization level
+
+debt$allocated_amount() # total income allocated to debt
+debt$spending()         # how much of the allocation is spend
+debt$income_utilization() # utilization level
+```
+
+# 🧾 Spending Some Amount
+
+Let’s simulate spending:
+
+```{r spend_some_amount}
+rent$withdraw(5000,channel="ABSA")      # paid rent
+savings$withdraw(6000,channel="ABSA")   # withdraw to pay savings the specifics
+                                        # Not known we can specify this by attaching
+                                        # which are the specific savings
+
+debt$withdraw(4000,channel="ABSA")      # withdraw to pay savings the specifics
+```
+
+# 📉 After Spending: Utilization Analysis
+
+```{r evolution}
+main$allocated_amount() # total income allocated
+main$spending()         # total spend
+main$income_utilization() # utilization of allocated amount?
+
+needs$allocated_amount() # total income allocated to needs
+needs$spending()         # how much of the allocation is spend
+needs$income_utilization() # utilization level
+
+
+savings$allocated_amount() # total income allocated to savings
+savings$spending()         # how much of the allocation is spend
+savings$income_utilization() # utilization level
+
+debt$allocated_amount() # total income allocated to debt
+debt$spending()         # how much of the allocation is spend
+debt$income_utilization() # utilization level
+```
+
+> Example interpretation:  
+> A 37.5% utilization rate means only 37.5% of allocated funds were actually used. The rest remains idle.  
+> In `Needs`, only `Rent` was defined — hence low utilization. You may want to define more obligations to reflect your actual needs.
+
+# 🔄 Advanced Usage
+
+- Set obligation frequency: `set_account_freq()`
+- Define fixed obligations: `set_fixed_amount()`
+- Configure time periods: `set_account_periods()`
+- Use `with_account_lock()` for concurrency-safe operations
+
+# 📚 Next Steps
+
+- View API endpoints via the Plumber API docs
+- Try the full interface in the Shiny App
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

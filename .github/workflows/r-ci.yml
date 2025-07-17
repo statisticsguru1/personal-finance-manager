@@ -1,0 +1,179 @@
+name: R CI
+
+on:
+  push:
+    branches: [main, refactor-main-account-docs]
+  pull_request:
+    branches: [main, refactor-main-account-docs]
+
+jobs:
+  finman-build:
+    name: 🔧 Finman R Package Build
+    runs-on: ubuntu-latest
+
+    env:
+      R_LIBS_USER: ${{ github.workspace }}/.Rlibrary
+      RENV_PATHS_LIBRARY: ${{ github.workspace }}/.Rlibrary
+      TZ: UTC
+      _R_CHECK_SYSTEM_CLOCK_: FALSE
+      NOT_CRAN: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Create R library directory
+        run: mkdir -p ${{ env.R_LIBS_USER }}
+
+      - name: Cache R packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: r-${{ runner.os }}-${{ hashFiles('finman/DESCRIPTION') }}
+          restore-keys: r-${{ runner.os }}-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev libssl-dev libxml2-dev libgit2-dev \
+            libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev \
+            libtiff5-dev libjpeg-dev libfontconfig1-dev libglpk-dev \
+            libx11-dev libxt-dev libudunits2-dev libgdal-dev \
+            libgeos-dev libproj-dev libcairo2-dev
+
+      - name: Install R package dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            devtools
+            remotes
+            pkgdown
+          working-directory: finman
+          use-lockfile: false
+
+      - name: Install local package
+        run: devtools::install("finman", upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Lint code
+        run: lintr::lint_package("finman")
+        shell: Rscript {0}
+
+      - name: Run tests
+        run: devtools::test(pkg = "finman")
+        shell: Rscript {0}
+
+      - name: Check code (CRAN-style)
+        run: devtools::check(pkg = "finman")
+        shell: Rscript {0}
+
+      - name: Test coverage
+        run: covr::codecov(path = "finman", token = Sys.getenv("CODECOV_TOKEN"))
+        shell: Rscript {0}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  api-tests:
+    name: 🌐 Finman API Tests
+    runs-on: ubuntu-latest
+    needs: finman-build
+
+    env:
+      R_LIBS_USER: ${{ github.workspace }}/.Rlibrary
+      RENV_PATHS_LIBRARY: ${{ github.workspace }}/.Rlibrary
+      TZ: UTC
+      NOT_CRAN: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Restore cached R packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: r-${{ runner.os }}-${{ hashFiles('finman/DESCRIPTION') }}
+          restore-keys: r-${{ runner.os }}-
+
+      - name: Install local package (finman)
+        run: devtools::install("finman", upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Install API test dependencies
+        run: install.packages(c("testthat", "jsonlite", "jose", "callr", "withr", "here", "httr", "plumber"))
+        shell: Rscript {0}
+
+      - name: Run API endpoint tests
+        run: testthat::test_file("api/tests/test_endpoints.R")
+        shell: Rscript {0}
+
+  site-build:
+    name: 🧱 Build and Deploy Documentation Sites
+    runs-on: ubuntu-latest
+    needs: [finman-build, api-tests]
+
+    env:
+      R_LIBS_USER: ${{ github.workspace }}/.Rlibrary
+      RENV_PATHS_LIBRARY: ${{ github.workspace }}/.Rlibrary
+      TZ: UTC
+      NOT_CRAN: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Restore cached R packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: r-${{ runner.os }}-${{ hashFiles('finman/DESCRIPTION') }}
+          restore-keys: r-${{ runner.os }}-
+
+      - name: Install R packages for site build
+        run: install.packages(c("pkgdown", "devtools", "quarto"))
+        shell: Rscript {0}
+
+      - name: Install Quarto CLI
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Install Pandoc (required for pkgdown)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
+      - name: Install local R package
+        run: devtools::install("finman", upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Build finman pkgdown site to docs/finman
+        run: pkgdown::build_site(pkg = "finman")
+        shell: Rscript {0}
+
+      - name: Copy pkgdown site to docs/finman
+        run: |
+          mkdir -p docs/finman
+          cp -r finman/docs/* docs/finman/
+
+      - name: Build API site to docs/api
+        run: quarto render . --output-dir ../../docs/api
+        working-directory: api/docs
+
+      - name: Build main site to docs/
+        run: quarto render site
+
+      - name: Deploy everything from docs/ to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages

@@ -1,0 +1,104 @@
+---
+title: "Modules"
+sidebar: true
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: right
+    page-layout: article
+    smooth-scroll: true
+    sidebar:
+      style: "docked"
+      background: light
+      contents:
+        - text: "Project Metadata"
+          href: "#project-metadata"
+        - text: "Authors"
+          href: "#authors"
+        - text: "Links"
+          href: "#external-links"
+
+---
+
+Personal Finance Manager is organized into modular components. Each module handles specific responsibilities and can be extended independently. This page gives an overview of all major modules and their scopes.
+
+---
+
+## 🧠 Core Backend (`finman/`)
+
+This is the brain of the system — an R package that handles:
+
+- **Account Hierarchy**: Main, Child, and Grandchild accounts using R6 classes.
+- **Transactions**: Deposit, withdrawal, transfer, allocation, and repayments.
+- **Rules Engine**: Allocation rules, due date handling, loan repayment priority.
+- **Persistence**: User-specific account trees saved as RDS files.
+
+🔗 See detailed docs: [finman site](./finman/index.html)
+
+---
+
+A RESTful interface built with **Plumber**. It exposes the backend functionalities over HTTP to power both the web app and mobile app.
+
+### Key Features
+
+- Authentication via token.
+- Endpoints for:
+  - User registration and account creation.
+  - Deposits and withdrawals.
+  - Getting/setting fixed amounts, frequencies, periods, etc.
+  - Managing account types and due dates.
+- Admin tools for dynamic configuration.
+
+🔗 See full reference: [API site](./api/index.html)
+
+---
+
+## 📊 Web Dashboard (`Shiny App/`)
+
+The **Shiny app** offers a rich UI for admins and users. It includes:
+
+- **Dashboard**: Overview of balances, allocations, due amounts.
+- **Accounts Page**: View/edit account details, visualize hierarchies.
+- **Registration Module**: Dynamically generated form based on admin config.
+- **Transactions Page**: History and audit of operations.
+
+Planned features:
+- Report generation.
+- Exportable statements.
+
+---
+
+## 📱 React Frontend (`React/`)
+
+A modern **React-based interface** that will serve both:
+
+- Mobile users (via PWA or app wrapper).
+- Web users who prefer a fast, responsive UI.
+
+Planned functionality:
+- Real-time balance updates.
+- Form-based account interactions (add/edit/close).
+- Admin access with scoped permissions.
+
+---
+
+## 🧩 Extensibility
+
+Each module is built to support:
+
+- **Custom extensions** (e.g., add new account types).
+- **Inter-module communication** (API talks to finman, Shiny consumes both).
+- **User-specific state** via persistent user data.
+
+---
+
+## 📌 Coming Soon
+
+- Notifications system.
+- Audit logs and activity summaries.
+- Role-based access control (RBAC) refinements.
+
+---
+
+> 🚀 This modular design allows the system to evolve independently while staying coherent.

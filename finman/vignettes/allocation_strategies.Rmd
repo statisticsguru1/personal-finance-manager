@@ -1,0 +1,148 @@
+---
+title: "Income Allocation Strategies"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Income Allocation Strategies}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r}
+library(finman)
+library(tibble)
+```
+
+
+## 📊 Income Allocation Strategies
+
+This vignette demonstrates how `finman` lets you build customized budgeting trees using real-world strategies — from **50/30/20**, to handling high debt or low income. The system supports:
+
+- Tiered budgeting (e.g., Needs → Rent, Food).
+- Flexible allocation percentages.
+- Passive vs. greedy allocation flows.
+
+---
+
+## 📁 Strategy 1: Standard 50/30/20 Budget
+
+This strategy breaks income into:
+
+- **50% Needs** – Rent, Food, Utilities.
+- **30% Savings/Wants** – Emergency Fund, Hobbies.
+- **20% Debt** – Loan payments, Credit cards.
+
+```{r}
+main <- MainAccount$new("Main")
+
+needs <- ChildAccount$new("Needs", allocation = 0.5)
+savings <- ChildAccount$new("Savings", allocation = 0.3)
+debt <- ChildAccount$new("Debt", allocation = 0.2)
+
+main$add_child_account(needs)
+main$add_child_account(savings)
+main$add_child_account(debt)
+
+# Tier 3 accounts under Needs
+needs$add_child_account(GrandchildAccount$new("Rent", fixed_amount = 8000, freq = 30, due_date = Sys.Date() + 7))
+needs$add_child_account(GrandchildAccount$new("Food", fixed_amount = 3000, freq = 30, due_date = Sys.Date() + 7))
+
+# Under Savings
+savings$add_child_account(GrandchildAccount$new("Emergency Fund", fixed_amount = 5000, freq = 30, due_date = Sys.Date() + 7))
+
+# Under Debt
+debt$add_child_account(GrandchildAccount$new("Student Loan", fixed_amount = 6000, freq = 30, due_date = Sys.Date() + 7))
+
+# Fund the budget
+main$deposit(30000, channel = "ABSA")
+```
+
+---
+
+## ⚠️ Strategy 2: Debt-Heavy Budget
+
+Users with overwhelming debt might prioritize repayment:
+
+- Allocate **40–60% to Debt**.
+- Reduce Wants or Savings.
+- Pay off defaulted or overdue loans first.
+
+```{r}
+main <- MainAccount$new("Main")
+
+debt_recovery <- ChildAccount$new("Debt Recovery", allocation = 0.5)
+needs <- ChildAccount$new("Needs", allocation = 0.4)
+savings <- ChildAccount$new("Savings", allocation = 0.1)
+
+main$add_child_account(debt_recovery)
+main$add_child_account(needs)
+main$add_child_account(savings)
+
+debt_recovery$add_child_account(GrandchildAccount$new("Defaulted Loan", fixed_amount = 15000, freq = 30, due_date = Sys.Date()))
+debt_recovery$add_child_account(GrandchildAccount$new("Overdue Credit", fixed_amount = 12000, freq = 30, due_date = Sys.Date()))
+```
+
+---
+
+## 💼 Strategy 3: High-Income, Low-Need
+
+With more disposable income:
+
+- Reduce Needs to 30%.
+- Boost long-term savings or projects.
+- Automatically fund goals like Retirement or Land.
+
+```{r}
+main <- MainAccount$new("Main")
+
+main$add_child_account(ChildAccount$new("Needs", allocation = 0.3))
+main$add_child_account(ChildAccount$new("Savings", allocation = 0.5))
+main$add_child_account(ChildAccount$new("Wants", allocation = 0.2))
+
+# Add savings targets
+main$child_accounts$Savings$add_child_account(GrandchildAccount$new("Retirement", fixed_amount = 8000, freq = 30, due_date = Sys.Date() + 30))
+main$child_accounts$Savings$add_child_account(GrandchildAccount$new("Land Purchase", fixed_amount = 10000, freq = 60, due_date = Sys.Date() + 60))
+```
+
+---
+
+## 📉 Strategy 4: Low Income, High Obligation
+
+- Focus all allocation on critical expenses.
+- Postpone savings and wants.
+- Let optional accounts deactivate automatically.
+
+```{r}
+main <- MainAccount$new("Main")
+
+needs <- ChildAccount$new("Needs", allocation = 0.9)
+savings <- ChildAccount$new("Savings", allocation = 0.1)
+wants <- ChildAccount$new("Wants", allocation = 0.0)
+
+main$add_child_account(needs)
+main$add_child_account(savings)
+main$add_child_account(wants)
+
+needs$add_child_account(GrandchildAccount$new("Rent", fixed_amount = 7000, freq = 30, due_date = Sys.Date() + 5))
+needs$add_child_account(GrandchildAccount$new("Food", fixed_amount = 3000, freq = 30, due_date = Sys.Date() + 5))
+```
+
+---
+
+## 🧠 Summary
+
+| Strategy    | Description                                         |
+| ----------- | --------------------------------------------------- |
+| 50/30/20    | Balanced budgeting: Needs, Savings, Debt            |
+| Debt-First  | Prioritize loan repayments and overdue liabilities  |
+| High-Income | Maximize structured savings and passive investments |
+| Low-Income  | Focus on essentials; disable non-critical spending  |
+
+> 🧹 You can freely design any hierarchy with flexible allocation totals. Add/remove groups or goals as your finances evolve.
+

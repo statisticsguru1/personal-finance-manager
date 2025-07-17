@@ -1,0 +1,103 @@
+project:
+  type: website
+  output-dir: .  # Outputs HTML to the same directory for GitHub Pages
+
+website:
+  title: "Finance Manager API"
+  navbar:
+    left:
+      - text: "Home"
+        file: index.md
+  sidebar:
+    style: docked
+    collapse-level: 1
+    search: true
+    contents:
+      - index.md
+
+      - section: "🔐 Auth"
+        contents:
+          - file: auth-filter.md
+            text: "Auth filter"        
+          - file: register.md
+            text: "Register"
+          - file: login.md
+            text: "Login"
+
+      - section: "📤 POST Endpoints"
+        contents:
+          - file: deposit.md
+            text: "Deposit"
+          - file: withdraw.md
+            text: "Withdraw"
+          - file: distribute.md
+            text: "Distribute Funds"
+          - file: set_child_allocation.md
+            text: "Set Child Allocations"
+          - file: change_account_status.md
+            text: "Change Account Status"
+          - file: set_priority.md
+            text: "Set Priority"
+          - file: set_due_date.md
+            text: "Set Due Date"
+          - file: set_fixed_amount.md
+            text: "Set Fixed Amount"
+          - file: set_account_type.md
+            text: "Set Account Type"
+          - file: set_account_freq.md
+            text: "Set Frequency"
+          - file: set_account_periods.md
+            text: "Set Periods"
+
+      - section: "📥 GET Endpoints"
+        contents:
+          - file: get_balance.md
+            text: "Get Balance"
+          - file: get_transactions.md
+            text: "Get Transactions"
+          - file: list_child_accounts.md
+            text: "List Child Accounts"
+          - file: list_all_accounts.md
+            text: "List All Accounts"
+          - file: find_account_by_name.md
+            text: "Find Account by Name"
+          - file: find_account_by_uuid.md
+            text: "Find Account by UUID"
+          - file: compute_total_balance.md
+            text: "Compute Total Balance"
+          - file: move_balance.md
+            text: "Move Balance"
+          - file: compute_total_due.md
+            text: "Compute Total Due"
+          - file: compute_total_due_within_days.md
+            text: "Due Within Days"
+          - file: spending.md
+            text: "Spending Overview"
+          - file: total_income.md
+            text: "Total Income"
+          - file: allocated_amount.md
+            text: "Allocated Amount"
+          - file: income_utilization.md
+            text: "Income Utilization"
+          - file: walking_amount.md
+            text: "Walking Amount"
+          - file: get_account_status.md
+            text: "Get Account Status"
+          - file: get_priority.md
+            text: "Get Priority"
+          - file: get_due_date.md
+            text: "Get Due Date"
+          - file: get_fixed_amount.md
+            text: "Get Fixed Amount"
+          - file: get_account_type.md
+            text: "Get Account Type"
+          - file: get_account_freq.md
+            text: "Get Frequency"
+          - file: get_account_periods.md
+            text: "Get Periods"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: right

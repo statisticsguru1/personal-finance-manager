@@ -1,0 +1,9 @@
+pandoc: '3.4'
+pkgdown: 2.0.7
+pkgdown_sha: ~
+articles:
+  account_lifecycle: account_lifecycle.html
+  allocation_strategies: allocation_strategies.html
+  finman-overview: finman-overview.html
+last_built: 2025-07-17T12:21Z
+

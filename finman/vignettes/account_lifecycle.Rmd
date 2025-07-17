@@ -1,0 +1,165 @@
+---
+title: "Account Lifecycle and Behavior"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Account Lifecycle and Behavior}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tidyverse)
+library(finman)
+```
+
+
+# 🔄 Account Lifecycle and Behavior
+
+This vignette explains how `finman` manages the **life cycle** of accounts — from creation, activation, allocation, and reactivation after obligations are met or missed.
+
+## 🏗️ 1. Account Creation
+
+Accounts in `finman` are hierarchical:
+
+- `MainAccount` sits at the top and receives deposits.
+- `ChildAccount`s receive allocations from the main account (group of obligations).
+- `GrandchildAccount`s track specific obligations like rent, loans insurance etc.
+
+
+```{r account_creation}
+main <- MainAccount$new("Main")
+needs <- ChildAccount$new("Needs", allocation = 0.5)
+savings <- ChildAccount$new("Savings", allocation = 0.3)
+debt <- ChildAccount$new("Debt", allocation = 0.2)
+
+main$add_child_account(needs)
+main$add_child_account(savings)
+main$add_child_account(debt)
+# Simulate overdue
+rent <- GrandchildAccount$new("Rent", 
+                              freq =1,
+                              due_date = Sys.Date() - 6,
+                              fixed_amount = 5000,
+                              account_type = "Bill")
+needs$add_child_account(rent)
+```
+
+## 🔋 2. Account Status: Active vs Inactive
+
+- Accounts with no allocation (`allocation = 0`) are **inactive** by default.
+- Accounts become **inactive** when their obligations are fully met.
+- Inactive accounts do not receive allocations.
+
+```{r account_status}
+rent$status  # "inactive"
+```
+
+### 🛠️ Reactivating Accounts
+
+Accounts are reactivated automatically when:
+
+- Their due date is reached or passed.
+- They have pending obligations (unpaid periods).
+
+You can also manually reactivate:
+
+```{r, account_reactivation}
+needs$set_child_allocation("Rent", 0.5)
+rent$change_status("active")
+rent$status
+```
+
+## 🔁 3. Automatic Reactivation by Due Date
+
+When a deposit is made for bills and the due date has passed, the account will automatically extend the due period and reactivate itself:
+
+```{r, auto_reactivation}
+rent$deposit(10000, channel = "Bank",date = Sys.Date() - 8) # funded days before due
+rent$get_account_status()
+rent$get_account_periods()
+```
+
+```{r}
+rent$deposit(1000, channel = "Bank",date = Sys.Date() - 3)
+rent$get_account_status()
+rent$get_account_periods()
+```
+
+
+## 📈 4. Priority-Based Greedy Allocation
+
+If multiple children are active, allocations follow the `priority` field:
+
+- Higher priority accounts receive funds first.
+- Allocation is based on defined percentages (`allocation`).so all active children receive their share proportionally.
+
+```{r}
+rent$change_status("active")  # ensure rent is active
+main$deposit(20000, channel = "Equity Bank")
+
+rent$get_balance()      # Rent gets funds
+needs$get_balance()     # Needs balance reflects leftover after rent
+main$get_balance()      # Should be zero if all children are active
+```
+
+However, since funds are distributed proportionally, the effect of priority can be subtle — all active accounts still receive their share.
+
+Priority becomes most apparent when the deposited amount is too small to distribute among all children. In such cases, the full amount is allocated to the child with the highest priority.
+
+```{r priority_checks}
+# set child priorities
+
+needs$set_priority(3)
+savings$set_priority(2)
+debt$set_priority(1)
+
+# deposit money
+main$deposit(10000, channel = "Equity Bank",transaction_number = "Trans1")
+
+# distributions order follows priority see timestamps
+
+needstime=needs$transactions%>%filter(TransactionID=="Trans1")
+savingstime=savings$transactions%>%filter(TransactionID=="Trans1")
+debttime=debt$transactions%>%filter(TransactionID=="Trans1")
+sprintf("needs: %s",needstime$Date)
+sprintf("savings: %s",savingstime$Date)
+sprintf("debt: %s",debttime$Date)
+
+```
+
+
+
+
+> 💡 If an account receives more than it needs, the extra is refunded to the parent and possibly redistributed.
+
+## 🔄 Handling Tiny Refunds and Preventing Cyclic Redistribution
+
+Since refunds are returned to the parent account, they are treated as regular deposits. This ensures that all deposit checks and validations apply uniformly. However, because deposits trigger redistribution to child accounts, this can inadvertently lead to cyclic loops, especially when the refunded amount is very small (e.g., 0.00001).
+
+To prevent such infinite allocation loops, any amount less than 0.10 is not redistributed among all children. Instead, the system deposits the entire small amount into the highest-priority active child account. This strategy maintains consistency while avoiding unnecessary micro-redistribution.
+
+```{r small_deposits}
+main$deposit(0.09, channel = "ABSA",transaction_number = "Test: Small Allocation")
+
+```
+---
+
+# ✅ Summary
+
+- Accounts can be nested, allocated funds, and tracked independently.
+- `finman` intelligently handles activation, deactivation, and reallocation.
+- Periodic obligations trigger reactivation, while priorities determine allocation order.
+
+This lifecycle ensures money flows where it's most needed, without micromanaging every transaction.
+
+---
+
+Next: Try the [`tracking-obligations`](tracking-obligations.html) vignette to dive deeper into bills and debts.
+
