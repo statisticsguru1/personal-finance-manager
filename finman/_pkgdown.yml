@@ -10,7 +10,6 @@ navbar:
       - reference
       - articles
       - news
-    right:
       - main-docs
       - api-docs
   components:
