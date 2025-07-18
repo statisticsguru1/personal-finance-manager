@@ -226,7 +226,7 @@ acc$set_account_periods(3)
 \code{\link{ChildAccount}}, \code{\link{MainAccount}}
 }
 \section{Super classes}{
-\code{finman::MainAccount} -> \code{finman::ChildAccount} -> \code{GrandchildAccount}
+\code{\link[finman:MainAccount]{finman::MainAccount}} -> \code{\link[finman:ChildAccount]{finman::ChildAccount}} -> \code{GrandchildAccount}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -314,7 +314,7 @@ parameters like due dates, target amounts, and funding cycles.
   priority = 0,
   fixed_amount = 0,
   due_date = NULL,
-  account_type = "Bill",
+  account_type = "Expense",
   freq = NULL,
   status = "active"
 )}\if{html}{\out{</div>}}

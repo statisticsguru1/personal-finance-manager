@@ -9,7 +9,7 @@ library(tidyverse)
 test_that("is_valid_user_id correctly validates user IDs", {
   expect_true(is_valid_user_id("user123"))
   expect_true(is_valid_user_id("USER_abc456"))
-  expect_false(is_valid_user_id("user-abc"))
+  expect_true(is_valid_user_id("user-abc"))
   expect_false(is_valid_user_id("user abc"))     # contains space
   expect_false(is_valid_user_id("../../etc"))    # path traversal attempt
   expect_false(is_valid_user_id(""))             # empty string

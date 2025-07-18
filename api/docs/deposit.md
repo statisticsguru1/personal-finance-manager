@@ -84,7 +84,6 @@ Content-Type: application/json
 
 ---
 
----
 ## 💖 Sponsors
 
 Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!

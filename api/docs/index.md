@@ -26,7 +26,7 @@ Welcome to the documentation for the **Personal Finance Manager API** — a secu
 - [POST /set_account_type](set_account_type.md)
 - [POST /set_account_freq](set_account_freq.md)
 - [POST /set_account_periods](set_account_periods.md)
-
+- [POST /register](register.md)
 
 ### GET
 
@@ -52,7 +52,8 @@ Welcome to the documentation for the **Personal Finance Manager API** — a secu
 - [GET /get_account_freq](get_account_freq.md)
 - [GET /get_account_periods](get_account_periods.md)
 
-
+## Delete
+- [DELETE /delete](delete.md)
 ---
 
 ## 🔐 Authentication

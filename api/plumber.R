@@ -4,7 +4,7 @@ library(future)
 library(promises)
 library(tidyverse)
 library(rlang)
-plan(sequential)
+plan(multisession)
 
 #* @apiTitle Personal Finance Manager API
 #* @apiDescription Secure API for managing user accounts, transactions, and balances.
@@ -87,7 +87,16 @@ check_rate_limit <- function(user_id) {
 #* @response 429 Rate limit exceeded or backoff triggered
 #* @response 500 Missing or invalid server secret
 function(req, res) {
-  if (req$PATH_INFO == "/__ping__") return(forward())
+  ip <- req$REMOTE_ADDR %||% "unknown"
+
+  if (req$PATH_INFO %in% c("/__ping__","/login")) {
+    # Apply rate limit based on IP even if auth is skipped
+    if (!check_rate_limit(ip)) {
+      res$status <- 429
+      return(list(error = "Rate limit exceeded. Try again later."))
+    }
+    return(forward())
+  }
 
   auth_header <- req$HTTP_AUTHORIZATION
   if (is.null(auth_header) || !startsWith(auth_header, "Bearer ")) {
@@ -166,6 +175,75 @@ function(req, res) {
 ping <- function() {
   list(status = "ok")
 }
+
+
+# -------------- Register endpoint ----------------------------------------------
+
+#' @tag accounts
+#' @post /register
+#' @summary Register a new user account
+#' @description
+#' Initializes a new user main account with optional initial balance.
+#' Returns the account's UUID upon successful creation.
+#'
+#' @param user_id:str* Unique user identifier (letters, digits, underscores)
+#' @param initial_balance:float Optional starting balance (default = 0)
+register <- function(req, res,
+                     user_id=NULL,
+                     initial_balance = 0) {
+  start_time <- Sys.time()
+
+  future({
+
+    if (is.null(user_id) || user_id == "") {
+      list(
+        success = FALSE,
+        status = 400,
+        error = "user_id is required"
+      )
+    }else{
+
+    # Create main account
+    create_user_account_base(
+      user_id = user_id,
+      initial_balance = as.numeric(initial_balance)
+    )
+
+    # Load UUID
+    uuid <- load_user_file(user_id, "account_tree.Rds")$uuid
+
+    list(
+      success = TRUE,
+      status = 200,
+      user_id = user_id,
+      uuid = uuid
+    )
+    }
+  }) %...>% (function(result) {
+    end_time <- Sys.time()
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(
+      difftime(end_time, start_time, units = "secs")
+    )
+
+    res$status <- result$status
+    result
+  }) %...!% (function(err) {
+    end_time <- Sys.time()
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(end_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(
+        difftime(end_time, start_time, units = "secs")
+      )
+    )
+  })
+}
+
 
 # -------------- Deposit endpoint ----------------------------------------------
 
@@ -3277,6 +3355,72 @@ get_account_periods <- function(req, res, uuid = NULL) {
           units = "secs"
         )
       )
+    )
+  })
+}
+
+
+
+# -------------- Delete User Account ----------------------------------------------
+
+#* @tag accounts
+#* @delete /delete
+#* @summary Delete a user account and its associated data file
+#* @description
+#* Deletes the user's account file (typically `"account_tree.Rds"`) from
+#* persistent storage.
+#* Performs file existence checks and wraps the operation in a file lock to
+#* ensure safe deletion.
+#*
+#* @param user_id:str* The user ID whose account should be deleted.
+delete<-function(req, res, user_id=NULL) {
+  start_time <- Sys.time()
+  future({
+    if (is.null(user_id)||user_id=="") {
+      res$status <- 400
+      return(
+        list(
+          status=400,
+          success = FALSE,
+          error = "Missing required parameter: user_id"
+        )
+      )
+    }
+
+    with_account_lock(user_id, {
+      if (!user_file_exists(user_id)) {
+        return(list(
+          success = FALSE,
+          status = 404,
+          error = sprintf("Account for user_id '%s' does not exist.", user_id)
+        ))
+      }
+
+      remove_user_file(user_id)
+
+      list(
+        success = TRUE,
+        status = 200,
+        message = sprintf("Account for user_id '%s' deleted successfully.", user_id)
+      )
+    })
+  }) %...>% (function(result) {
+    end_time <- Sys.time()
+    result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$end_time <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
+    result$execution_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
+
+    res$status <- result$status %||% 200
+    result
+  }) %...!% (function(err) {
+    end_time <- Sys.time()
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = conditionMessage(err),
+      start_time = format(start_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      end_time = format(end_time, "%Y-%m-%dT%H:%M:%OS3Z"),
+      execution_time = as.numeric(difftime(end_time, start_time, units = "secs"))
     )
   })
 }

@@ -8,10 +8,8 @@
 
 ## 📌 Description
 
-The `auth` filter is applied to all incoming requests **except**:
-- `/register`
-- `/login`
-- `/__ping__`
+The `auth` filter is applied to all incoming requests **While**  `/login`
+and  `/__ping__`, are exempt from JWT authentication, they are still subject to rate limiting and exponential backoff to prevent brute-force attacks.
 
 It performs these responsibilities:
 

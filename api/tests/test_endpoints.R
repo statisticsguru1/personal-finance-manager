@@ -96,9 +96,148 @@ token <- jwt_encode_hmac(
   secret = secret_key
 )
 
+
+
 # ============================================================================
 # Tier one endpoints
 # ============================================================================
+
+# ============================================================================
+# Testing the /register endpoint
+# ============================================================================
+test_that("Register a new user with default balance", {
+  user_id <- uuid::UUIDgenerate()
+  tokenregister <- jwt_encode_hmac(
+    jwt_claim(user_id = user_id, role = "user"),
+    secret = secret_key
+  )
+
+  res <- POST(
+    url = "http://127.0.0.1:8000/register",
+    httr::add_headers(Authorization = paste("Bearer", tokenregister)),
+    body = list(user_id = user_id),
+    encode = "json"
+  )
+  parsed <- jsonlite::fromJSON(rawToChar(res$content))
+  expect_equal(status_code(res), 200)
+  expect_true(parsed$success)
+  expect_equal(parsed$user_id, user_id)
+  expect_match(parsed$uuid, "^[a-f0-9\\-]+$")
+})
+
+test_that("Register with initial balance", {
+  user_id <- uuid::UUIDgenerate()
+  tokenregister <- jwt_encode_hmac(
+    jwt_claim(user_id = user_id, role = "user"),
+    secret = secret_key
+  )
+
+  res <- POST(
+    url = "http://127.0.0.1:8000/register",
+    httr::add_headers(Authorization = paste("Bearer", tokenregister)),
+    body = list(user_id = user_id, initial_balance = 150.75),
+    encode = "json"
+  )
+  parsed <- jsonlite::fromJSON(rawToChar(res$content))
+  expect_equal(status_code(res), 200)
+  expect_true(parsed$success)
+  expect_equal(parsed$user_id, user_id)
+  expect_match(parsed$uuid, "^[a-f0-9\\-]+$")
+})
+
+test_that("Register fails with missing user_id", {
+  user_id <- uuid::UUIDgenerate()
+  tokenregister <- jwt_encode_hmac(
+    jwt_claim(user_id = user_id, role = "user"),
+    secret = secret_key
+  )
+
+  res <- POST(
+    url = "http://127.0.0.1:8000/register",
+    httr::add_headers(Authorization = paste("Bearer", tokenregister)),
+    body = list(initial_balance = 100),
+    encode = "json"
+  )
+
+  parsed <- jsonlite::fromJSON(rawToChar(res$content))
+  expect_equal(status_code(res), 400)
+  expect_false(parsed$success)
+  expect_match(parsed$error, "user_id is required")
+})
+
+test_that("Register fails with empty user_id", {
+  user_id <- uuid::UUIDgenerate()
+  tokenregister <- jwt_encode_hmac(
+    jwt_claim(user_id = user_id, role = "user"),
+    secret = secret_key
+  )
+
+  res <- POST(
+    url = "http://127.0.0.1:8000/register",
+    httr::add_headers(Authorization = paste("Bearer", tokenregister)),
+    body = list(user_id = ""),
+    encode = "json"
+  )
+
+  expect_equal(status_code(res), 400)
+  parsed <- jsonlite::fromJSON(rawToChar(res$content))
+  expect_false(parsed$success)
+  expect_match(parsed$error, "user_id is required")
+})
+
+test_that("Register with invalid initial_balance (non-numeric)", {
+  user_id <- uuid::UUIDgenerate()
+  tokenregister <- jwt_encode_hmac(
+    jwt_claim(user_id = user_id, role = "user"),
+    secret = secret_key
+  )
+
+  res <- POST(
+    url = "http://127.0.0.1:8000/register",
+    httr::add_headers(Authorization = paste("Bearer", tokenregister)),
+    body = list(user_id = user_id, initial_balance = "invalid"),
+    encode = "json"
+  )
+
+  parsed <- jsonlite::fromJSON(rawToChar(res$content))
+  expect_equal(status_code(res), 200)
+  expect_true(parsed$success)
+  expect_equal(parsed$user_id, user_id)
+  # Should still assign default 0 or NA based on coercion behavior
+})
+
+
+test_that("Registering an already existing user returns 409 or succeeds based on backend", {
+  user_id <- uuid::UUIDgenerate()
+  tokenregister <- jwt_encode_hmac(
+    jwt_claim(user_id = user_id, role = "user"),
+    secret = secret_key
+  )
+
+  # First registration
+  res1 <- POST(
+    url = "http://127.0.0.1:8000/register",
+    httr::add_headers(Authorization = paste("Bearer", tokenregister)),
+    body = list(user_id = user_id),
+    encode = "json"
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  expect_equal(status_code(res1), 200)
+
+  # Second registration (expect conflict or overwrite depending on system design)
+  res2 <- POST(
+    url = "http://127.0.0.1:8000/register",
+    httr::add_headers(Authorization = paste("Bearer", tokenregister)),
+    body = list(user_id = user_id),
+    encode = "json"
+  )
+
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  expect_equal(status_code(res2), 500)
+  expect_match(parsed2$error, "User already exists")
+})
+
+
 
 # ============================================================================
 # Testing the /deposit endpoint
@@ -2891,4 +3030,93 @@ test_that("GET /get_account_periods works correctly", {
   expect_equal(httr::status_code(res5), 403)
   expect_false(parsed5$success)
   expect_match(parsed5$error, "only applicable to grandchild accounts")
+})
+
+
+# ============================================================================
+# Testing the /delete
+# ============================================================================
+
+user_id <- uuid::UUIDgenerate()
+token <- jwt_encode_hmac(
+  jwt_claim(user_id = user_id, role = "user"),
+  secret = secret_key
+)
+
+# register the account
+res <- POST(
+  url = "http://127.0.0.1:8000/register",
+  httr::add_headers(Authorization = paste("Bearer", token)),
+  body = list(user_id = user_id),
+  encode = "json"
+)
+
+test_that("Returns error if user_id is missing", {
+  res <- httr::DELETE(
+    url = "http://127.0.0.1:8000/delete",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body=list()
+    )
+
+  parsed <- fromJSON(rawToChar(res$content))
+  expect_equal(res$status_code, 400)
+  expect_false(parsed$success)
+  expect_match(parsed$error, "Missing required parameter")
+})
+
+test_that("Successfully deletes an existing account", {
+  res <- httr::DELETE(
+    url = "http://127.0.0.1:8000/delete",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(user_id = user_id)
+  )
+  parsed <- fromJSON(rawToChar(res$content))
+  expect_equal(res$status_code, 200)
+  expect_true(parsed$success)
+  expect_match(
+    parsed$message,
+    sprintf(
+      "Account for user_id '%s' deleted successfully",
+      user_id
+    )
+  )
+  # File should be gone now
+  expect_false(finman:::user_file_exists(user_id))
+})
+
+
+test_that("Returns 404 if user account does not exist", {
+  user_id <- "nonexistent_user"
+  res <- httr::DELETE(
+    url = "http://127.0.0.1:8000/delete",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(user_id = user_id))
+
+
+  parsed <- fromJSON(rawToChar(res$content))
+
+  expect_equal(res$status_code, 404)
+  expect_false(parsed$success)
+  expect_match(
+    parsed$error,
+    sprintf("Account for user_id '%s' does not exist", user_id)
+  )
+})
+
+
+test_that("Rejects invalid user_id input (e.g., malicious input)", {
+  user_id <- "../etc/passwd"
+  token <- jwt_encode_hmac(
+    jwt_claim(user_id = user_id, role = "user"),
+    secret = secret_key
+  )
+  res <- httr::DELETE(
+    url = "http://127.0.0.1:8000/delete",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(user_id = user_id)
+    )
+
+  parsed <- fromJSON(rawToChar(res$content))
+  expect_true(res$status_code %in% c(400, 500))  # Depending on sanitization
+  expect_false(parsed$success)
 })

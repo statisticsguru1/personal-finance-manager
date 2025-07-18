@@ -68,3 +68,10 @@ GET /allocated_amount?uuid=acc-2023-001&from=2024-01-01&to=2024-12-31
 - Includes all deposits allocated to the account and its descendants.
 
 - If no from or to is provided, defaults to full history.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

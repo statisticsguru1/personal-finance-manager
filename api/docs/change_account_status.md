@@ -69,3 +69,10 @@ Content-Type: application/json
 - Only accounts inheriting from ChildAccount class are eligible.
 
 - This endpoint is locked via with_account_lock() to prevent race conditions during status changes.
+
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

@@ -147,7 +147,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Main Docs</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./../finman/"> 
+    <a class="nav-link" href="./../finman/index.html"> 
 <span class="menu-text">finman</span></a>
   </li>  
 </ul>
@@ -472,7 +472,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <hr>
 <section id="description" class="level2">
 <h2 class="anchored" data-anchor-id="description">📌 Description</h2>
-<p>The <code>auth</code> filter is applied to all incoming requests <strong>except</strong>: - <code>/register</code> - <code>/login</code> - <code>/__ping__</code></p>
+<p>The <code>auth</code> filter is applied to all incoming requests <strong>While</strong> <code>/login</code> and <code>/__ping__</code>, are exempt from JWT authentication, they are still subject to rate limiting and exponential backoff to prevent brute-force attacks.</p>
 <p>It performs these responsibilities:</p>
 <ul>
 <li>🔑 Verifies Bearer token from the <code>Authorization</code> header</li>

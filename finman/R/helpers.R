@@ -19,7 +19,7 @@ library(tidyverse)
 #'
 #' @export
 is_valid_user_id <- function(user_id) {
-  grepl("^[a-zA-Z0-9_]+$", user_id)
+  grepl("^[a-zA-Z0-9_-]+$", user_id)
 }
 
 #--------------- creates base account during reg----------------------------

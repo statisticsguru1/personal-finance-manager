@@ -146,3 +146,9 @@ needs$add_child_account(GrandchildAccount$new("Food", fixed_amount = 3000, freq 
 
 > 🧹 You can freely design any hierarchy with flexible allocation totals. Add/remove groups or goals as your finances evolve.
 
+---
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

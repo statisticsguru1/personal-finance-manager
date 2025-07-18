@@ -106,6 +106,12 @@ website:
             text: "Get Frequency"
           - file: get_account_periods.md
             text: "Get Periods"
+      - section: "Delete"
+        contents:
+          - file: delete.md
+            text: "Delete"
+
+
 
 format:
   html:
