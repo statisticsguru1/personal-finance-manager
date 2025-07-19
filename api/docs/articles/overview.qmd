@@ -1,0 +1,349 @@
+---
+title: "Finance Manager API: Overview"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Finance Manager API Overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(httr)
+library(jose)
+library(jsonlite)
+library(finman)
+library(withr)
+library(here)
+```
+
+## Background
+
+This vignette provides an overview of how to interact with the **Finance Manager API** from R. It demonstrates how to simulate client interactions such as account registration, login, and balance queries.
+
+## API set up
+
+This part is only needed if the API is not hosted.
+Since the server is not deployed publicly, we **start the API server locally in the background** using the [`callr`](https://callr.r-lib.org) package. This lets us send HTTP requests to the locally running server just like a real client would.
+
+
+###  First set up the env variables
+
+```{r add_env_vals}
+tmp_dir <- tempfile("test-api-deposit-") 
+dir.create(tmp_dir, recursive = TRUE)    # creating a temporally accounts folder
+                                         # this will be permanent dir on deployment
+Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)   # use tempfile to avoid contamination
+Sys.setenv(ACCOUNT_BACKEND = "file")     # default storage backend(local dir)
+Sys.setenv(MAX_REQUESTS = 1000)          # maximum requests per rate limit
+Sys.setenv(WINDOW_SIZE = 3600)           # rate limit window size
+Sys.setenv(JWT_SECRET = "test-secret")   # secret Key for signing tokens
+secret_key <- Sys.getenv("JWT_SECRET")
+```
+
+
+### Function to listen if server is live
+
+This function pings the server after every 0.1 seconds with a timeout of 80 seconds to establish if its live. Its a way to avoid sending request when server is not live.
+
+```{r fun_to_check_server}
+wait_for_server_ready <- function(
+  url = "http://127.0.0.1:8000/__ping__",
+  timeout = 40
+) {
+  start_time <- Sys.time()
+  while (as.numeric(Sys.time() - start_time, units = "secs") < timeout) {
+    res <- tryCatch(httr::GET(url), error = function(e) NULL)
+    if (!is.null(res) && httr::status_code(res) == 200) return(TRUE)
+    Sys.sleep(0.10)
+  }
+  stop("Server did not become ready within timeout.")
+}
+```
+
+
+### Spin up the server
+
+Spin up the server on background but capture both std output and stderr for debugging.
+> This approach is ideal for testing and documenting the API **without requiring a live deployment**.
+
+```{r spin_server}
+log_out <- tempfile("server-out-", fileext = ".log")
+log_err <- tempfile("server-err-", fileext = ".log")
+
+server <- callr::r_bg(
+  function(main_file, jwt, base_dir, project_dir) {
+    setwd(project_dir)
+    Sys.setenv(JWT_SECRET = jwt)
+    Sys.setenv(ACCOUNT_BASE_DIR = base_dir)
+    Sys.setenv(ACCOUNT_BACKEND = "file")
+    source(main_file)
+  },
+  args = list(
+    main_file = here("api", "main.R"),
+    jwt = secret_key,
+    base_dir = tmp_dir,
+    project_dir = here()
+  ),
+  stdout = log_out,
+  stderr = log_err
+)
+
+
+withr::defer({
+  if (server$is_alive()) server$kill()
+  cat("📤 Server stdout:\n")
+  cat(readLines(log_out, warn = FALSE), sep = "\n")
+  cat("\n📥 Server stderr:\n")
+  cat(readLines(log_err, warn = FALSE), sep = "\n")
+}, envir = parent.frame())
+```
+
+
+### Wait for the server to be ready.
+
+```{r wait_server}
+wait_for_server_ready("http://127.0.0.1:8000/__ping__")
+```
+
+
+## Interact with the server.
+
+This is where where to start if the server is hosted. 
+
+### create auth token
+
+You need to a signed JWT authorization token to access the API. this API being part of backend it is assumed when users are signed in from the front end they are granted the auth token below.
+
+```{r generate_token}
+user_id =uuid::UUIDgenerate()                 # generate a user id
+token <- jwt_encode_hmac(
+  jwt_claim(user_id = user_id, role = "user"),
+  secret = secret_key
+)
+```
+
+
+### 1) create account.
+create a user account. this will return the base/root account.
+```{r create_account}
+  res <- POST(
+    url = "http://127.0.0.1:8000/register",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(user_id = user_id),
+    encode = "json"
+  )
+  parsed <- jsonlite::fromJSON(rawToChar(res$content))
+  print(parsed)
+```
+
+### check account balance
+
+2) lets see the balance of the created account  
+```{r check_bal_base_acc}
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_balance",
+    query = list(uuid = parsed$uuid),
+    httr::add_headers(Authorization = paste("Bearer", token))
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  print(parsed1)
+```
+
+### see transaction list
+
+currently the account has no transactions
+
+```{r check_tra_base_acc}
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_transactions",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = parsed$uuid)
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  print(parsed1)
+```
+
+
+
+###  list child accounts
+
+currently we havent added any  child
+```{r list_children_acc}
+  res1 <- httr::GET(
+    url = "http://127.0.0.1:8000/list_child_accounts",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = parsed$uuid)
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  print(parsed1)
+```
+
+
+###  attach child accounts 
+
+Attaching child accounts
+
+```{r attach_children_acc}
+res1 <- httr::POST(
+    url = "http://127.0.0.1:8000/add_sub_account",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    encode = "json",
+    body = list(
+      parent_uuid = parsed$uuid,
+      name = "Needs",
+      allocation = 0.5
+    )
+  )
+  parsed1 <- jsonlite::fromJSON(rawToChar(res1$content))
+  print(parsed1)
+  
+res2 <- httr::POST(
+    url = "http://127.0.0.1:8000/add_sub_account",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    encode = "json",
+    body = list(
+      parent_uuid = parsed$uuid,
+      name = "Wants",
+      allocation = 0.3
+    )
+  )
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  print(parsed2)
+
+res3 <- httr::POST(
+    url = "http://127.0.0.1:8000/add_sub_account",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    encode = "json",
+    body = list(
+      parent_uuid = parsed$uuid,
+      name = "Savings",
+      allocation = 0.2
+    )
+  )
+  parsed3 <- jsonlite::fromJSON(rawToChar(res3$content))
+  print(parsed3)
+```
+
+### deposit to main
+
+```{r deposit_to main}
+
+res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/deposit",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = parsed$uuid, amount = 40000, channel = "ABSA bank"),
+    encode = "form"
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+print(parsed4)
+```
+```{r deposit_to needs}
+
+res4 <- httr::POST(
+    url = "http://127.0.0.1:8000/deposit",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = parsed1$uuid, amount = 20000, channel = "Stanbic bank"),
+    encode = "form"
+  )
+  parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
+print(parsed4)
+```
+
+
+### Withdraw from needs account
+
+```{r withdraw}
+  res5 <- httr::POST(
+    url = "http://127.0.0.1:8000/withdraw",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    body = list(uuid = parsed1$uuid, amount = 20000, channel = "mpesa"),
+    encode = "form"
+  )
+  parsed5 <- jsonlite::fromJSON(rawToChar(res5$content))
+  print(parsed5)
+```
+
+
+
+### Check  needs balance 
+
+```{r check balance after}
+  res6 <- httr::GET(
+    url = "http://127.0.0.1:8000/get_balance",
+    query = list(uuid = parsed1$uuid),
+    httr::add_headers(Authorization = paste("Bearer", token))
+  )
+  parsed6 <- jsonlite::fromJSON(rawToChar(res6$content))
+  print(parsed6)
+```
+
+
+
+
+### compute total balance
+
+```{r compute_total_balance}
+  res7 <- httr::GET(
+    url = "http://127.0.0.1:8000/compute_total_balance",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = parsed$uuid)
+  )
+  parsed7 <- jsonlite::fromJSON(rawToChar(res7$content))
+  print(parsed7)
+```
+
+
+
+### compute total due
+
+```{r compute_total_due}
+  res8 <- httr::GET(
+    url = "http://127.0.0.1:8000/compute_total_due",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = parsed$uuid)
+    
+  )
+parsed8 <- jsonlite::fromJSON(rawToChar(res8$content))
+print(parsed8)
+```
+  
+
+### compute total income
+
+```{r compute_total_income} 
+  res9 <- httr::GET(
+    url = "http://127.0.0.1:8000/total_income",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = parsed$uuid)
+  )
+  parsed9 <- jsonlite::fromJSON(rawToChar(res9$content))
+  print(parsed9)
+```
+
+
+### Total spend
+
+```{r spending}
+
+  res11 <- httr::GET(
+    url = "http://127.0.0.1:8000/spending",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = parsed$uuid)
+  )
+  parsed11 <- jsonlite::fromJSON(rawToChar(res11$content))
+  print(parsed11)
+```
+
+
+### Income utilization
+
+```{r utilization}
+  res10 <- httr::GET(
+    url = "http://127.0.0.1:8000/income_utilization",
+    httr::add_headers(Authorization = paste("Bearer", token)),
+    query = list(uuid = parsed$uuid)
+  )
+  parsed10 <- jsonlite::fromJSON(rawToChar(res10$content))
+  print(parsed10)
+```

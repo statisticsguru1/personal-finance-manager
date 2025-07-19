@@ -10,10 +10,8 @@ website:
         file: index.md
       - text: "Articles"
         menu:
-          - text: "Using the API"
-            file: articles/using-api.qmd
-          - text: "Account Lifecycle"
-            file: articles/account-lifecycle.qmd
+          - text: "API overview"
+            file: articles/overview.qmd
       - text: "Main Docs"
         href: ../
       - text: "finman"

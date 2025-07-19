@@ -1498,7 +1498,7 @@
     "href": "deposit.html",
     "title": "💰 POST /deposit",
     "section": "",
-    "text": "Deposits funds into a user’s account. Requires a valid JWT token and a UUID identifying the account. Updates balances and persists changes securely.\n\n\n\n\nMethod: POST\nURL: /deposit\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to deposit into\n\n\namount\nfloat\n✅\nAmount to deposit\n\n\nchannel\nstring\n✅\nDeposit channel (e.g., M-Pesa, Bank)\n\n\ntransaction_number\nstring\n❌\nOptional reference number\n\n\nby\nstring\n❌\nWho performed the deposit (default = User)\n\n\ndate\nstring\n❌\nDeposit timestamp (default = now)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1500,\n  \"channel\": \"mpesa\",\n  \"transaction_number\": \"MPESA123456\",\n  \"by\": \"User\"\n}\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"account_uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1500,\n  \"balance\": 3300,\n  \"start_time\": \"2025-07-10T08:50:15.123Z\",\n  \"end_time\": \"2025-07-10T08:50:15.200Z\",\n  \"execution_time\": 0.077\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized for this account\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nUses a lock mechanism to ensure safe concurrent writes.\nReturns structured timing for performance tracking.\nMust be called after auth (JWT must be valid).\n\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "text": "Deposits funds into a user’s account. Requires a valid JWT token and a UUID identifying the account. Updates balances and persists changes securely.\n\n\n\n\nMethod: POST\nURL: /deposit\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to deposit into\n\n\namount\nfloat\n✅\nAmount to deposit\n\n\nchannel\nstring\n✅\nDeposit channel (e.g., M-Pesa, Bank)\n\n\ntransaction_number\nstring\n❌\nOptional reference number\n\n\nby\nstring\n❌\nWho performed the deposit (default = User)\n\n\ndate\nstring\n❌\nDeposit timestamp (default = now)\n\n\n\n\n\n\n\n{\n  \"uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1500,\n  \"channel\": \"mpesa\",\n  \"transaction_number\": \"MPESA123456\",\n  \"by\": \"User\"\n}\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"account_uuid\": \"acc-2023-savings-abc123\",\n  \"amount\": 1500,\n  \"balance\": 3300,\n  \"start_time\": \"2025-07-10T08:50:15.123Z\",\n  \"end_time\": \"2025-07-10T08:50:15.200Z\",\n  \"execution_time\": 0.077\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n403\nUnauthorized for this account\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\n\nUses a lock mechanism to ensure safe concurrent writes.\nReturns structured timing for performance tracking.\nMust be called after auth (JWT must be valid).\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -1702,7 +1702,7 @@
     "href": "compute_total_balance.html",
     "title": "📊 GET /compute_total_balance",
     "section": "",
-    "text": "Returns the total balance of a specified account including all its children and descendants.\n\n\n\n\nMethod: GET\nURL: /compute_total_balance\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to compute total balance for\n\n\n\n\n\n\n\nGET /compute_total_balance?uuid=acc-2024-456\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-456\",\n  \"total_balance\": 18450.75,\n  \"start_time\": \"2025-07-10T13:02:15.120Z\",\n  \"end_time\": \"2025-07-10T13:02:15.180Z\",\n  \"execution_time\": 0.06\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing or invalid UUID\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nInternally calls account$compute_total_balance().\nThis is a read-only operation (no locking needed).\nIdeal for getting an overview of full funds under a category like “Needs” or “Investments”.",
+    "text": "Returns the total balance of a specified account including all its children and descendants.\n\n\n\n\nMethod: GET\nURL: /compute_total_balance\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to compute total balance for\n\n\n\n\n\n\n\nGET /compute_total_balance?uuid=acc-2024-456\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2024-456\",\n  \"total_balance\": 18450.75,\n  \"start_time\": \"2025-07-10T13:02:15.120Z\",\n  \"end_time\": \"2025-07-10T13:02:15.180Z\",\n  \"execution_time\": 0.06\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing or invalid UUID\n\n\n403\nUnauthorized to access the account\n\n\n404\nAccount not found\n\n\n500\nInternal server error\n\n\n\n\n\n\n\nInternally calls account$compute_total_balance().\nThis is a read-only operation (no locking needed).\nIdeal for getting an overview of full funds under a category like “Needs” or “Investments”.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -1794,6 +1794,18 @@
     ]
   },
   {
+    "objectID": "compute_total_balance.html#sponsors",
+    "href": "compute_total_balance.html#sponsors",
+    "title": "📊 GET /compute_total_balance",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Compute Total Balance"
+    ]
+  },
+  {
     "objectID": "auth-filter.html",
     "href": "auth-filter.html",
     "title": "🔐 Auth Filter",
@@ -1878,67 +1890,11 @@
     ]
   },
   {
-    "objectID": "add_sub_account.html",
-    "href": "add_sub_account.html",
-    "title": "🧩 POST /add_sub_account",
-    "section": "",
-    "text": "Creates a new child or grandchild account under a specified parent account.\n\n\n\n\nMethod: POST\nURL: /add_sub_account\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nparent_uuid\nstring\n✅\nUUID of the parent account\n\n\nname\nstring\n✅\nName of the new account (must be unique under this parent)\n\n\nallocation\nfloat\n✅\nAllocation percentage (between 0 and 1)\n\n\npriority\nint\n❌\nPriority weight for ordering (default: 0)\n\n\nfixed_amount\nfloat\n❌\nFixed allocation amount (only used for grandchild accounts)\n\n\ndue_date\nstring\n❌\nOptional due date (ISO-8601 format)\n\n\naccount_type\nstring\n❌\nType of grandchild account (e.g., “loan”, “expense”)\n\n\nfreq\nint\n❌\nFrequency of recurring charges (used only for grandchild accounts)\n\n\n\n\n\n\n\n{\n  \"parent_uuid\": \"acc-main-2023-001\",\n  \"name\": \"Rent\",\n  \"allocation\": 0.3,\n  \"priority\": 1,\n  \"fixed_amount\": 2000,\n  \"due_date\": \"2025-08-01T00:00:00Z\",\n  \"account_type\": \"fixed\",\n  \"freq\": 30\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Rent added under Needs\",\n  \"child_type\": \"GrandchildAccount\",\n  \"allocation\": 0.3,\n  \"start_time\": \"2025-07-10T10:01:35.120Z\",\n  \"end_time\": \"2025-07-10T10:01:35.210Z\",\n  \"execution_time\": 0.09\n}\n\n\n\n\n\n\nStatus\nError Reason\n\n\n\n\n404\nParent account not found\n\n\n400\nInvalid allocation or name already exists\n\n\n500\nUnexpected system or conversion errors\n\n\n\n\n\n\n\nDetermines account type by checking the class of the parent account.\nLocks the user’s account tree during modification.\nAll accounts are persisted to account_tree.Rds."
-  },
-  {
-    "objectID": "add_sub_account.html#summary",
-    "href": "add_sub_account.html#summary",
-    "title": "🧩 POST /add_sub_account",
-    "section": "",
-    "text": "Method: POST\nURL: /add_sub_account\nAuth: Required\nTag: accounts"
-  },
-  {
-    "objectID": "add_sub_account.html#headers",
-    "href": "add_sub_account.html#headers",
-    "title": "🧩 POST /add_sub_account",
-    "section": "",
-    "text": "Authorization: Bearer &lt;your-token&gt;\nContent-Type: application/json"
-  },
-  {
-    "objectID": "add_sub_account.html#request-parameters",
-    "href": "add_sub_account.html#request-parameters",
-    "title": "🧩 POST /add_sub_account",
-    "section": "",
-    "text": "Name\nType\nRequired\nDescription\n\n\n\n\nparent_uuid\nstring\n✅\nUUID of the parent account\n\n\nname\nstring\n✅\nName of the new account (must be unique under this parent)\n\n\nallocation\nfloat\n✅\nAllocation percentage (between 0 and 1)\n\n\npriority\nint\n❌\nPriority weight for ordering (default: 0)\n\n\nfixed_amount\nfloat\n❌\nFixed allocation amount (only used for grandchild accounts)\n\n\ndue_date\nstring\n❌\nOptional due date (ISO-8601 format)\n\n\naccount_type\nstring\n❌\nType of grandchild account (e.g., “loan”, “expense”)\n\n\nfreq\nint\n❌\nFrequency of recurring charges (used only for grandchild accounts)"
-  },
-  {
-    "objectID": "add_sub_account.html#example-request",
-    "href": "add_sub_account.html#example-request",
-    "title": "🧩 POST /add_sub_account",
-    "section": "",
-    "text": "{\n  \"parent_uuid\": \"acc-main-2023-001\",\n  \"name\": \"Rent\",\n  \"allocation\": 0.3,\n  \"priority\": 1,\n  \"fixed_amount\": 2000,\n  \"due_date\": \"2025-08-01T00:00:00Z\",\n  \"account_type\": \"fixed\",\n  \"freq\": 30\n}"
-  },
-  {
-    "objectID": "add_sub_account.html#success-response",
-    "href": "add_sub_account.html#success-response",
-    "title": "🧩 POST /add_sub_account",
-    "section": "",
-    "text": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Rent added under Needs\",\n  \"child_type\": \"GrandchildAccount\",\n  \"allocation\": 0.3,\n  \"start_time\": \"2025-07-10T10:01:35.120Z\",\n  \"end_time\": \"2025-07-10T10:01:35.210Z\",\n  \"execution_time\": 0.09\n}"
-  },
-  {
-    "objectID": "add_sub_account.html#failure-responses",
-    "href": "add_sub_account.html#failure-responses",
-    "title": "🧩 POST /add_sub_account",
-    "section": "",
-    "text": "Status\nError Reason\n\n\n\n\n404\nParent account not found\n\n\n400\nInvalid allocation or name already exists\n\n\n500\nUnexpected system or conversion errors"
-  },
-  {
-    "objectID": "add_sub_account.html#notes",
-    "href": "add_sub_account.html#notes",
-    "title": "🧩 POST /add_sub_account",
-    "section": "",
-    "text": "Determines account type by checking the class of the parent account.\nLocks the user’s account tree during modification.\nAll accounts are persisted to account_tree.Rds."
-  },
-  {
     "objectID": "allocated_amount.html",
     "href": "allocated_amount.html",
     "title": "🪙 GET /allocated_amount",
     "section": "",
-    "text": "Returns the total allocated amount (deposits) for an account and all its child accounts in a specified date range.\n\n\n\n\nMethod: GET\nURL: /allocated_amount\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to compute allocation for\n\n\nfrom\nstring\n❌\nStart date (YYYY-MM-DD). Defaults to earliest date\n\n\nto\nstring\n❌\nEnd date (YYYY-MM-DD). Defaults to today\n\n\n\n\n\n\n\nGET /allocated_amount?uuid=acc-2023-001&from=2024-01-01&to=2024-12-31\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2023-001\",\n  \"from\": \"2024-01-01\",\n  \"to\": \"2024-12-31\",\n  \"allocated_amount\": 21500,\n  \"start_time\": \"2025-07-10T15:42:31.115Z\",\n  \"end_time\": \"2025-07-10T15:42:31.162Z\",\n  \"execution_time\": 0.047\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID missing or invalid\n\n\n403\nUnauthorized access\n\n\n404\nAccount not found\n\n\n500\nInternal server error or invalid date\n\n\n\n\n\n\n\nInternally uses account$allocated_amount(date_range).\nIncludes all deposits allocated to the account and its descendants.\nIf no from or to is provided, defaults to full history.",
+    "text": "Returns the total allocated amount (deposits) for an account and all its child accounts in a specified date range.\n\n\n\n\nMethod: GET\nURL: /allocated_amount\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to compute allocation for\n\n\nfrom\nstring\n❌\nStart date (YYYY-MM-DD). Defaults to earliest date\n\n\nto\nstring\n❌\nEnd date (YYYY-MM-DD). Defaults to today\n\n\n\n\n\n\n\nGET /allocated_amount?uuid=acc-2023-001&from=2024-01-01&to=2024-12-31\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"acc-2023-001\",\n  \"from\": \"2024-01-01\",\n  \"to\": \"2024-12-31\",\n  \"allocated_amount\": 21500,\n  \"start_time\": \"2025-07-10T15:42:31.115Z\",\n  \"end_time\": \"2025-07-10T15:42:31.162Z\",\n  \"execution_time\": 0.047\n}\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nUUID missing or invalid\n\n\n403\nUnauthorized access\n\n\n404\nAccount not found\n\n\n500\nInternal server error or invalid date\n\n\n\n\n\n\n\nInternally uses account$allocated_amount(date_range).\nIncludes all deposits allocated to the account and its descendants.\nIf no from or to is provided, defaults to full history.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📥 GET Endpoints",
@@ -2030,11 +1986,114 @@
     ]
   },
   {
+    "objectID": "allocated_amount.html#sponsors",
+    "href": "allocated_amount.html#sponsors",
+    "title": "🪙 GET /allocated_amount",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "📥 GET Endpoints",
+      "Allocated Amount"
+    ]
+  },
+  {
+    "objectID": "add_sub_account.html",
+    "href": "add_sub_account.html",
+    "title": "🧩 POST /add_sub_account",
+    "section": "",
+    "text": "Creates a new child or grandchild account under a specified parent account.\n\n\n\n\nMethod: POST\nURL: /add_sub_account\nAuth: Required\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nparent_uuid\nstring\n✅\nUUID of the parent account\n\n\nname\nstring\n✅\nName of the new account (must be unique under this parent)\n\n\nallocation\nfloat\n✅\nAllocation percentage (between 0 and 1)\n\n\npriority\nint\n❌\nPriority weight for ordering (default: 0)\n\n\nfixed_amount\nfloat\n❌\nFixed allocation amount (only used for grandchild accounts)\n\n\ndue_date\nstring\n❌\nOptional due date (ISO-8601 format)\n\n\naccount_type\nstring\n❌\nType of grandchild account (e.g., “loan”, “expense”)\n\n\nfreq\nint\n❌\nFrequency of recurring charges (used only for grandchild accounts)\n\n\n\n\n\n\n\n{\n  \"parent_uuid\": \"acc-main-2023-001\",\n  \"name\": \"Rent\",\n  \"allocation\": 0.3,\n  \"priority\": 1,\n  \"fixed_amount\": 2000,\n  \"due_date\": \"2025-08-01T00:00:00Z\",\n  \"account_type\": \"fixed\",\n  \"freq\": 30\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Rent added under Needs\",\n  \"child_type\": \"GrandchildAccount\",\n  \"allocation\": 0.3,\n  \"start_time\": \"2025-07-10T10:01:35.120Z\",\n  \"end_time\": \"2025-07-10T10:01:35.210Z\",\n  \"execution_time\": 0.09\n}\n\n\n\n\n\n\nStatus\nError Reason\n\n\n\n\n404\nParent account not found\n\n\n400\nInvalid allocation or name already exists\n\n\n500\nUnexpected system or conversion errors\n\n\n\n\n\n\n\nDetermines account type by checking the class of the parent account.\nLocks the user’s account tree during modification.\nAll accounts are persisted to account_tree.Rds.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors"
+  },
+  {
+    "objectID": "add_sub_account.html#summary",
+    "href": "add_sub_account.html#summary",
+    "title": "🧩 POST /add_sub_account",
+    "section": "",
+    "text": "Method: POST\nURL: /add_sub_account\nAuth: Required\nTag: accounts"
+  },
+  {
+    "objectID": "add_sub_account.html#headers",
+    "href": "add_sub_account.html#headers",
+    "title": "🧩 POST /add_sub_account",
+    "section": "",
+    "text": "Authorization: Bearer &lt;your-token&gt;\nContent-Type: application/json"
+  },
+  {
+    "objectID": "add_sub_account.html#request-parameters",
+    "href": "add_sub_account.html#request-parameters",
+    "title": "🧩 POST /add_sub_account",
+    "section": "",
+    "text": "Name\nType\nRequired\nDescription\n\n\n\n\nparent_uuid\nstring\n✅\nUUID of the parent account\n\n\nname\nstring\n✅\nName of the new account (must be unique under this parent)\n\n\nallocation\nfloat\n✅\nAllocation percentage (between 0 and 1)\n\n\npriority\nint\n❌\nPriority weight for ordering (default: 0)\n\n\nfixed_amount\nfloat\n❌\nFixed allocation amount (only used for grandchild accounts)\n\n\ndue_date\nstring\n❌\nOptional due date (ISO-8601 format)\n\n\naccount_type\nstring\n❌\nType of grandchild account (e.g., “loan”, “expense”)\n\n\nfreq\nint\n❌\nFrequency of recurring charges (used only for grandchild accounts)"
+  },
+  {
+    "objectID": "add_sub_account.html#example-request",
+    "href": "add_sub_account.html#example-request",
+    "title": "🧩 POST /add_sub_account",
+    "section": "",
+    "text": "{\n  \"parent_uuid\": \"acc-main-2023-001\",\n  \"name\": \"Rent\",\n  \"allocation\": 0.3,\n  \"priority\": 1,\n  \"fixed_amount\": 2000,\n  \"due_date\": \"2025-08-01T00:00:00Z\",\n  \"account_type\": \"fixed\",\n  \"freq\": 30\n}"
+  },
+  {
+    "objectID": "add_sub_account.html#success-response",
+    "href": "add_sub_account.html#success-response",
+    "title": "🧩 POST /add_sub_account",
+    "section": "",
+    "text": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Rent added under Needs\",\n  \"child_type\": \"GrandchildAccount\",\n  \"allocation\": 0.3,\n  \"start_time\": \"2025-07-10T10:01:35.120Z\",\n  \"end_time\": \"2025-07-10T10:01:35.210Z\",\n  \"execution_time\": 0.09\n}"
+  },
+  {
+    "objectID": "add_sub_account.html#failure-responses",
+    "href": "add_sub_account.html#failure-responses",
+    "title": "🧩 POST /add_sub_account",
+    "section": "",
+    "text": "Status\nError Reason\n\n\n\n\n404\nParent account not found\n\n\n400\nInvalid allocation or name already exists\n\n\n500\nUnexpected system or conversion errors"
+  },
+  {
+    "objectID": "add_sub_account.html#notes",
+    "href": "add_sub_account.html#notes",
+    "title": "🧩 POST /add_sub_account",
+    "section": "",
+    "text": "Determines account type by checking the class of the parent account.\nLocks the user’s account tree during modification.\nAll accounts are persisted to account_tree.Rds."
+  },
+  {
+    "objectID": "add_sub_account.html#sponsors",
+    "href": "add_sub_account.html#sponsors",
+    "title": "🧩 POST /add_sub_account",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors"
+  },
+  {
+    "objectID": "articles/overview.html",
+    "href": "articles/overview.html",
+    "title": "Finance Manager API: Overview",
+    "section": "",
+    "text": "This vignette provides an overview of how to interact with the Finance Manager API from R. It demonstrates how to simulate client interactions such as account registration, login, and balance queries."
+  },
+  {
+    "objectID": "articles/overview.html#background",
+    "href": "articles/overview.html#background",
+    "title": "Finance Manager API: Overview",
+    "section": "",
+    "text": "This vignette provides an overview of how to interact with the Finance Manager API from R. It demonstrates how to simulate client interactions such as account registration, login, and balance queries."
+  },
+  {
+    "objectID": "articles/overview.html#api-set-up",
+    "href": "articles/overview.html#api-set-up",
+    "title": "Finance Manager API: Overview",
+    "section": "API set up",
+    "text": "API set up\nThis part is only needed if the API is not hosted. Since the server is not deployed publicly, we start the API server locally in the background using the callr package. This lets us send HTTP requests to the locally running server just like a real client would.\n\nFirst set up the env variables\n\ntmp_dir &lt;- tempfile(\"test-api-deposit-\") \ndir.create(tmp_dir, recursive = TRUE)    # creating a temporally accounts folder\n                                         # this will be permanent dir on deployment\nSys.setenv(ACCOUNT_BASE_DIR = tmp_dir)   # use tempfile to avoid contamination\nSys.setenv(ACCOUNT_BACKEND = \"file\")     # default storage backend(local dir)\nSys.setenv(MAX_REQUESTS = 1000)          # maximum requests per rate limit\nSys.setenv(WINDOW_SIZE = 3600)           # rate limit window size\nSys.setenv(JWT_SECRET = \"test-secret\")   # secret Key for signing tokens\nsecret_key &lt;- Sys.getenv(\"JWT_SECRET\")\n\n\n\nFunction to listen if server is live\nThis function pings the server after every 0.1 seconds with a timeout of 80 seconds to establish if its live. Its a way to avoid sending request when server is not live.\n\nwait_for_server_ready &lt;- function(\n  url = \"http://127.0.0.1:8000/__ping__\",\n  timeout = 40\n) {\n  start_time &lt;- Sys.time()\n  while (as.numeric(Sys.time() - start_time, units = \"secs\") &lt; timeout) {\n    res &lt;- tryCatch(httr::GET(url), error = function(e) NULL)\n    if (!is.null(res) && httr::status_code(res) == 200) return(TRUE)\n    Sys.sleep(0.10)\n  }\n  stop(\"Server did not become ready within timeout.\")\n}\n\n\n\nSpin up the server\nSpin up the server on background but capture both std output and stderr for debugging. &gt; This approach is ideal for testing and documenting the API without requiring a live deployment.\n\nlog_out &lt;- tempfile(\"server-out-\", fileext = \".log\")\nlog_err &lt;- tempfile(\"server-err-\", fileext = \".log\")\n\nserver &lt;- callr::r_bg(\n  function(main_file, jwt, base_dir, project_dir) {\n    setwd(project_dir)\n    Sys.setenv(JWT_SECRET = jwt)\n    Sys.setenv(ACCOUNT_BASE_DIR = base_dir)\n    Sys.setenv(ACCOUNT_BACKEND = \"file\")\n    source(main_file)\n  },\n  args = list(\n    main_file = here(\"api\", \"main.R\"),\n    jwt = secret_key,\n    base_dir = tmp_dir,\n    project_dir = here()\n  ),\n  stdout = log_out,\n  stderr = log_err\n)\n\nSuperclass process has cloneable=FALSE, but subclass r_process has cloneable=TRUE. A subclass cannot be cloneable when its superclass is not cloneable, so cloning will be disabled for r_process.\n\nwithr::defer({\n  if (server$is_alive()) server$kill()\n  cat(\"📤 Server stdout:\\n\")\n  cat(readLines(log_out, warn = FALSE), sep = \"\\n\")\n  cat(\"\\n📥 Server stderr:\\n\")\n  cat(readLines(log_err, warn = FALSE), sep = \"\\n\")\n}, envir = parent.frame())\n\n📤 Server stdout:\n\n\n📥 Server stderr:\n\n\n\n\nWait for the server to be ready.\n\nwait_for_server_ready(\"http://127.0.0.1:8000/__ping__\")\n\n[1] TRUE"
+  },
+  {
+    "objectID": "articles/overview.html#interact-with-the-server.",
+    "href": "articles/overview.html#interact-with-the-server.",
+    "title": "Finance Manager API: Overview",
+    "section": "Interact with the server.",
+    "text": "Interact with the server.\nThis is where where to start if the server is hosted.\n\ncreate auth token\nYou need to a signed JWT authorization token to access the API. this API being part of backend it is assumed when users are signed in from the front end they are granted the auth token below.\n\nuser_id =uuid::UUIDgenerate()                 # generate a user id\ntoken &lt;- jwt_encode_hmac(\n  jwt_claim(user_id = user_id, role = \"user\"),\n  secret = secret_key\n)\n\n\n\n1) create account.\ncreate a user account. this will return the base/root account.\n\n  res &lt;- POST(\n    url = \"http://127.0.0.1:8000/register\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    body = list(user_id = user_id),\n    encode = \"json\"\n  )\n  parsed &lt;- jsonlite::fromJSON(rawToChar(res$content))\n  print(parsed)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$user_id\n[1] \"700ea057-e217-4d8e-bd08-09fc2bcbe15a\"\n\n$uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$start_time\n[1] \"2025-07-18T23:16:38.903Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:39.157Z\"\n\n$execution_time\n[1] 0.2536\n\n\n\n\ncheck account balance\n\nlets see the balance of the created account\n\n\n  res1 &lt;- httr::GET(\n    url = \"http://127.0.0.1:8000/get_balance\",\n    query = list(uuid = parsed$uuid),\n    httr::add_headers(Authorization = paste(\"Bearer\", token))\n  )\n  parsed1 &lt;- jsonlite::fromJSON(rawToChar(res1$content))\n  print(parsed1)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$balance\n[1] 0\n\n$start_time\n[1] \"2025-07-18T23:16:39.239Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:39.426Z\"\n\n$execution_time\n[1] 0.187\n\n\n\n\nsee transaction list\ncurrently the account has no transactions\n\n  res1 &lt;- httr::GET(\n    url = \"http://127.0.0.1:8000/get_transactions\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    query = list(uuid = parsed$uuid)\n  )\n  parsed1 &lt;- jsonlite::fromJSON(rawToChar(res1$content))\n  print(parsed1)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$transaction_count\n[1] 0\n\n$transactions\nlist()\n\n$start_time\n[1] \"2025-07-18T23:16:39.501Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:39.659Z\"\n\n$execution_time\n[1] 0.1573\n\n\n\n\nlist child accounts\ncurrently we havent added any child\n\n  res1 &lt;- httr::GET(\n    url = \"http://127.0.0.1:8000/list_child_accounts\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    query = list(uuid = parsed$uuid)\n  )\n  parsed1 &lt;- jsonlite::fromJSON(rawToChar(res1$content))\n  print(parsed1)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$account_name\n[1] \"Main\"\n\n$child_account_names\nlist()\n\n$child_count\n[1] 0\n\n$start_time\n[1] \"2025-07-18T23:16:39.724Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:40.180Z\"\n\n$execution_time\n[1] 0.4563\n\n\n\n\nattach child accounts\nAttaching child accounts\n\nres1 &lt;- httr::POST(\n    url = \"http://127.0.0.1:8000/add_sub_account\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    encode = \"json\",\n    body = list(\n      parent_uuid = parsed$uuid,\n      name = \"Needs\",\n      allocation = 0.5\n    )\n  )\n  parsed1 &lt;- jsonlite::fromJSON(rawToChar(res1$content))\n  print(parsed1)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$message\n[1] \"Needs added under Main\"\n\n$uuid\n[1] \"acc409e907c-c744-42dd-a780-4d5088dc4bde\"\n\n$child_type\n[1] \"ChildAccount\"\n\n$allocation\n[1] 0.5\n\n$start_time\n[1] \"2025-07-18T23:16:40.259Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:40.796Z\"\n\n$execution_time\n[1] 0.5371\n\nres2 &lt;- httr::POST(\n    url = \"http://127.0.0.1:8000/add_sub_account\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    encode = \"json\",\n    body = list(\n      parent_uuid = parsed$uuid,\n      name = \"Wants\",\n      allocation = 0.3\n    )\n  )\n  parsed2 &lt;- jsonlite::fromJSON(rawToChar(res2$content))\n  print(parsed2)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$message\n[1] \"Wants added under Main\"\n\n$uuid\n[1] \"acc6cae6cbe-361a-4448-ac42-a71dae1f8d3c\"\n\n$child_type\n[1] \"ChildAccount\"\n\n$allocation\n[1] 0.3\n\n$start_time\n[1] \"2025-07-18T23:16:40.813Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:41.036Z\"\n\n$execution_time\n[1] 0.2228\n\nres3 &lt;- httr::POST(\n    url = \"http://127.0.0.1:8000/add_sub_account\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    encode = \"json\",\n    body = list(\n      parent_uuid = parsed$uuid,\n      name = \"Savings\",\n      allocation = 0.2\n    )\n  )\n  parsed3 &lt;- jsonlite::fromJSON(rawToChar(res3$content))\n  print(parsed3)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$message\n[1] \"Savings added under Main\"\n\n$uuid\n[1] \"acc3c3c4d60-ea11-443e-a015-622063bd4a0b\"\n\n$child_type\n[1] \"ChildAccount\"\n\n$allocation\n[1] 0.2\n\n$start_time\n[1] \"2025-07-18T23:16:41.063Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:41.542Z\"\n\n$execution_time\n[1] 0.4787\n\n\n\nres4 &lt;- httr::POST(\n    url = \"http://127.0.0.1:8000/deposit\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    body = list(uuid = parsed$uuid, amount = 40000, channel = \"ABSA bank\"),\n    encode = \"form\"\n  )\n  parsed4 &lt;- jsonlite::fromJSON(rawToChar(res4$content))\nprint(parsed4)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$account_uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$amount\n[1] 40000\n\n$balance\n[1] 0\n\n$start_time\n[1] \"2025-07-18T23:16:41.623Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:41.890Z\"\n\n$execution_time\n[1] 0.267\n\n\n\nres4 &lt;- httr::POST(\n    url = \"http://127.0.0.1:8000/deposit\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    body = list(uuid = parsed1$uuid, amount = 20000, channel = \"Stanbic bank\"),\n    encode = \"form\"\n  )\n  parsed4 &lt;- jsonlite::fromJSON(rawToChar(res4$content))\nprint(parsed4)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$account_uuid\n[1] \"acc409e907c-c744-42dd-a780-4d5088dc4bde\"\n\n$amount\n[1] 20000\n\n$balance\n[1] 40000\n\n$start_time\n[1] \"2025-07-18T23:16:41.973Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:42.184Z\"\n\n$execution_time\n[1] 0.2114\n\n\n\n\nWithdraw from needs account\n\n  res5 &lt;- httr::POST(\n    url = \"http://127.0.0.1:8000/withdraw\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    body = list(uuid = parsed1$uuid, amount = 20000, channel = \"mpesa\"),\n    encode = \"form\"\n  )\n  parsed5 &lt;- jsonlite::fromJSON(rawToChar(res5$content))\n  print(parsed5)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$account_uuid\n[1] \"acc409e907c-c744-42dd-a780-4d5088dc4bde\"\n\n$balance\n[1] 20000\n\n$start_time\n[1] \"2025-07-18T23:16:42.257Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:42.487Z\"\n\n$execution_time\n[1] 0.2303\n\n\n\n\nCheck needs balance\n\n  res6 &lt;- httr::GET(\n    url = \"http://127.0.0.1:8000/get_balance\",\n    query = list(uuid = parsed1$uuid),\n    httr::add_headers(Authorization = paste(\"Bearer\", token))\n  )\n  parsed6 &lt;- jsonlite::fromJSON(rawToChar(res6$content))\n  print(parsed6)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$uuid\n[1] \"acc409e907c-c744-42dd-a780-4d5088dc4bde\"\n\n$balance\n[1] 20000\n\n$start_time\n[1] \"2025-07-18T23:16:42.577Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:42.753Z\"\n\n$execution_time\n[1] 0.1756\n\n\n\n\ncompute total balance\n\n  res7 &lt;- httr::GET(\n    url = \"http://127.0.0.1:8000/compute_total_balance\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    query = list(uuid = parsed$uuid)\n  )\n  parsed7 &lt;- jsonlite::fromJSON(rawToChar(res7$content))\n  print(parsed7)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$total_balance\n[1] 40000\n\n$start_time\n[1] \"2025-07-18T23:16:42.820Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:42.984Z\"\n\n$execution_time\n[1] 0.1645\n\n\n\n\ncompute total due\n\n  res8 &lt;- httr::GET(\n    url = \"http://127.0.0.1:8000/compute_total_due\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    query = list(uuid = parsed$uuid)\n    \n  )\nparsed8 &lt;- jsonlite::fromJSON(rawToChar(res8$content))\nprint(parsed8)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$total_due\n[1] 0\n\n$start_time\n[1] \"2025-07-18T23:16:43.050Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:43.223Z\"\n\n$execution_time\n[1] 0.173\n\n\n\n\ncompute total income\n\n  res9 &lt;- httr::GET(\n    url = \"http://127.0.0.1:8000/total_income\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    query = list(uuid = parsed$uuid)\n  )\n  parsed9 &lt;- jsonlite::fromJSON(rawToChar(res9$content))\n  print(parsed9)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$from\n[1] \"1026-03-18\"\n\n$to\n[1] \"2025-07-18\"\n\n$total_income\n[1] 60000\n\n$start_time\n[1] \"2025-07-18T23:16:43.293Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:43.517Z\"\n\n$execution_time\n[1] 0.2241\n\n\n\n\nTotal spend\n\n  res11 &lt;- httr::GET(\n    url = \"http://127.0.0.1:8000/spending\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    query = list(uuid = parsed$uuid)\n  )\n  parsed11 &lt;- jsonlite::fromJSON(rawToChar(res11$content))\n  print(parsed11)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$from\n[1] \"1026-03-18\"\n\n$to\n[1] \"2025-07-18\"\n\n$total_spending\n[1] 20000\n\n$start_time\n[1] \"2025-07-18T23:16:43.586Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:43.794Z\"\n\n$execution_time\n[1] 0.2085\n\n\n\n\nIncome utilization\n\n  res10 &lt;- httr::GET(\n    url = \"http://127.0.0.1:8000/income_utilization\",\n    httr::add_headers(Authorization = paste(\"Bearer\", token)),\n    query = list(uuid = parsed$uuid)\n  )\n  parsed10 &lt;- jsonlite::fromJSON(rawToChar(res10$content))\n  print(parsed10)\n\n$success\n[1] TRUE\n\n$status\n[1] 200\n\n$uuid\n[1] \"acc2b85106c-1589-4386-8910-c7e9ec189516\"\n\n$from\n[1] \"1026-03-18\"\n\n$to\n[1] \"2025-07-18\"\n\n$utilization\n[1] 0.3333\n\n$start_time\n[1] \"2025-07-18T23:16:43.860Z\"\n\n$end_time\n[1] \"2025-07-18T23:16:44.081Z\"\n\n$execution_time\n[1] 0.2214"
+  },
+  {
     "objectID": "change_account_status.html",
     "href": "change_account_status.html",
     "title": "🔄 POST /change_account_status",
     "section": "",
-    "text": "Changes the status of a child or grandchild account. Main or parent accounts are not eligible for this operation.\n\n\n\n\nMethod: POST\nURL: /change_account_status\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to update\n\n\nstatus\nstring\n✅\nNew status to apply: \"active\", \"inactive\", or \"closed\"\n\n\n\n\n\n\n\n{\n  \"uuid\": \"abc123-child-account\",\n  \"status\": \"inactive\"\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"abc123-child-account\",\n  \"new_status\": \"inactive\",\n  \"message\": \"Account Rent status updated to inactive\",\n  \"start_time\": \"2025-07-10T07:10:10.003Z\",\n  \"end_time\": \"2025-07-10T07:10:10.022Z\",\n  \"execution_time\": 0.019\n}\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing parameters or invalid status value\n\n\n403\nAttempt to change a non-child account or unauthorized access\n\n\n404\nAccount not found\n\n\n500\nUnexpected server error\n\n\n\n\n\n\n\nStatus transitions may impact how funds are allocated (e.g., inactive sub-accounts stop drawing allocations).\nOnly accounts inheriting from ChildAccount class are eligible.\nThis endpoint is locked via with_account_lock() to prevent race conditions during status changes.",
+    "text": "Changes the status of a child or grandchild account. Main or parent accounts are not eligible for this operation.\n\n\n\n\nMethod: POST\nURL: /change_account_status\nTag: accounts\n\n\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuuid\nstring\n✅\nUUID of the account to update\n\n\nstatus\nstring\n✅\nNew status to apply: \"active\", \"inactive\", or \"closed\"\n\n\n\n\n\n\n\n{\n  \"uuid\": \"abc123-child-account\",\n  \"status\": \"inactive\"\n}\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"uuid\": \"abc123-child-account\",\n  \"new_status\": \"inactive\",\n  \"message\": \"Account Rent status updated to inactive\",\n  \"start_time\": \"2025-07-10T07:10:10.003Z\",\n  \"end_time\": \"2025-07-10T07:10:10.022Z\",\n  \"execution_time\": 0.019\n}\n\n\n\n\n\n\n\n\n\n\nStatus\nDescription\n\n\n\n\n400\nMissing parameters or invalid status value\n\n\n403\nAttempt to change a non-child account or unauthorized access\n\n\n404\nAccount not found\n\n\n500\nUnexpected server error\n\n\n\n\n\n\n\nStatus transitions may impact how funds are allocated (e.g., inactive sub-accounts stop drawing allocations).\nOnly accounts inheriting from ChildAccount class are eligible.\nThis endpoint is locked via with_account_lock() to prevent race conditions during status changes.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -2119,6 +2178,18 @@
     "title": "🔄 POST /change_account_status",
     "section": "",
     "text": "Status transitions may impact how funds are allocated (e.g., inactive sub-accounts stop drawing allocations).\nOnly accounts inheriting from ChildAccount class are eligible.\nThis endpoint is locked via with_account_lock() to prevent race conditions during status changes.",
+    "crumbs": [
+      "Home",
+      "📤 POST Endpoints",
+      "Change Account Status"
+    ]
+  },
+  {
+    "objectID": "change_account_status.html#sponsors",
+    "href": "change_account_status.html#sponsors",
+    "title": "🔄 POST /change_account_status",
+    "section": "",
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
     "crumbs": [
       "Home",
       "📤 POST Endpoints",
@@ -2238,63 +2309,108 @@
     "href": "delete.html",
     "title": "🗑️ DELETE /delete",
     "section": "",
-    "text": "Deletes a user account and its associated data file. Requires a valid user_id parameter. Returns success message or appropriate error if the user doesn’t exist or deletion fails.\n\n\n\nMethod: DELETE URL: /delete Auth: Not Required Tag: accounts —\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuser_id\nstring\n✅\nUnique ID of the user to be deleted\n\n\n\n\n\n\nDELETE /delete?user_id=4a76343a-e971-4bd7-b8c4-5fa9fccee433\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Account for user_id '4a76343a-e971-4bd7-b8c4-5fa9fccee433' deleted successfully.\",\n  \"start_time\": \"2025-07-17T08:34:02.123Z\",\n  \"end_time\": \"2025-07-17T08:34:02.160Z\",\n  \"execution_time\": 0.037\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing required user_id\n\n\n404\nAccount for given user_id not found\n\n\n500\nInternal server error during deletion\n\n\n\n{\n  \"success\": false,\n  \"status\": 404,\n  \"error\": \"Account for user_id 'xyz' does not exist.\",\n  \"start_time\": \"2025-07-17T08:34:02.123Z\",\n  \"end_time\": \"2025-07-17T08:34:02.150Z\",\n  \"execution_time\": 0.027\n}\n\n\n\n\n\nThe user ID is used to identify the user’s account file (e.g., account_tree.Rds) in persistent storage.\nThe operation is wrapped in a file lock to ensure safe concurrent access.\nNo JWT token required, but the endpoint is still protected by rate limiting and exponential backoff to prevent abuse.\nThis is a destructive operation and should be called with caution.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors"
+    "text": "Deletes a user account and its associated data file. Requires a valid user_id parameter. Returns success message or appropriate error if the user doesn’t exist or deletion fails.\n\n\n\nMethod: DELETE URL: /delete Auth: Not Required Tag: accounts —\n\n\n\nAuthorization: Bearer &lt;your-token&gt;\nContent-Type: application/json\n\n\n\n\n\n\n\nName\nType\nRequired\nDescription\n\n\n\n\nuser_id\nstring\n✅\nUnique ID of the user to be deleted\n\n\n\n\n\n\nDELETE /delete?user_id=4a76343a-e971-4bd7-b8c4-5fa9fccee433\n\n\n\n\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Account for user_id '4a76343a-e971-4bd7-b8c4-5fa9fccee433' deleted successfully.\",\n  \"start_time\": \"2025-07-17T08:34:02.123Z\",\n  \"end_time\": \"2025-07-17T08:34:02.160Z\",\n  \"execution_time\": 0.037\n}\n\n\n\n\n\n\n\nStatus\nReason\n\n\n\n\n400\nMissing required user_id\n\n\n404\nAccount for given user_id not found\n\n\n500\nInternal server error during deletion\n\n\n\n{\n  \"success\": false,\n  \"status\": 404,\n  \"error\": \"Account for user_id 'xyz' does not exist.\",\n  \"start_time\": \"2025-07-17T08:34:02.123Z\",\n  \"end_time\": \"2025-07-17T08:34:02.150Z\",\n  \"execution_time\": 0.027\n}\n\n\n\n\n\nThe user ID is used to identify the user’s account file (e.g., account_tree.Rds) in persistent storage.\nThe operation is wrapped in a file lock to ensure safe concurrent access.\nNo JWT token required, but the endpoint is still protected by rate limiting and exponential backoff to prevent abuse.\nThis is a destructive operation and should be called with caution.\n\n\n\n\n\nSupport my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "Delete",
+      "Delete"
+    ]
   },
   {
     "objectID": "delete.html#summary",
     "href": "delete.html#summary",
     "title": "🗑️ DELETE /delete",
     "section": "",
-    "text": "Method: DELETE URL: /delete Auth: Not Required Tag: accounts —"
+    "text": "Method: DELETE URL: /delete Auth: Not Required Tag: accounts —",
+    "crumbs": [
+      "Home",
+      "Delete",
+      "Delete"
+    ]
   },
   {
     "objectID": "delete.html#headers",
     "href": "delete.html#headers",
     "title": "🗑️ DELETE /delete",
     "section": "",
-    "text": "Authorization: Bearer &lt;your-token&gt;\nContent-Type: application/json"
+    "text": "Authorization: Bearer &lt;your-token&gt;\nContent-Type: application/json",
+    "crumbs": [
+      "Home",
+      "Delete",
+      "Delete"
+    ]
   },
   {
     "objectID": "delete.html#request-parameters",
     "href": "delete.html#request-parameters",
     "title": "🗑️ DELETE /delete",
     "section": "",
-    "text": "Name\nType\nRequired\nDescription\n\n\n\n\nuser_id\nstring\n✅\nUnique ID of the user to be deleted"
+    "text": "Name\nType\nRequired\nDescription\n\n\n\n\nuser_id\nstring\n✅\nUnique ID of the user to be deleted",
+    "crumbs": [
+      "Home",
+      "Delete",
+      "Delete"
+    ]
   },
   {
     "objectID": "delete.html#example-request-query-parameter",
     "href": "delete.html#example-request-query-parameter",
     "title": "🗑️ DELETE /delete",
     "section": "",
-    "text": "DELETE /delete?user_id=4a76343a-e971-4bd7-b8c4-5fa9fccee433"
+    "text": "DELETE /delete?user_id=4a76343a-e971-4bd7-b8c4-5fa9fccee433",
+    "crumbs": [
+      "Home",
+      "Delete",
+      "Delete"
+    ]
   },
   {
     "objectID": "delete.html#success-response",
     "href": "delete.html#success-response",
     "title": "🗑️ DELETE /delete",
     "section": "",
-    "text": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Account for user_id '4a76343a-e971-4bd7-b8c4-5fa9fccee433' deleted successfully.\",\n  \"start_time\": \"2025-07-17T08:34:02.123Z\",\n  \"end_time\": \"2025-07-17T08:34:02.160Z\",\n  \"execution_time\": 0.037\n}"
+    "text": "{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Account for user_id '4a76343a-e971-4bd7-b8c4-5fa9fccee433' deleted successfully.\",\n  \"start_time\": \"2025-07-17T08:34:02.123Z\",\n  \"end_time\": \"2025-07-17T08:34:02.160Z\",\n  \"execution_time\": 0.037\n}",
+    "crumbs": [
+      "Home",
+      "Delete",
+      "Delete"
+    ]
   },
   {
     "objectID": "delete.html#failure-response-examples",
     "href": "delete.html#failure-response-examples",
     "title": "🗑️ DELETE /delete",
     "section": "",
-    "text": "Status\nReason\n\n\n\n\n400\nMissing required user_id\n\n\n404\nAccount for given user_id not found\n\n\n500\nInternal server error during deletion\n\n\n\n{\n  \"success\": false,\n  \"status\": 404,\n  \"error\": \"Account for user_id 'xyz' does not exist.\",\n  \"start_time\": \"2025-07-17T08:34:02.123Z\",\n  \"end_time\": \"2025-07-17T08:34:02.150Z\",\n  \"execution_time\": 0.027\n}"
+    "text": "Status\nReason\n\n\n\n\n400\nMissing required user_id\n\n\n404\nAccount for given user_id not found\n\n\n500\nInternal server error during deletion\n\n\n\n{\n  \"success\": false,\n  \"status\": 404,\n  \"error\": \"Account for user_id 'xyz' does not exist.\",\n  \"start_time\": \"2025-07-17T08:34:02.123Z\",\n  \"end_time\": \"2025-07-17T08:34:02.150Z\",\n  \"execution_time\": 0.027\n}",
+    "crumbs": [
+      "Home",
+      "Delete",
+      "Delete"
+    ]
   },
   {
     "objectID": "delete.html#notes",
     "href": "delete.html#notes",
     "title": "🗑️ DELETE /delete",
     "section": "",
-    "text": "The user ID is used to identify the user’s account file (e.g., account_tree.Rds) in persistent storage.\nThe operation is wrapped in a file lock to ensure safe concurrent access.\nNo JWT token required, but the endpoint is still protected by rate limiting and exponential backoff to prevent abuse.\nThis is a destructive operation and should be called with caution."
+    "text": "The user ID is used to identify the user’s account file (e.g., account_tree.Rds) in persistent storage.\nThe operation is wrapped in a file lock to ensure safe concurrent access.\nNo JWT token required, but the endpoint is still protected by rate limiting and exponential backoff to prevent abuse.\nThis is a destructive operation and should be called with caution.",
+    "crumbs": [
+      "Home",
+      "Delete",
+      "Delete"
+    ]
   },
   {
     "objectID": "delete.html#sponsors",
     "href": "delete.html#sponsors",
     "title": "🗑️ DELETE /delete",
     "section": "",
-    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors"
+    "text": "Support my work through GitHub Sponsors!\n\n\n\nGitHub Sponsors",
+    "crumbs": [
+      "Home",
+      "Delete",
+      "Delete"
+    ]
   },
   {
     "objectID": "distribute.html",

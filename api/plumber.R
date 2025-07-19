@@ -32,7 +32,7 @@ if (!exists("request_tracker", inherits = FALSE)) {
   request_tracker <- new.env()
 }
 
-MAX_REQUESTS <- as.numeric(Sys.getenv("MAX_REQUESTS", unset = 1000))
+MAX_REQUESTS <- as.numeric(Sys.getenv("MAX_REQUESTS", unset = 1000000000))
 WINDOW_SIZE <- as.numeric(Sys.getenv("WINDOW_SIZE", unset = 3600))
 
 
@@ -631,6 +631,7 @@ add_child_account <- function(req, res,
         success = TRUE,
         status = 200,
         message = paste(name, "added under", parent$name),
+        uuid = child$uuid,
         child_type = class(child)[1],
         allocation = child$allocation
       )
