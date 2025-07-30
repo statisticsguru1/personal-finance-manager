@@ -196,7 +196,7 @@ jobs:
       - name: Convert Locust Results to HTML Report
         run: |
           ./locust-reporter -dir loadtests -prefix locust-results \
-            -outfile api/doc/locust-report.html -failures
+            -outfile api/docs/locust-report.html -failures
 
       - name: Build API site to docs/api
         run: quarto render . --output-dir ../../docs/api
