@@ -213,7 +213,7 @@ jobs:
           PORT=8002 Rscript api/main.R &
           PORT=8003 Rscript api/main.R &
           sleep 15  # Allow all instances to start
-          locust -f loadtests/locust_script.py -H http://127.0.0.1:8000 \
+          locust -f loadtests/locust_script.py -H http://127.0.0.1:8004 \
             --headless --csv=loadtests/locust-results-Nginx --csv-full-history \
             --exit-code-on-error 0
 
