@@ -108,8 +108,8 @@ class APIUser(HttpUser):
     @task(4)
     def deposit(self):
         uuid_to_use = self.get_eligible_uuid(level_probs={"main": 4, "children": 2, "grandchildren": 1})
-        #amount = round(random.uniform(500, 10000), 2)
-        amount = 500
+        amount = round(random.uniform(500, 10000), 2)
+        #amount = 500
         response = self.client.post(
             "/deposit",
             json={"uuid": uuid_to_use, "amount": amount, "channel": "ABSA"},
@@ -717,12 +717,17 @@ class StepLoadShape(LoadTestShape):
     step_load = 50  # users to add each step
     spawn_rate = 50  # users/sec
     max_users = 1000
+    max_duration = 6000       # total duration in seconds (e.g., 10 minutes)
 
     def tick(self):
         run_time = self.get_run_time()
+
+        if run_time > self.max_duration:
+            return None
+
         current_step = run_time // self.step_time
         users = (current_step + 1) * self.step_load
 
         if users > self.max_users:
-            return None
+            users = self.max_users
         return (users, self.spawn_rate)

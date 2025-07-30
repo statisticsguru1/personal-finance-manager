@@ -161,7 +161,7 @@ jobs:
       - name: Install libsodium system dependency
         run: sudo apt-get update && sudo apt-get install -y libsodium-dev
 
-      - name: Install API test dependencies
+      - name: Install API  dependencies
         run: install.packages(c("future","promises","testthat", "jsonlite", "jose", "callr", "withr", "here", "httr", "plumber"))
         shell: Rscript {0}
 
@@ -190,7 +190,7 @@ jobs:
           Rscript --max-connections=4096 api/main.R &
           sleep 10  # wait for API to start
           locust -f loadtests/locust_script.py -H http://127.0.0.1:8000 \
-            --headless --csv=loadtests/locust-results --csv-full-history -u 10 -r 2 -t10s
+            --headless --csv=loadtests/locust-results --csv-full-history
 
       - name: Convert Locust Results to HTML Report
         run: |
