@@ -2,9 +2,9 @@ name: R CI
 
 on:
   push:
-    branches: [main, refactor-main-account-docs]
+    branches: [main,master, refactor-main-account-docs]
   pull_request:
-    branches: [main, refactor-main-account-docs]
+    branches: [main,master, refactor-main-account-docs]
 
 jobs:
   finman-build:
