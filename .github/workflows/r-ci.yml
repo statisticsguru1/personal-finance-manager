@@ -185,29 +185,43 @@ jobs:
           wget https://github.com/benc-uk/locust-reporter/releases/download/v1.2.3/locust-reporter
           chmod +x locust-reporter
 
-      - name: Run Locust Load Test and Generate CSV Results
+      - name: Run Locust Load Test (single instance) and Generate CSV Results
         run: |
           Rscript --max-connections=4096 api/main.R &
-          sleep 10  # wait for API to start
+          sleep 10  # Wait for API to start
           locust -f loadtests/locust_script.py -H http://127.0.0.1:8000 \
             --headless --csv=loadtests/locust-results --csv-full-history \
             --exit-code-on-error 0
 
-      - name: Convert Locust Results to HTML Report
+      - name: Convert Locust Results to HTML Report (single instance)
         run: |
           ./locust-reporter -dir loadtests -prefix locust-results \
             -outfile api/docs/locust-report.html -failures
 
-      - name: Build API site to docs/api
-        run: quarto render . --output-dir ../../docs/api
-        working-directory: api/docs
+      - name: Install Nginx
+        run: sudo apt-get update && sudo apt-get install -y nginx
 
-      - name: Build main site to docs/
-        run: quarto render site
+      - name: Add Custom Nginx Config
+        run: |
+          sudo cp loadtests/nginx.conf /etc/nginx/nginx.conf
+          sudo nginx -t
+          sudo nginx
 
-      - name: Deploy everything from docs/ to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-          publish_branch: gh-pages
+      - name: Run 3 API Instances in Background and Run Locust via Nginx
+        run: |
+          PORT=8001 Rscript api/main.R &
+          PORT=8002 Rscript api/main.R &
+          PORT=8003 Rscript api/main.R &
+          sleep 15  # Allow all instances to start
+          locust -f loadtests/locust_script.py -H http://127.0.0.1:8000 \
+            --headless --csv=loadtests/locust-results-Nginx --csv-full-history \
+            --exit-code-on-error 0
+
+      - name: Convert Locust Results to HTML Report (Nginx load balancer)
+        run: |
+          ./locust-reporter -dir loadtests -prefix locust-results-Nginx \
+            -outfile api/docs/locust-report-Nginx.html -failures
+
+      - name: Stop Nginx
+        if: always()
+        run: sudo nginx -s stop

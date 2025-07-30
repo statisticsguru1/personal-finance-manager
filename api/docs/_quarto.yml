@@ -12,8 +12,12 @@ website:
         menu:
           - text: "API overview"
             file: articles/overview.qmd
-      - text: "Load Test Report"
-        href: ./locust-report.html
+      - text: "Load Test Reports"
+        menu:
+          - text: "Single Instance"
+            href: ./locust-report.html
+          - text: "Behind Nginx (3 Instances)"
+            href: ./locust-results-Nginx.html
       - text: "Main Docs"
         href: ../
       - text: "finman"
