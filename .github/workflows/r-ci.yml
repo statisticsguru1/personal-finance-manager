@@ -171,7 +171,7 @@ jobs:
       - name: Install Locust & Download locust-reporter
         run: |
           pip install locust
-          wget https://github.com/benc-uk/locust-reporter/releases/download/v1.2.2/locust-reporter-linux-amd64 -O locust-reporter
+          wget https://github.com/benc-uk/locust-reporter/releases/download/v1.2.3/locust-reporter
           chmod +x locust-reporter
 
       - name: Run Locust Load Test and Generate CSV Results
