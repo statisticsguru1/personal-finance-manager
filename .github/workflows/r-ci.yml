@@ -165,7 +165,6 @@ jobs:
         run: install.packages(c("testthat", "jsonlite", "jose", "callr", "withr", "here", "httr", "plumber"))
         shell: Rscript {0}
 
-
       - name: Build finman pkgdown site to docs/finman
         run: pkgdown::build_site(pkg = "finman")
         shell: Rscript {0}
