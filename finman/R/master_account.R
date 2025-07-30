@@ -256,11 +256,11 @@ MainAccount <- R6Class(
           By = by,
           TransactionID = transaction_number,
           Channel = channel,
-          Amount = amount,
-          Balance = balance,
-          amount_due = amount_due,
-          overall_balance = overall_balance,
-          Date = as.POSIXct((date)),
+          Amount = as.numeric(amount),
+          Balance = as.numeric(balance),
+          amount_due = as.numeric(amount_due),
+          overall_balance = as.numeric(overall_balance),
+          Date = as.POSIXct(date),
           stringsAsFactors = FALSE
         )
       )

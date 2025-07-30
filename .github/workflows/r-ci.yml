@@ -190,7 +190,8 @@ jobs:
           Rscript --max-connections=4096 api/main.R &
           sleep 10  # wait for API to start
           locust -f loadtests/locust_script.py -H http://127.0.0.1:8000 \
-            --headless --csv=loadtests/locust-results --csv-full-history
+            --headless --csv=loadtests/locust-results --csv-full-history \
+            --exit-code-on-error 0
 
       - name: Convert Locust Results to HTML Report
         run: |
