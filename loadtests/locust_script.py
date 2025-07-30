@@ -99,7 +99,7 @@ class APIUser(HttpUser):
                 "child_name": payload.get("name"),
             })
         else:
-            print(f"[{self.user_id}] add_sub_account failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] add_sub_account failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def ping(self):
@@ -116,7 +116,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] Deposit failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] Deposit failed: {response.status_code} - {response.json().get('error')}")
 
     @task(4)
     def withdraw(self):
@@ -127,7 +127,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] Withdraw failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] Withdraw failed: {response.status_code} - {response.json().get('error')}")
 
     @task(1)
     def distribute_funds(self):
@@ -154,7 +154,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] Distribute failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] Distribute failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def set_child_allocation(self):
@@ -179,7 +179,7 @@ class APIUser(HttpUser):
 
         response = self.client.post("/set_child_allocation", json=payload, headers=self.headers)
         if response.status_code != 200:
-            print(f"[{self.user_id}] set_child_allocation failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] set_child_allocation failed: {response.status_code} - {response.json().get('error')}")
 
     @task(4)
     def get_balance(self):
@@ -190,7 +190,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] get_balance failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] get_balance failed: {response.status_code} - {response.json().get('error')}")
 
     @task(4)
     def get_transactions(self):
@@ -201,7 +201,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] get_transactions failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] get_transactions failed: {response.status_code} - {response.json().get('error')}")
 
     @task(3)
     def list_child_accounts(self):
@@ -212,7 +212,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] list_child_accounts failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] list_child_accounts failed: {response.status_code} - {response.json().get('error')}")
 
     @task(3)
     def list_all_accounts(self):
@@ -223,7 +223,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] list_all_accounts failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] list_all_accounts failed: {response.status_code} - {response.json().get('error')}")
 
     @task(3)
     def find_account_by_name(self):
@@ -245,7 +245,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] find_account_by_name failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] find_account_by_name failed: {response.status_code} - {response.json().get('error')}")
 
     @task(3)
     def find_account_by_uuid(self):
@@ -256,7 +256,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] find_account_by_uuid failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] find_account_by_uuid failed: {response.status_code} - {response.json().get('error')}")
 
     @task(3)
     def move_balance(self):
@@ -276,7 +276,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] move_balance failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] move_balance failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def compute_total_balance(self):
@@ -290,7 +290,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] compute_total_balance failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] compute_total_balance failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def compute_total_due(self):
@@ -303,7 +303,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] compute_total_due failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] compute_total_due failed: {response.status_code} - {response.json().get('error')}")
 
     @task(1)
     def compute_total_due_within_days(self):
@@ -317,7 +317,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] compute_total_due_within_days failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] compute_total_due_within_days failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def spending(self):
@@ -338,7 +338,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] spending failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] spending failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def total_income(self):
@@ -359,7 +359,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] total_income failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] total_income failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def allocated_amount(self):
@@ -380,7 +380,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] allocated_amount failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] allocated_amount failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def income_utilization(self):
@@ -401,7 +401,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] income_utilization failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] income_utilization failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def walking_amount(self):
@@ -425,7 +425,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] walking_amount failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] walking_amount failed: {response.status_code} - {response.json().get('error')}")
 
 
 
@@ -451,7 +451,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] change_account_status failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] change_account_status failed: {response.status_code} - {response.json().get('error')}")
 
 
     @task(2)
@@ -469,7 +469,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] get_account_status failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] get_account_status failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def set_account_priority(self):
@@ -493,7 +493,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] set_priority failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] set_priority failed: {response.status_code} - {response.json().get('error')}")
 
     def get_account_priority(self):
         # Only pick UUIDs from child or grandchild accounts
@@ -513,7 +513,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] get_priority failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] get_priority failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def set_due_date(self):
@@ -537,7 +537,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] set_due_date failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] set_due_date failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def get_due_date(self):
@@ -556,7 +556,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] get_due_date failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] get_due_date failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def set_fixed_amount(self):
@@ -576,7 +576,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] set_fixed_amount failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] set_fixed_amount failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def get_fixed_amount(self):
@@ -591,7 +591,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] get_fixed_amount failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] get_fixed_amount failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def set_account_type(self):
@@ -614,7 +614,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] set_account_type failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] set_account_type failed: {response.status_code} - {response.json().get('error')}")
 
 
     @task(2)
@@ -632,7 +632,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] get_account_type failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] get_account_type failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def set_account_freq(self):
@@ -655,7 +655,7 @@ class APIUser(HttpUser):
         
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] set_account_freq failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] set_account_freq failed: {response.status_code} - {response.json().get('error')}")
 
     @task(4)
     def get_account_freq(self):
@@ -670,7 +670,7 @@ class APIUser(HttpUser):
             headers=self.headers
         )
         if response.status_code != 200:
-            print(f"[{self.user_id}] get_account_freq failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] get_account_freq failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def set_account_periods(self):
@@ -691,7 +691,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] set_account_periods failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] set_account_periods failed: {response.status_code} - {response.json().get('error')}")
 
     @task(2)
     def get_account_periods(self):
@@ -710,7 +710,7 @@ class APIUser(HttpUser):
         )
 
         if response.status_code != 200:
-            print(f"[{self.user_id}] get_account_periods failed: {response.status_code} - {response.json().get("error")}")
+            print(f"[{self.user_id}] get_account_periods failed: {response.status_code} - {response.json().get('error')}")
 
 class StepLoadShape(LoadTestShape):
     step_time = 60   # seconds per step
