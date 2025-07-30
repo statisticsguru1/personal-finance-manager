@@ -55,7 +55,7 @@ create_user_account_base <- function(
 
   save_user_file(user_id, main, file_name = "account_tree.Rds")
 
-  invisible(TRUE)
+  invisible(return(main$uuid))
 }
 
 
@@ -272,6 +272,32 @@ user_file_exists <- function(user_id, file_name = "account_tree.Rds") {
 
 # --------------------- loading/saving plugins /checking existence--------------
 ####################### loading ####################################
+#' Retry reading RDS file
+#'
+#' Attempts to read an RDS file multiple times before failing.
+#'
+#' @param file Path to the RDS file.
+#' @param max_tries Number of retry attempts (default = 3).
+#' @param delay Delay between retries in seconds (default = 0.3).
+#'
+#' @return The object read from the RDS file.
+#' @export
+retry_read_rds <- function(file, max_tries = 3, delay = 0.3) {
+  for (i in seq_len(max_tries)) {
+    tryCatch({
+      return(readRDS(file))
+    }, error = function(e) {
+      if (i == max_tries) {
+        message(sprintf("Failed to read RDS after %d attempts: %s", max_tries, e$message))
+        stop(e)
+      } else {
+        Sys.sleep(delay)
+      }
+    })
+  }
+}
+
+
 #' Load a User File from Local Filesystem
 #'
 #' Loads a user-specific file (e.g., account tree, lock file) from the
@@ -310,17 +336,110 @@ user_file_exists <- function(user_id, file_name = "account_tree.Rds") {
 #' @export
 load_from_file <- function(user_id, file_name, base_dir) {
   file_path <- file.path(base_dir, user_id, file_name)
-
   ext <- tools::file_ext(file_path)
-  switch(ext,
-         "Rds" = readRDS(file_path),
-         "json" = jsonlite::fromJSON(file_path),
-         "csv" = read.csv(file_path),
-         stop("Unsupported file type: ", ext))
+
+  result <- tryCatch({
+    switch(
+      ext,
+      "Rds" = tryCatch({
+        retry_read_rds(file_path)
+      }, error = function(e) {
+        stop(
+          sprintf(
+            "Error loading RDS file: %s\nFile: %s",
+            conditionMessage(e),
+            file_path
+        )
+       )
+      }),
+
+      "json" = tryCatch({
+        jsonlite::fromJSON(file_path)
+      }, error = function(e) {
+        stop(
+          sprintf(
+            "Error loading JSON file: %s\nFile: %s",
+            conditionMessage(e),
+            file_path
+          )
+        )
+      }),
+
+      "csv" = tryCatch({
+        read.csv(file_path)
+      }, error = function(e) {
+        stop(
+          sprintf(
+            "Error loading CSV file: %s\nFile: %s",
+            conditionMessage(e),
+            file_path
+          )
+        )
+      }),
+
+      stop(
+        sprintf(
+          "Unsupported file type '.%s'.\nFile: %s",
+          ext,
+          file_path
+        )
+      )
+    )
+  }, error = function(e) {
+    stop(
+      sprintf(
+        "Failed to load file '%s' for user '%s':\n%s",
+        file_name,
+        user_id,
+        conditionMessage(e)
+    )
+   )
+  })
+
+  return(result)
 }
 
 
+
 ####################### saving #####################################
+
+## saving with retries
+#' Retry saveRDS with Delay and Limited Attempts
+#'
+#' Attempts to save an R object to a file using `saveRDS()`, retrying on error up to a maximum number of tries.
+#' This is useful in scenarios with high concurrency or potential file system contention, such as APIs or parallel processes.
+#'
+#' @param object An R object to save.
+#' @param file A character string naming the file to save the R object to.
+#' @param max_tries Maximum number of attempts before giving up. Default is 3.
+#' @param delay Time in seconds to wait between attempts. Default is 0.3.
+#'
+#' @return `invisible(TRUE)` if successful. If all attempts fail, an error is raised.
+#'
+#' @examples
+#' \dontrun{
+#' retry_save_rds(my_data, "config.rds")
+#' }
+#'
+#' @export
+retry_save_rds <- function(object, file, max_tries = 3, delay = 0.3) {
+  for (i in seq_len(max_tries)) {
+    tryCatch({
+      saveRDS(object, file)
+      return(invisible(TRUE))
+    }, error = function(e) {
+      if (i == max_tries) {
+        message(sprintf("Failed to save RDS after %d attempts: %s", max_tries, e$message))
+        stop(e)
+      } else {
+        Sys.sleep(delay)
+      }
+    })
+  }
+}
+
+
+
 ## saving to local file
 
 #' Save a User's File to the Local File System
@@ -385,35 +504,104 @@ load_from_file <- function(user_id, file_name, base_dir) {
 
 save_to_file <- function(user_id, object, file_name, base_dir) {
   user_dir <- file.path(base_dir, user_id)
-  if (!dir.exists(user_dir)) dir.create(user_dir, recursive = TRUE)
+
+  if (!dir.exists(user_dir)) {
+    dir.create(user_dir, recursive = TRUE)
+  }
 
   file_path <- file.path(user_dir, file_name)
   ext <- tools::file_ext(file_name)
 
-  switch(
-    ext,
-    "Rds" = saveRDS(object, file_path),
-    "json" = jsonlite::write_json(object, file_path, auto_unbox = TRUE),
-    "csv" = write.csv(object, file_path, row.names = FALSE),
-    "lock" = writeLines(as.character(object), file_path),
-    {
-      warning(
-        sprintf(
-          "Unrecognized file extension '.%s'.\n
-          The object will be saved using R's binary `serialize()`.
-          \nTo handle this file type properly, consider extending the save
-          \nplugin for 'file' backend.",
-          ext
+  tryCatch({
+    switch(
+      ext,
+      "Rds" = {
+        tryCatch({
+          retry_save_rds(object,file_path)
+          #saveRDS(object,file_path)
+        }, error = function(e) {
+          stop(
+            sprintf(
+              "Error while saving RDS file: %s\nFile: %s",
+              conditionMessage(e),
+              file_path
+            )
+          )
+        })
+      },
+      "json" = {
+        tryCatch({
+          jsonlite::write_json(object, file_path, auto_unbox = TRUE)
+        }, error = function(e) {
+          stop(
+            sprintf(
+              "Error while writing JSON file: %s\nFile: %s",
+              conditionMessage(e),
+              file_path
+            )
+          )
+        })
+      },
+      "csv" = {
+        tryCatch({
+          write.csv(object, file_path, row.names = FALSE)
+        }, error = function(e) {
+          stop(
+            sprintf(
+              "Error while writing CSV file: %s\nFile: %s",
+              conditionMessage(e),
+              file_path)
+          )
+        })
+      },
+      "lock" = {
+        tryCatch({
+          if (!file.create(file_path)) {
+            stop("Unable to create .lock file")
+          }
+        }, error = function(e) {
+          stop(
+            sprintf(
+              "Error while creating lock file: %s\nFile: %s",
+              conditionMessage(e),
+              file_path
+            )
+          )
+        })
+      },
+      {
+        warning(
+          sprintf(
+            "Unrecognized file extension '.%s'. Saving using R's binary `serialize()`.\nFile: %s",
+            ext, file_path
+          )
         )
-      )
-      con <- file(file_path, open = "wb")
-      on.exit(close(con), add = TRUE)
-      serialize(object, con)
-    }
-  )
-
+        tryCatch({
+          con <- file(file_path, open = "wb")
+          on.exit(close(con), add = TRUE)
+          serialize(object, con)
+        }, error = function(e) {
+          stop(
+            sprintf(
+              "Error while serializing to file: %s\nFile: %s",
+              conditionMessage(e), file_path)
+          )
+        })
+      }
+    )
+  }, error = function(e) {
+    stop(
+      sprintf(
+        "Failed to save file '%s' for user '%s':\n%s",
+        file_name,
+        user_id,
+        conditionMessage(e))
+    )
+  })
+  gc()
   invisible(file_path)
 }
+
 
 
 ###################### Removing ##################################

@@ -142,7 +142,7 @@ jobs:
       - name: Install R packages for site build
         run: install.packages(c("pkgdown", "devtools", "quarto"))
         shell: Rscript {0}
-
+ 
       - name: Install Quarto CLI
         uses: quarto-dev/quarto-actions/setup@v2
 
@@ -163,6 +163,28 @@ jobs:
         run: |
           mkdir -p docs/finman
           cp -r finman/docs/* docs/finman/
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Locust & Download locust-reporter
+        run: |
+          pip install locust
+          wget https://github.com/benc-uk/locust-reporter/releases/download/v1.2.2/locust-reporter-linux-amd64 -O locust-reporter
+          chmod +x locust-reporter
+
+      - name: Run Locust Load Test and Generate CSV Results
+        run: |
+          Rscript --max-connections=4096 api/main.R &
+          sleep 10  # wait for API to start
+          locust -f loadtests/locust_script.py -H http://127.0.0.1:8000 \
+            --headless --csv=loadtests/locust-results --csv-full-history -u 10 -r 2 -t10s
+
+      - name: Convert Locust Results to HTML Report
+        run: |
+          ./locust-reporter -dir loadtests -prefix locust-results \
+            -outfile api/doc/locust-report.html -failures
 
       - name: Build API site to docs/api
         run: quarto render . --output-dir ../../docs/api

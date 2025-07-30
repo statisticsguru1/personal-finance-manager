@@ -12,6 +12,8 @@ website:
         menu:
           - text: "API overview"
             file: articles/overview.qmd
+      - text: "Load Test Report"
+        href: ./locust-report.html
       - text: "Main Docs"
         href: ../
       - text: "finman"

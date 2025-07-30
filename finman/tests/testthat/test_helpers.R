@@ -29,7 +29,7 @@ test_that("create_user_account_base creates account tree correctly", {
   ))
 
   # Should not error when user does not exist
-  expect_invisible(create_user_account_base(user_id))
+  expect_visible(create_user_account_base(user_id))
   expect_true(user_file_exists(user_id, file_name = "account_tree.Rds"))
 
   # Read back and verify it's a MainAccount
