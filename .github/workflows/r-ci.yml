@@ -106,6 +106,9 @@ jobs:
         run: devtools::install("finman", upgrade = "never")
         shell: Rscript {0}
 
+      - name: Install libsodium system dependency
+        run: sudo apt-get update && sudo apt-get install -y libsodium-dev
+
       - name: Install API test dependencies
         run: install.packages(c("testthat", "jsonlite", "jose", "callr", "withr", "here", "httr", "plumber"))
         shell: Rscript {0}

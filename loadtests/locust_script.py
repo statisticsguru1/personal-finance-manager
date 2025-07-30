@@ -33,7 +33,7 @@ class APIUser(HttpUser):
             )
 
             if response.status_code != 200:
-                print(f"[{self.user_id}] Registration failed: {response.status_code} - {response.json().get("error")}")
+                print(f"[{self.user_id}] Registration failed: {response.status_code} - {response.json().get('error')}")
                 raise StopUser()
             else:
                 cont = response.json()
