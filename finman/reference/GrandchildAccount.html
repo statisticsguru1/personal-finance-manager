@@ -40,7 +40,7 @@ automatic closure/reactivation to ensure intelligent fund allocation."><meta pro
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>GrandAccount Class</h1>
-      <small class="dont-index">Source: <a href="https://github.com/statisticsguru1/personal-finance-manager/blob/refactor-main-account-docs/R/grand_child_account.R" class="external-link"><code>R/grand_child_account.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/statisticsguru1/personal-finance-manager/blob/master/R/grand_child_account.R" class="external-link"><code>R/grand_child_account.R</code></a></small>
       <div class="d-none name"><code>GrandchildAccount.Rd</code></div>
     </div>
 
@@ -191,7 +191,7 @@ parameters like due dates, target amounts, and funding cycles.</p><div class="se
 <span>  priority <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  fixed_amount <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  due_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  account_type <span class="op">=</span> <span class="st">"Bill"</span>,</span>
+<span>  account_type <span class="op">=</span> <span class="st">"Expense"</span>,</span>
 <span>  freq <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  status <span class="op">=</span> <span class="st">"active"</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
@@ -859,7 +859,7 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span>  due_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rent</span><span class="op">$</span><span class="fu">get_due_date</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2025-08-16"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2025-08-29"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
 <span class="r-in"><span><span class="co">## Method `GrandchildAccount$set_due_date`</span></span></span>
@@ -867,7 +867,7 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">bill</span> <span class="op">&lt;-</span> <span class="va">GrandchildAccount</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Electricity"</span>, fixed_amount <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">bill</span><span class="op">$</span><span class="fu">set_due_date</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">15</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Due date for Electricity set to 20301 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Due date for Electricity set to 20314 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
 <span class="r-in"><span><span class="co">## Method `GrandchildAccount$get_fixed_amount`</span></span></span>

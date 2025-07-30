@@ -98,15 +98,15 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-articles">    
         <li>
-    <a class="dropdown-item" href="./articles/using-api.qmd">
- <span class="dropdown-text">Using the API</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./articles/account-lifecycle.qmd">
- <span class="dropdown-text">Account Lifecycle</span></a>
+    <a class="dropdown-item" href="./articles/overview.html">
+ <span class="dropdown-text">API overview</span></a>
   </li>  
     </ul>
   </li>
+  <li class="nav-item">
+    <a class="nav-link" href="././locust-report.html"> 
+<span class="menu-text">Load Test Report</span></a>
+  </li>  
   <li class="nav-item">
     <a class="nav-link" href="./../"> 
 <span class="menu-text">Main Docs</span></a>
@@ -401,6 +401,23 @@ ul.task-list li input[type="checkbox"] {
 </li>
       </ul>
   </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Delete</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./delete.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Delete</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
@@ -419,6 +436,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#post" id="toc-post" class="nav-link" data-scroll-target="#post">POST</a></li>
   <li><a href="#get" id="toc-get" class="nav-link" data-scroll-target="#get">GET</a></li>
   </ul></li>
+  <li><a href="#delete" id="toc-delete" class="nav-link" data-scroll-target="#delete">Delete</a></li>
   <li><a href="#authentication" id="toc-authentication" class="nav-link" data-scroll-target="#authentication">🔐 Authentication</a></li>
   <li><a href="#core-features" id="toc-core-features" class="nav-link" data-scroll-target="#core-features">📦 Core Features</a></li>
   <li><a href="#how-to-use-the-api" id="toc-how-to-use-the-api" class="nav-link" data-scroll-target="#how-to-use-the-api">🧭 How to Use the API</a></li>
@@ -462,6 +480,7 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="./set_account_type.html">POST /set_account_type</a></li>
 <li><a href="./set_account_freq.html">POST /set_account_freq</a></li>
 <li><a href="./set_account_periods.html">POST /set_account_periods</a></li>
+<li><a href="./register.html">POST /register</a></li>
 </ul>
 </section>
 <section id="get" class="level3">
@@ -489,8 +508,13 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="./get_account_freq.html">GET /get_account_freq</a></li>
 <li><a href="./get_account_periods.html">GET /get_account_periods</a></li>
 </ul>
-<hr>
 </section>
+</section>
+<section id="delete" class="level2">
+<h2 class="anchored" data-anchor-id="delete">Delete</h2>
+<ul>
+<li><h2 id="delete-delete" class="anchored"><a href="./delete.html">DELETE /delete</a></h2></li>
+</ul>
 </section>
 <section id="authentication" class="level2">
 <h2 class="anchored" data-anchor-id="authentication">🔐 Authentication</h2>

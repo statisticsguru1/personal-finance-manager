@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>distribute – Finance Manager API</title>
+<title>delete – Finance Manager API</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -161,7 +161,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./deposit.html">📤 POST Endpoints</a></li><li class="breadcrumb-item"><a href="./distribute.html">Distribute Funds</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./delete.html">Delete</a></li><li class="breadcrumb-item"><a href="./delete.html">Delete</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -218,13 +218,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
  <span class="menu-text">📤 POST Endpoints</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./deposit.html" class="sidebar-item-text sidebar-link">
@@ -239,7 +239,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./distribute.html" class="sidebar-item-text sidebar-link active">
+  <a href="./distribute.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Distribute Funds</span></a>
   </div>
 </li>
@@ -438,16 +438,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
  <span class="menu-text">Delete</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./delete.html" class="sidebar-item-text sidebar-link">
+  <a href="./delete.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Delete</span></a>
   </div>
 </li>
@@ -463,13 +463,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#post-distribute" id="toc-post-distribute" class="nav-link active" data-scroll-target="#post-distribute">🔁 POST /distribute</a>
+  <li><a href="#delete-delete" id="toc-delete-delete" class="nav-link active" data-scroll-target="#delete-delete">🗑️ DELETE /delete</a>
   <ul class="collapse">
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">📌 Summary</a></li>
   <li><a href="#headers" id="toc-headers" class="nav-link" data-scroll-target="#headers">🔐 Headers</a></li>
   <li><a href="#request-parameters" id="toc-request-parameters" class="nav-link" data-scroll-target="#request-parameters">📤 Request Parameters</a></li>
-  <li><a href="#example-request" id="toc-example-request" class="nav-link" data-scroll-target="#example-request">📥 Example Request</a></li>
-  <li><a href="#success-response" id="toc-success-response" class="nav-link" data-scroll-target="#success-response">✅ Success Response</a></li>
+  <li><a href="#example-request-query-parameter" id="toc-example-request-query-parameter" class="nav-link" data-scroll-target="#example-request-query-parameter">📥 Example Request (Query Parameter)</a></li>
+  <li><a href="#success-response" id="toc-success-response" class="nav-link" data-scroll-target="#success-response">📤 Success Response</a></li>
   <li><a href="#failure-response-examples" id="toc-failure-response-examples" class="nav-link" data-scroll-target="#failure-response-examples">❌ Failure Response Examples</a></li>
   <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">🧠 Notes</a></li>
   <li><a href="#sponsors" id="toc-sponsors" class="nav-link" data-scroll-target="#sponsors">💖 Sponsors</a></li>
@@ -478,24 +478,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./deposit.html">📤 POST Endpoints</a></li><li class="breadcrumb-item"><a href="./distribute.html">Distribute Funds</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./delete.html">Delete</a></li><li class="breadcrumb-item"><a href="./delete.html">Delete</a></li></ol></nav></header>
 
 
 
 
-<section id="post-distribute" class="level1">
-<h1>🔁 POST /distribute</h1>
-<p>Distributes a specified amount from a parent account to its child accounts according to their allocation rules.</p>
+<section id="delete-delete" class="level1">
+<h1>🗑️ DELETE /delete</h1>
+<p>Deletes a user account and its associated data file. Requires a valid user_id parameter. Returns success message or appropriate error if the user doesn’t exist or deletion fails.</p>
 <hr>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">📌 Summary</h2>
-<ul>
-<li><strong>Method</strong>: <code>POST</code></li>
-<li><strong>URL</strong>: <code>/distribute</code></li>
-<li><strong>Auth</strong>: Required</li>
-<li><strong>Tag</strong>: <code>accounts</code></li>
-</ul>
-<hr>
+<p><strong>Method:</strong> <code>DELETE</code> <strong>URL:</strong> <code>/delete</code> <strong>Auth:</strong> Not Required <strong>Tag:</strong> <code>accounts</code> —</p>
 </section>
 <section id="headers" class="level2">
 <h2 class="anchored" data-anchor-id="headers">🔐 Headers</h2>
@@ -506,12 +500,6 @@ Content-Type: application/json</code></pre>
 <section id="request-parameters" class="level2">
 <h2 class="anchored" data-anchor-id="request-parameters">📤 Request Parameters</h2>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 61%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -522,54 +510,29 @@ Content-Type: application/json</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>uuid</code></td>
+<td><code>user_id</code></td>
 <td>string</td>
 <td>✅</td>
-<td>UUID of the parent account</td>
-</tr>
-<tr class="even">
-<td><code>amount</code></td>
-<td>float</td>
-<td>✅</td>
-<td>Amount to distribute (must be &gt; 0)</td>
-</tr>
-<tr class="odd">
-<td><code>transaction</code></td>
-<td>string</td>
-<td>❌</td>
-<td>Optional transaction reference (autogenerated if NULL)</td>
-</tr>
-<tr class="even">
-<td><code>by</code></td>
-<td>string</td>
-<td>❌</td>
-<td>Who performed the distribution (default = “System”)</td>
+<td>Unique ID of the user to be deleted</td>
 </tr>
 </tbody>
 </table>
-<hr>
 </section>
-<section id="example-request" class="level2">
-<h2 class="anchored" data-anchor-id="example-request">📥 Example Request</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"uuid"</span><span class="fu">:</span> <span class="st">"parent-acc-2023-001"</span><span class="fu">,</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"amount"</span><span class="fu">:</span> <span class="dv">5000</span><span class="fu">,</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"transaction"</span><span class="fu">:</span> <span class="st">"dist-INV004"</span><span class="fu">,</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"by"</span><span class="fu">:</span> <span class="st">"System"</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="example-request-query-parameter" class="level2">
+<h2 class="anchored" data-anchor-id="example-request-query-parameter">📥 Example Request (Query Parameter)</h2>
+<pre><code>DELETE /delete?user_id=4a76343a-e971-4bd7-b8c4-5fa9fccee433</code></pre>
 <hr>
 </section>
 <section id="success-response" class="level2">
-<h2 class="anchored" data-anchor-id="success-response">✅ Success Response</h2>
+<h2 class="anchored" data-anchor-id="success-response">📤 Success Response</h2>
 <div class="sourceCode" id="cb3"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"success"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"status"</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">,</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"message"</span><span class="fu">:</span> <span class="st">"Distributed 5000 from Needs"</span><span class="fu">,</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"uuid"</span><span class="fu">:</span> <span class="st">"parent-acc-2023-001"</span><span class="fu">,</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"start_time"</span><span class="fu">:</span> <span class="st">"2025-07-10T10:01:15.120Z"</span><span class="fu">,</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"end_time"</span><span class="fu">:</span> <span class="st">"2025-07-10T10:01:15.180Z"</span><span class="fu">,</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"execution_time"</span><span class="fu">:</span> <span class="fl">0.06</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"message"</span><span class="fu">:</span> <span class="st">"Account for user_id '4a76343a-e971-4bd7-b8c4-5fa9fccee433' deleted successfully."</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"start_time"</span><span class="fu">:</span> <span class="st">"2025-07-17T08:34:02.123Z"</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"end_time"</span><span class="fu">:</span> <span class="st">"2025-07-17T08:34:02.160Z"</span><span class="fu">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"execution_time"</span><span class="fu">:</span> <span class="fl">0.037</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <hr>
 </section>
 <section id="failure-response-examples" class="level2">
@@ -583,28 +546,36 @@ Content-Type: application/json</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>403</code></td>
-<td>Unauthorized to access the account</td>
+<td><code>400</code></td>
+<td>Missing required <code>user_id</code></td>
 </tr>
 <tr class="even">
 <td><code>404</code></td>
-<td>Account not found</td>
+<td>Account for given <code>user_id</code> not found</td>
 </tr>
 <tr class="odd">
 <td><code>500</code></td>
-<td>Invalid amount, zero, negative, or missing account</td>
+<td>Internal server error during deletion</td>
 </tr>
 </tbody>
 </table>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"success"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"status"</span><span class="fu">:</span> <span class="dv">404</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"error"</span><span class="fu">:</span> <span class="st">"Account for user_id 'xyz' does not exist."</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"start_time"</span><span class="fu">:</span> <span class="st">"2025-07-17T08:34:02.123Z"</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"end_time"</span><span class="fu">:</span> <span class="st">"2025-07-17T08:34:02.150Z"</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"execution_time"</span><span class="fu">:</span> <span class="fl">0.027</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <hr>
 </section>
 <section id="notes" class="level2">
 <h2 class="anchored" data-anchor-id="notes">🧠 Notes</h2>
 <ul>
-<li>Automatically uses <code>account$distribute_to_children()</code> internally.</li>
-<li>Locks the account tree for safe concurrent execution.</li>
-<li>Will fail if amount is missing, zero, or negative.</li>
-<li>If transaction reference is missing, one is auto-generated.</li>
+<li>The user ID is used to identify the user’s account file (e.g., account_tree.Rds) in persistent storage.</li>
+<li>The operation is wrapped in a file lock to ensure safe concurrent access.</li>
+<li>No JWT token required, but the endpoint is still protected by rate limiting and exponential backoff to prevent abuse.</li>
+<li>This is a destructive operation and should be called with caution.</li>
 </ul>
 <hr>
 </section>

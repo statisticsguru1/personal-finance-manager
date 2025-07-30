@@ -67,7 +67,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Account Lifecycle and Behavior</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/statisticsguru1/personal-finance-manager/blob/refactor-main-account-docs/vignettes/account_lifecycle.Rmd" class="external-link"><code>vignettes/account_lifecycle.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/statisticsguru1/personal-finance-manager/blob/master/vignettes/account_lifecycle.Rmd" class="external-link"><code>vignettes/account_lifecycle.Rmd</code></a></small>
       <div class="d-none name"><code>account_lifecycle.Rmd</code></div>
     </div>
 
@@ -256,11 +256,11 @@ allocated to the child with the highest priority.</p>
 <span><span class="va">savingstime</span><span class="op">=</span><span class="va">savings</span><span class="op">$</span><span class="va">transactions</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">TransactionID</span><span class="op">==</span><span class="st">"Trans1"</span><span class="op">)</span></span>
 <span><span class="va">debttime</span><span class="op">=</span><span class="va">debt</span><span class="op">$</span><span class="va">transactions</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">TransactionID</span><span class="op">==</span><span class="st">"Trans1"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"needs: %s"</span>,<span class="va">needstime</span><span class="op">$</span><span class="va">Date</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "needs: 2025-07-17 18:49:20.740839"</span></span>
+<span><span class="co">#&gt; [1] "needs: 2025-07-30 19:51:11.895576"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"savings: %s"</span>,<span class="va">savingstime</span><span class="op">$</span><span class="va">Date</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "savings: 2025-07-17 18:49:20.743038"</span></span>
+<span><span class="co">#&gt; [1] "savings: 2025-07-30 19:51:11.897914"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"debt: %s"</span>,<span class="va">debttime</span><span class="op">$</span><span class="va">Date</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "debt: 2025-07-17 18:49:20.744768"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "debt: 2025-07-30 19:51:11.899643"</span></span></code></pre></div>
 <blockquote>
 <p>💡 If an account receives more than it needs, the extra is refunded
 to the parent and possibly redistributed.</p>
@@ -306,6 +306,14 @@ micromanaging every transaction.</p>
 <hr>
 <p>Next: Try the <a href="tracking-obligations.html"><code>tracking-obligations</code></a>
 vignette to dive deeper into bills and debts.</p>
+<hr>
+<div class="section level3">
+<h3 id="sponsors">💖 Sponsors<a class="anchor" aria-label="anchor" href="#sponsors"></a>
+</h3>
+<p>Support my work through <a href="https://github.com/sponsors/statisticsguru1" class="external-link">GitHub
+Sponsors</a>!</p>
+<p><a href="https://github.com/sponsors/statisticsguru1" class="external-link"><img src="https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square" alt="GitHub Sponsors"></a></p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
