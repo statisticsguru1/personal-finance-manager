@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>change_account_status – Finance Manager API</title>
+<title>Behind Nginx (3 Instances) – Finance Manager API</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,41 +19,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -172,7 +137,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./deposit.html">📤 POST Endpoints</a></li><li class="breadcrumb-item"><a href="./change_account_status.html">Change Account Status</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Behind Nginx (3 Instances)</li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -229,13 +194,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
  <span class="menu-text">📤 POST Endpoints</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./deposit.html" class="sidebar-item-text sidebar-link">
@@ -262,7 +227,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./change_account_status.html" class="sidebar-item-text sidebar-link active">
+  <a href="./change_account_status.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Change Account Status</span></a>
   </div>
 </li>
@@ -474,153 +439,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#post-change_account_status" id="toc-post-change_account_status" class="nav-link active" data-scroll-target="#post-change_account_status">🔄 POST /change_account_status</a>
-  <ul class="collapse">
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">📌 Summary</a></li>
-  <li><a href="#headers" id="toc-headers" class="nav-link" data-scroll-target="#headers">🔐 Headers</a></li>
-  <li><a href="#request-body-parameters" id="toc-request-body-parameters" class="nav-link" data-scroll-target="#request-body-parameters">📥 Request Body Parameters</a></li>
-  <li><a href="#example-request" id="toc-example-request" class="nav-link" data-scroll-target="#example-request">💡 Example Request</a></li>
-  <li><a href="#success-response" id="toc-success-response" class="nav-link" data-scroll-target="#success-response">✅ Success Response</a></li>
-  <li><a href="#error-responses" id="toc-error-responses" class="nav-link" data-scroll-target="#error-responses">❌ Error Responses</a></li>
-  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">🧠 Notes</a></li>
-  <li><a href="#sponsors" id="toc-sponsors" class="nav-link" data-scroll-target="#sponsors">💖 Sponsors</a></li>
-  </ul></li>
+  <li><a href="#loadtestsnginx-report.qmd" id="toc-loadtestsnginx-report.qmd" class="nav-link active" data-scroll-target="#loadtestsnginx-report.qmd"># loadtests/nginx-report.qmd</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./deposit.html">📤 POST Endpoints</a></li><li class="breadcrumb-item"><a href="./change_account_status.html">Change Account Status</a></li></ol></nav></header>
+<main class="content" id="quarto-document-content">
 
-
-
-
-<section id="post-change_account_status" class="level1">
-<h1>🔄 POST /change_account_status</h1>
-<p>Changes the status of a <strong>child or grandchild</strong> account. Main or parent accounts are not eligible for this operation.</p>
-<hr>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">📌 Summary</h2>
-<ul>
-<li><strong>Method</strong>: <code>POST</code></li>
-<li><strong>URL</strong>: <code>/change_account_status</code></li>
-<li><strong>Tag</strong>: <code>accounts</code></li>
-</ul>
-<hr>
-</section>
-<section id="headers" class="level2">
-<h2 class="anchored" data-anchor-id="headers">🔐 Headers</h2>
-<pre><code>Authorization: Bearer &lt;your-token&gt;
-Content-Type: application/json</code></pre>
-<hr>
-</section>
-<section id="request-body-parameters" class="level2">
-<h2 class="anchored" data-anchor-id="request-body-parameters">📥 Request Body Parameters</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 9%">
-<col style="width: 7%">
-<col style="width: 9%">
-<col style="width: 72%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>uuid</code></td>
-<td>string</td>
-<td>✅</td>
-<td>UUID of the account to update</td>
-</tr>
-<tr class="even">
-<td><code>status</code></td>
-<td>string</td>
-<td>✅</td>
-<td>New status to apply: <code>"active"</code>, <code>"inactive"</code>, or <code>"closed"</code></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="example-request" class="level2">
-<h2 class="anchored" data-anchor-id="example-request">💡 Example Request</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"uuid"</span><span class="fu">:</span> <span class="st">"abc123-child-account"</span><span class="fu">,</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"status"</span><span class="fu">:</span> <span class="st">"inactive"</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="success-response" class="level2">
-<h2 class="anchored" data-anchor-id="success-response">✅ Success Response</h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"success"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"status"</span><span class="fu">:</span> <span class="dv">200</span><span class="fu">,</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"uuid"</span><span class="fu">:</span> <span class="st">"abc123-child-account"</span><span class="fu">,</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"new_status"</span><span class="fu">:</span> <span class="st">"inactive"</span><span class="fu">,</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"message"</span><span class="fu">:</span> <span class="st">"Account Rent status updated to inactive"</span><span class="fu">,</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"start_time"</span><span class="fu">:</span> <span class="st">"2025-07-10T07:10:10.003Z"</span><span class="fu">,</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"end_time"</span><span class="fu">:</span> <span class="st">"2025-07-10T07:10:10.022Z"</span><span class="fu">,</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"execution_time"</span><span class="fu">:</span> <span class="fl">0.019</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="error-responses" class="level2">
-<h2 class="anchored" data-anchor-id="error-responses">❌ Error Responses</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 9%">
-<col style="width: 90%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Status</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>400</code></td>
-<td>Missing parameters or invalid status value</td>
-</tr>
-<tr class="even">
-<td><code>403</code></td>
-<td>Attempt to change a non-child account or unauthorized access</td>
-</tr>
-<tr class="odd">
-<td><code>404</code></td>
-<td>Account not found</td>
-</tr>
-<tr class="even">
-<td><code>500</code></td>
-<td>Unexpected server error</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="notes" class="level2">
-<h2 class="anchored" data-anchor-id="notes">🧠 Notes</h2>
-<ul>
-<li><p>Status transitions may impact how funds are allocated (e.g., inactive sub-accounts stop drawing allocations).</p></li>
-<li><p>Only accounts inheriting from ChildAccount class are eligible.</p></li>
-<li><p>This endpoint is locked via with_account_lock() to prevent race conditions during status changes.</p></li>
-</ul>
-<hr>
-</section>
-<section id="sponsors" class="level2">
-<h2 class="anchored" data-anchor-id="sponsors">💖 Sponsors</h2>
-<p>Support my work through <a href="https://github.com/sponsors/statisticsguru1">GitHub Sponsors</a>!</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><a href="https://github.com/sponsors/statisticsguru1"><img src="https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square.png" class="img-fluid figure-img"></a></p>
-<figcaption>GitHub Sponsors</figcaption>
-</figure>
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Behind Nginx (3 Instances)</h1>
 </div>
 
 
-</section>
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="loadtestsnginx-report.qmd" class="level2">
+<h2 class="anchored" data-anchor-id="loadtestsnginx-report.qmd"># loadtests/nginx-report.qmd</h2>
+<p>title: “Behind Nginx (3 Instances)” format: html —</p>
+<iframe src="./locust-results-Nginx.html" width="100%" height="800px" style="border: none;">
+</iframe>
+
+
 </section>
 
 </main> <!-- /main -->
