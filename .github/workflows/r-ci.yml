@@ -225,3 +225,17 @@ jobs:
       - name: Stop Nginx
         if: always()
         run: sudo nginx -s stop
+        
+      - name: Build API site to docs/api
+        run: quarto render . --output-dir ../../docs/api
+        working-directory: api/docs
+
+      - name: Build main site to docs/
+        run: quarto render site
+
+      - name: Deploy everything from docs/ to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
