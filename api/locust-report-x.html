@@ -460,16 +460,22 @@ ul.task-list li input[type="checkbox"] {
 
 
 <style>
-.iframe-container {
-  height: calc(100vh - 100px); /* Adjust based on navbar height */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
-iframe {
+
+.fullscreen-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   border: none;
 }
 </style>
-<div class="iframe-container">
+<div class="fullscreen-iframe">
 <p><iframe src="./locust-report.html"></iframe></p>
 </div>
 
