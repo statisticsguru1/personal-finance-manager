@@ -3,4 +3,17 @@ title: "Single Instance Report"
 format: html
 ---
 
-<iframe src="./locust-report.html" width="100%" height="800px" style="border: none;"></iframe>
+<style>
+.iframe-container {
+  height: calc(100vh - 100px); /* Adjust based on navbar height */
+}
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>
+
+<div class="iframe-container">
+  <iframe src="./locust-report.html"></iframe>
+</div>

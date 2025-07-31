@@ -1,7 +1,34 @@
-# loadtests/nginx-report.qmd
 ---
 title: "Behind Nginx (3 Instances)"
 format: html
 ---
 
-<iframe src="./locust-report-Nginx.html" width="100%" height="800px" style="border: none;"></iframe>
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.iframe-container {
+  height: calc(100vh - 100px); /* Adjust based on header/footer height */
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>
+
+> 💡 **Note:** R has a limit on the number of simultaneous connections:
+>
+> - **Up to R version 4.4.0**: The maximum is **128 connections**.
+> - **R version 4.4.1 and above**: Increased to **4096 connections**.
+>
+> When using `future_promise()` or running multiple APIs concurrently (e.g., 3 instances behind Nginx in the same environment), you may quickly hit these limits — especially under heavy load. Consider adjusting or distributing instances if needed.
+
+<div class="iframe-container">
+  <iframe src="./locust-report-Nginx.html"></iframe>
+</div>
+
