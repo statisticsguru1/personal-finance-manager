@@ -103,10 +103,21 @@ ul.task-list li input[type="checkbox"] {
   </li>  
     </ul>
   </li>
-  <li class="nav-item">
-    <a class="nav-link" href="././locust-report.html"> 
-<span class="menu-text">Load Test Report</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-load-test-reports" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Load Test Reports</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-load-test-reports">    
+        <li>
+    <a class="dropdown-item" href="././locust-report.html">
+ <span class="dropdown-text">Single Instance</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="././locust-results-Nginx.html">
+ <span class="dropdown-text">Behind Nginx (3 Instances)</span></a>
+  </li>  
+    </ul>
+  </li>
   <li class="nav-item">
     <a class="nav-link" href="./../"> 
 <span class="menu-text">Main Docs</span></a>
