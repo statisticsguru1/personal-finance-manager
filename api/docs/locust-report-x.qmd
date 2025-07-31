@@ -1,0 +1,6 @@
+---
+title: "Single Instance Report"
+format: html
+---
+
+<iframe src="./locust-report.html" width="100%" height="800px" style="border: none;"></iframe>

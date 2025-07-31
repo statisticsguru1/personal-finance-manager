@@ -1,0 +1,7 @@
+# loadtests/nginx-report.qmd
+---
+title: "Behind Nginx (3 Instances)"
+format: html
+---
+
+<iframe src="./locust-results-Nginx.html" width="100%" height="800px" style="border: none;"></iframe>

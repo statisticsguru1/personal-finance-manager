@@ -15,9 +15,9 @@ website:
       - text: "Load Test Reports"
         menu:
           - text: "Single Instance"
-            href: ./locust-report.html
+            href: ./locust-report-x.qmd
           - text: "Behind Nginx (3 Instances)"
-            href: ./locust-results-Nginx.html
+            href: ./locust-results-Nginx-x.qmd
       - text: "Main Docs"
         href: ../
       - text: "finman"
