@@ -434,14 +434,8 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#loadtestsnginx-report.qmd" id="toc-loadtestsnginx-report.qmd" class="nav-link active" data-scroll-target="#loadtestsnginx-report.qmd"># loadtests/nginx-report.qmd</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -465,14 +459,36 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="loadtestsnginx-report.qmd" class="level2">
-<h2 class="anchored" data-anchor-id="loadtestsnginx-report.qmd"># loadtests/nginx-report.qmd</h2>
-<p>title: “Behind Nginx (3 Instances)” format: html —</p>
-<iframe src="./locust-report-Nginx.html" width="100%" height="800px" style="border: none;">
-</iframe>
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.iframe-container {
+  height: calc(100vh - 100px); /* Adjust based on header/footer height */
+}
+
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>
+<blockquote class="blockquote">
+<p>💡 <strong>Note:</strong> R has a limit on the number of simultaneous connections:</p>
+<ul>
+<li><strong>Up to R version 4.4.0</strong>: The maximum is <strong>128 connections</strong>.</li>
+<li><strong>R version 4.4.1 and above</strong>: Increased to <strong>4096 connections</strong>.</li>
+</ul>
+<p>When using <code>future_promise()</code> or running multiple APIs concurrently (e.g., 3 instances behind Nginx in the same environment), you may quickly hit these limits — especially under heavy load. Consider adjusting or distributing instances if needed.</p>
+</blockquote>
+<div class="iframe-container">
+<p><iframe src="./locust-report-Nginx.html"></iframe></p>
+</div>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
