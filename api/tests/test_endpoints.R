@@ -119,11 +119,19 @@ test_that("Register a new user with default balance", {
     encode = "json"
   )
   parsed <- jsonlite::fromJSON(rawToChar(res$content))
+
   expect_equal(status_code(res), 200)
   expect_true(parsed$success)
   expect_equal(parsed$user_id, user_id)
   expect_match(parsed$uuid, "^[a-f0-9\\-]+$")
+
+  # ✅ Execution metadata checks (covers async result enrichment)
+  expect_true(!is.null(parsed$start_time))
+  expect_true(!is.null(parsed$end_time))
+  expect_true(!is.null(parsed$execution_time))
+  expect_match(parsed$start_time, "^\\d{4}-\\d{2}-\\d{2}T")
 })
+
 
 test_that("Register with initial balance", {
   user_id <- uuid::UUIDgenerate()
@@ -236,6 +244,37 @@ test_that("Registering an already existing user returns 409 or succeeds based on
   expect_equal(status_code(res2), 500)
   expect_match(parsed2$error, "User already exists")
 })
+
+test_that("Register fails without Authorization header", {
+  res <- POST(
+    url = "http://127.0.0.1:8000/register",
+    body = list(user_id = uuid::UUIDgenerate()),
+    encode = "json"
+  )
+  parsed <- jsonlite::fromJSON(rawToChar(res$content))
+  expect_equal(status_code(res), 401)
+  expect_match(parsed$error, "Missing or invalid token")
+})
+
+test_that("Register returns execution timing metadata", {
+  user_id <- uuid::UUIDgenerate()
+  tokenregister <- jwt_encode_hmac(
+    jwt_claim(user_id = user_id, role = "user"),
+    secret = secret_key
+  )
+
+  res <- POST(
+    url = "http://127.0.0.1:8000/register",
+    httr::add_headers(Authorization = paste("Bearer", tokenregister)),
+    body = list(user_id = user_id),
+    encode = "json"
+  )
+  parsed <- jsonlite::fromJSON(rawToChar(res$content))
+  expect_true(!is.null(parsed$execution_time))
+  expect_match(parsed$start_time, "^\\d{4}-\\d{2}-\\d{2}T")
+  expect_match(parsed$end_time, "^\\d{4}-\\d{2}-\\d{2}T")
+})
+
 
 
 
