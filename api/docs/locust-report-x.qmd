@@ -1,19 +1,28 @@
 ---
 title: "Single Instance Report"
 format: html
+page-layout: full
 ---
 
+```{=html}
 <style>
-.iframe-container {
-  height: calc(100vh - 100px); /* Adjust based on navbar height */
-}
-iframe {
-  width: 100vh;
-  height: 100vh;
-  border: none;
-}
+  html, body, iframe {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    border: none;
+    overflow: hidden;
+  }
+
+  iframe {
+    display: block;
+  }
 </style>
 
-<div class="iframe-container">
-  <iframe src="./locust-report.html"></iframe>
-</div>
+<iframe 
+  src="./locust-report.html"
+  frameborder="0"
+  scrolling="auto">
+</iframe>
+```
