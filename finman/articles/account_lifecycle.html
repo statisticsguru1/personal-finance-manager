@@ -256,11 +256,11 @@ allocated to the child with the highest priority.</p>
 <span><span class="va">savingstime</span><span class="op">=</span><span class="va">savings</span><span class="op">$</span><span class="va">transactions</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">TransactionID</span><span class="op">==</span><span class="st">"Trans1"</span><span class="op">)</span></span>
 <span><span class="va">debttime</span><span class="op">=</span><span class="va">debt</span><span class="op">$</span><span class="va">transactions</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">TransactionID</span><span class="op">==</span><span class="st">"Trans1"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"needs: %s"</span>,<span class="va">needstime</span><span class="op">$</span><span class="va">Date</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "needs: 2025-08-01 06:41:05.507622"</span></span>
+<span><span class="co">#&gt; [1] "needs: 2025-08-01 11:23:51.681772"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"savings: %s"</span>,<span class="va">savingstime</span><span class="op">$</span><span class="va">Date</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "savings: 2025-08-01 06:41:05.509969"</span></span>
+<span><span class="co">#&gt; [1] "savings: 2025-08-01 11:23:51.683984"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"debt: %s"</span>,<span class="va">debttime</span><span class="op">$</span><span class="va">Date</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "debt: 2025-08-01 06:41:05.511729"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "debt: 2025-08-01 11:23:51.685651"</span></span></code></pre></div>
 <blockquote>
 <p>💡 If an account receives more than it needs, the extra is refunded
 to the parent and possibly redistributed.</p>
