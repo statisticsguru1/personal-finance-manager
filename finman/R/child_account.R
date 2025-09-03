@@ -278,14 +278,16 @@ ChildAccount <- R6Class(
     #' acc$change_status("closed")    # Successful closure
 
     change_status = function(status) {
-      if (self$status == "closed") {
-        print("This account is already closed.")
-      } else if (status == "closed") {
+      if (self$status == "closed"&& status == "closed") {
+        stop("This account is already closed.")
+      }
+
+      if (status == "closed") {
         if (self$balance > 0) {
           stop("Withdraw from this account or move the balance before closure.")
         } else {
-          self$status <- "closed"
           cat(self$name, "has been closed.\n")
+          self$status <- "closed"
         }
       } else {
         self$status <- status

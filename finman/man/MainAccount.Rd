@@ -236,8 +236,6 @@ print(main_acc$transactions)
   found <- main_acc$find_account_by_uuid(groceries$uuid)
   if (!is.null(found)) cat("Found UUID:", found$uuid)
 }
-# Move balance to another account (by UUID)
-
 
 ## ------------------------------------------------
 ## Method `MainAccount$move_balance`
@@ -443,6 +441,10 @@ account$walking_amount("amount_due", c(Sys.Date() - 30,
 Sys.Date()))
 account$walking_amount("Balance", c(Sys.Date() - 7, Sys.Date()))
 }
+}
+\seealso{
+[remove_account()]
+# Move balance to another account (by UUID)
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -1037,8 +1039,6 @@ if no match is found.
   found <- main_acc$find_account_by_uuid(groceries$uuid)
   if (!is.null(found)) cat("Found UUID:", found$uuid)
 }
-# Move balance to another account (by UUID)
-
 }
 \if{html}{\out{</div>}}
 

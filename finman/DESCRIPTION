@@ -19,17 +19,18 @@ Imports:
     uuid,
     lubridate,
     jose,
-    filelock,
-    withr,
-    jsonlite,
-    rlang
+    jsonlite
 Suggests: 
     testthat (>= 3.0.0),
     covr,
     lintr,
     pkgdown,
     knitr,
-    rmarkdown
+    rmarkdown,
+    withr,
+    rlang,
+    tibble,
+    filelock
 Config/testthat/edition: 3
 License: file LICENSE
 VignetteBuilder: knitr

@@ -96,7 +96,7 @@ test_that("deposit: accepts custom date", {
 test_that("change_status: does nothing if already closed", {
   acc <- ChildAccount$new("Test", allocation = 1, priority = 1)
   acc$status <- "closed"
-  expect_output(acc$change_status("closed"), "already closed")
+  expect_error(acc$change_status("closed"), "This account is already closed")
   expect_equal(acc$status, "closed")
 })
 

@@ -1,5 +1,4 @@
 library(jose)
-library(filelock)
 library(tidyverse)
 #--------------------- validates user id before creating base acc-------------
 #' Validate a User ID Format
@@ -822,3 +821,234 @@ with_account_lock <- function(
 
   force(expr)
 }
+
+###################### Get minimal tree ##################################
+
+#' Get a Minimal Version of the Account Tree
+#'
+#' Retrieves a lightweight representation of an account object,
+#' containing only essential details.
+#' This is particularly useful for front-end initialization,
+#' as it avoids fetching large volumes of data or making multiple
+#' batch requests.
+#'
+#' @param account An R6 account object from the \code{finman} package.
+#' @param n Integer. The number of days within which to compute
+#'   the amount due. Default is 30.
+#' @param daterange A length-2 \code{Date} vector specifying the
+#'   date range for statistics (spending, total due, etc.).
+#'   Default is from 1,000 years ago to today
+#'   (\code{c(Sys.Date() - 365000, Sys.Date())}).
+#'
+#' @return A list containing:
+#'   \itemize{
+#'     \item \code{name} – Account name.
+#'     \item \code{account_uuid} – Account unique identifier.
+#'     \item \code{balance} – Current account balance.
+#'     \item \code{transactions} – Transaction history.
+#'     \item \code{child_accounts_list} – Summary list of child accounts
+#'       (name and UUID).
+#'     \item \code{total_balance} – Total balance including child accounts.
+#'     \item \code{total_due} – Total amount due including child accounts.
+#'     \item \code{compute_total_due_within_n_days} – Amount due within the
+#'       specified period.
+#'     \item \code{spending}, \code{total_income}, \code{allocated_amount},
+#'           \code{income_utilization}, \code{walking_amount_due},
+#'           \code{walking_balance} – Computed statistics for the specified
+#'           date range.
+#'     \item \code{parent_uuid}, \code{allocation}, \code{account_status},
+#'           \code{priority} – Additional details for \code{ChildAccount} objects.
+#'     \item \code{due_date}, \code{fixed_amount}, \code{account_type},
+#'           \code{account_freq}, \code{account_periods} – Additional details
+#'           for \code{GrandchildAccount} objects.
+#'     \item \code{child_accounts} – Recursively minimal child account trees.
+#'   }
+#'
+#' @examples
+#' \dontrun{
+#' library(finman)
+#'
+#' # Create main account
+#' main_account <- MainAccount$new("Main")
+#'
+#' # Add tier 2 accounts
+#' main_account$add_child_account(
+#'   ChildAccount$new("Needs", allocation = 0.55))
+#' main_account$add_child_account(
+#'   ChildAccount$new("Goals", allocation = 0.25))
+#' main_account$add_child_account(
+#'   ChildAccount$new("Debt Repayment", allocation = 0.20))
+#'
+#' # Add tier 3 accounts (example: Needs -> Rent)
+#' main_account$child_accounts$`Needs`$add_child_account(
+#'   GrandchildAccount$new(
+#'     "Rent",
+#'     allocation = 0.20,
+#'     fixed_amount = 7500,
+#'     account_type = "Bill",
+#'     freq = 30,
+#'     due_date = dmy("28-1-2025")
+#'   )
+#' )
+#'
+#' # Deposit and withdraw
+#' main_account$deposit(10000, "TXN001", "Mpesa")
+#' main_account$find_account("Rent")$withdraw(200, "TXN005", "Cash")
+#'
+#' # Get minimal account tree
+#' tree <- minimal_tree(main_account)
+#' }
+#'
+#' @export
+minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date())){
+  details<- list(
+    name = account$name,
+    account_uuid = account$uuid,
+    account_class = class(account)[1],
+    balance = account$get_balance(),
+    transactions =account$get_transactions(),
+    child_accounts_list = sapply(
+      account$child_accounts,
+      function(acc){
+        list(
+        name = acc$name,
+        uuid =acc$uuid
+        )
+      },
+      simplify = F
+    ),
+    total_balance = account$compute_total_balance(),
+    total_due = account$compute_total_due(),
+    #construct name based on provided n
+    compute_total_due_within_n_days = account$compute_total_due_within_n_days(n),
+    spending = account$spending(daterange=daterange),
+    total_income =account$total_income(daterange=daterange),
+    allocated_amount = account$allocated_amount(daterange=daterange),
+    income_utilization = account$income_utilization(daterange=daterange),
+    walking_amount_due = account$walking_amount(daterange=daterange),
+    walking_balance = account$walking_amount(amt_type = "Balance", daterange=daterange)
+  )
+
+    #add tier 2 details
+    if(inherits(account,"ChildAccount")){
+      details$parent_uuid = account$parent$uuid
+      details$parent_name = account$parent$name
+      details$allocation = account$allocation
+      details$account_status = account$get_account_status()
+      details$priority = account$get_priority()
+    }
+
+    # tier 3
+    if(inherits(account,"GrandchildAccount")){
+      details$due_date = account$get_due_date()
+      details$fixed_amount= account$get_fixed_amount()
+      details$account_type = account$get_account_type()
+      details$account_freq = account$get_account_freq()
+      details$account_periods = account$get_account_periods()
+    }
+  if(length(account$child_accounts)==0 || is.null(account$child_accounts)){
+    details$child_accounts<-list()
+  } else{
+    details$child_accounts = sapply(
+      account$child_accounts,
+      minimal_tree,
+      simplify = F
+    )
+  }
+
+  return(invisible(details))
+}
+
+###################### remove_account ##################################
+###################### remove_account ##################################
+
+#' Remove an Account (Main or Sub-Account)
+#'
+#' Deletes an account from the account tree.
+#' If the \code{uuid} matches the main/root account, the user's entire
+#' account file is removed. Otherwise, the function locates the target
+#' account within the tree and removes it from its parent.
+#'
+#' @param tree An R6 account tree object (e.g., created via
+#'   \code{MainAccount$new()}).
+#' @param user_id Character string. The unique identifier of the user who
+#'   owns the account tree. Used to locate and delete the user's
+#'   persisted file.
+#' @param uuid Character string. The UUID of the account to be removed.
+#'
+#' @return Logical \code{TRUE} if the account was successfully removed.
+#'   Throws an error if the account or its parent cannot be found.
+#'
+#' @details
+#' - If the UUID corresponds to the main/root account:
+#'   \itemize{
+#'     \item The user's \code{"account_tree.Rds"} file is deleted from
+#'           persistent storage.
+#'   }
+#' - If the UUID corresponds to a sub-account:
+#'   \itemize{
+#'     \item The target account is located via
+#'           \code{tree$find_account_by_uuid(uuid)}.
+#'     \item Its parent is identified, and the child is removed from
+#'           \code{parent$child_accounts}.
+#'     \item The updated tree is saved back to persistent storage with
+#'           \code{save_user_file()}.
+#'   }
+#'
+#' @seealso [find_account_by_uuid()], [save_user_file()]
+#'
+#' @examples
+#' \dontrun{
+#' library(finman)
+#'
+#' # Create a main account
+#' main <- MainAccount$new("Main")
+#'
+#' # Add a sub-account
+#' needs <- ChildAccount$new("Needs", allocation = 0.5)
+#' main$add_child_account(needs)
+#'
+#' # Add a grandchild account
+#' rent <- GrandchildAccount$new(
+#'   "Rent", allocation = 0.3, fixed_amount = 7500,
+#'   account_type = "Bill", freq = 30, due_date = Sys.Date() + 30
+#' )
+#' needs$add_child_account(rent)
+#'
+#' # Persist the account tree
+#' save_user_file("user123", main, "account_tree.Rds")
+#'
+#' # Remove the grandchild account by uuid
+#' remove_account(main, "user123", rent$uuid)
+#'
+#' # Remove the main account (deletes the file)
+#' remove_account(main, "user123", main$uuid)
+#' }
+#' @export
+remove_account <- function(tree,user_id, uuid) {
+  # If uuid matches main account
+  if (tree$uuid == uuid) {
+    remove_user_file(user_id)
+    return(TRUE)
+  }
+
+  # Otherwise, find the account and its parent
+  account <- tree$find_account_by_uuid(uuid)
+  if (is.null(account)) {
+    stop(sprintf("Account with uuid %s not found", uuid))
+  }
+  parent <- account$parent
+  if (is.null(parent)) {
+    stop(sprintf("Parent for account %s not found", uuid))
+  }
+
+  # Remove the child from parent's list
+  parent$child_accounts <- Filter(
+    function(acc) acc$uuid != uuid,
+    parent$child_accounts
+  )
+
+  save_user_file(user_id, tree)
+  TRUE
+}
+

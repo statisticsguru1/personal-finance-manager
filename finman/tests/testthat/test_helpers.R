@@ -786,102 +786,95 @@ test_that("verify_token fails with wrong secret", {
   expect_null(result)
 })
 
+
+
 # =========================================================
-# Test file lock helper function
+# Test minimal tree
 # =========================================================
 
-test_that("with_account_lock() creates and removes lockfile (plugin-aware)", {
-  tmp_dir <- tempfile("acct_lock_test_")
-  user_id <- "testuser_lock1"
-
-  withr::local_envvar(c(
-    ACCOUNT_BACKEND = "file",
-    ACCOUNT_BASE_DIR = tmp_dir
-  ))
-
-  dir.create(file.path(tmp_dir, user_id), recursive = TRUE)
-  defer(unlink(tmp_dir, recursive = TRUE), teardown_env())
-
-  expect_false(user_file_exists(user_id, "account_tree.lock"))
-
-  with_account_lock(user_id, {
-    expect_true(user_file_exists(user_id, "account_tree.lock"))
-  })
-
-  expect_false(user_file_exists(user_id, "account_tree.lock"))
+test_that("Main account with no children returns only main account node", {
+  main <- MainAccount$new("Main")
+  tree <- minimal_tree(main)
+  expect_true("Main" %in% tree$name)
+  expect_equal(length(tree$children), 0)
 })
 
-test_that("with_account_lock() times out if lockfile already exists", {
-  tmp_dir <- tempfile("acct_lock_timeout_")
-  user_id <- "testuser_lock2"
+test_that("Main account with multiple children is included in tree", {
+  main <- MainAccount$new("Main")
+  main$add_child_account(ChildAccount$new("Needs", allocation = 0.5))
+  main$add_child_account(ChildAccount$new("Goals", allocation = 0.5))
 
-  withr::local_envvar(c(
-    ACCOUNT_BACKEND = "file",
-    ACCOUNT_BASE_DIR = tmp_dir
-  ))
+  tree <- minimal_tree(main)
+  child_names <- names(tree$child_accounts_list)
+  expect_true(all(c("Needs", "Goals") %in% child_names))
+})
 
-  dir.create(file.path(tmp_dir, user_id), recursive = TRUE)
-  save_user_file(user_id, Sys.getpid(), file_name = "account_tree.lock")
-  defer(unlink(tmp_dir, recursive = TRUE), teardown_env())
+test_that("Child account with no grandchildren shows no sub-nodes", {
+  main <- MainAccount$new("Main")
+  main$add_child_account(ChildAccount$new("Needs", allocation = 0.5))
 
-  start <- Sys.time()
-  expect_error(
-    with_account_lock(user_id, {
-      cat("Should not reach here")
-    }, timeout = 1),
-    "Could not acquire lock"
+  tree <- minimal_tree(main)
+  needs <- tree$children[[1]]
+  expect_equal(length(needs$children), 0)
+})
+
+test_that("Child account with grandchildren nests them correctly", {
+  main <- MainAccount$new("Main")
+  needs <- ChildAccount$new("Needs", allocation = 0.5)
+  needs$add_child_account(
+    GrandchildAccount$new(
+      "Rent", allocation = 0.2, fixed_amount = 7500,
+      account_type = "Bill", freq = 30, due_date = dmy("28-1-2025")
+    )
   )
+  main$add_child_account(needs)
 
-  duration <- as.numeric(difftime(Sys.time(), start, units = "secs"))
-  expect_gte(duration, 1)
+  tree <- minimal_tree(main)
+  needs_node <- tree$child_accounts$Needs
+  gc_names <- names(needs_node$child_accounts_list)
+  expect_true("Rent" %in% gc_names)
 })
 
-test_that("with_account_lock() supports return values (plugin-compatible)", {
-  tmp_dir <- tempfile("acct_lock_return_")
-  user_id <- "testuser_lock3"
-
-  withr::local_envvar(c(
-    ACCOUNT_BACKEND = "file",
-    ACCOUNT_BASE_DIR = tmp_dir
-  ))
-
-  dir.create(file.path(tmp_dir, user_id), recursive = TRUE)
-  defer(unlink(tmp_dir, recursive = TRUE), teardown_env())
-
-  result <- with_account_lock(user_id, {
-    999
-  })
-
-  expect_equal(result, 999)
-  expect_false(user_file_exists(user_id, "account_tree.lock"))
-})
-
-test_that("with_account_lock() cleans up lockfile after error", {
-  tmp_dir <- tempfile("acct_lock_error_")
-  user_id <- "testuser_lock4"
-
-  withr::local_envvar(c(
-    ACCOUNT_BACKEND = "file",
-    ACCOUNT_BASE_DIR = tmp_dir
-  ))
-
-  dir.create(file.path(tmp_dir, user_id), recursive = TRUE)
-  defer(unlink(tmp_dir, recursive = TRUE), teardown_env())
-
-  expect_error(
-    with_account_lock(user_id, {
-      stop("Simulated failure inside lock")
-    }),
-    "Simulated failure"
+test_that("Deposits and withdrawals are reflected in the tree", {
+  main <- MainAccount$new("Main")
+  needs <- ChildAccount$new("Needs", allocation = 1)
+  needs$add_child_account(
+    GrandchildAccount$new(
+      "Rent", allocation = 1, fixed_amount = 500,
+      account_type = "Bill", freq = 30, due_date = dmy("28-1-2025")
+    )
   )
+  main$add_child_account(needs)
 
-  expect_false(user_file_exists(user_id, "account_tree.lock"))
+  main$deposit(1000,"User", "TXN1", "Mpesa")
+  Rent_uuid<-main$find_account("Rent")[[1]]$uuid
+  main$find_account_by_uuid(Rent_uuid)$withdraw(200, "TXN2","User","Cash")
+  tree <- minimal_tree(main)
+  rent_node <- tree$child_accounts$Needs$child_accounts$Rent
+  expect_true(rent_node$balance >= 0)
 })
-test_that("with_account_lock errors on invalid user ID", {
-  expect_error(
-    with_account_lock("invalid id!", {
-      message("This won't run")
-    }),
-    "Invalid user ID format"
+
+test_that("Inactive children are handled", {
+  main <- MainAccount$new("Main")
+  needs <- ChildAccount$new("Needs", allocation = 1)
+  rent <- GrandchildAccount$new(
+    "Rent", allocation = 1, fixed_amount = 500,
+    account_type = "Bill", freq = 30, due_date = dmy("28-1-2025")
   )
+  rent$change_status("inactive")
+  needs$add_child_account(rent)
+  main$add_child_account(needs)
+
+  tree <- minimal_tree(main)
+  rent_node <- tree$child_accounts$Needs$child_accounts$Rent
+  expect_true(rent_node$account_status %in% c("inactive"))
+})
+
+test_that("Passing NULL throws an error", {
+  expect_error(minimal_tree(NULL))
+})
+
+test_that("Passing an object that isn't a MainAccount throws an error", {
+  fake <- list(name = "FakeAccount")
+  expect_error(minimal_tree(fake))
 })

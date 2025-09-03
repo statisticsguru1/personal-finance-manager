@@ -734,6 +734,7 @@ MainAccount <- R6Class(
     #'   found <- main_acc$find_account_by_uuid(groceries$uuid)
     #'   if (!is.null(found)) cat("Found UUID:", found$uuid)
     #' }
+    #' @seealso [remove_account()]
     find_account_by_uuid = function(target_uuid, visited_paths = NULL) {
       # Check if the current account matches the target UUID
       if (self$uuid == target_uuid) {
