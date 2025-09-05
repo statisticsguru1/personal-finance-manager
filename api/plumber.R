@@ -90,7 +90,7 @@ function(req, res) {
   ip <- req$REMOTE_ADDR %||% ""
   if (!nzchar(ip)) ip <- "unknown"
 
-  if (req$PATH_INFO %in% c("/__ping__","/login")) {
+  if (req$PATH_INFO %in% c("/__ping__","/login","/generate_access_token")) {
     # Apply rate limit based on IP even if auth is skipped
     if (!check_rate_limit(ip)) {
       res$status <- 429
@@ -192,7 +192,162 @@ function(req, res) {
   forward()
 }
 
+# -------------- Auth token --------------------------------------------------
+#' @tag Authorization #'
+#' @post /generate_access_token
+#' @summary Generate a new access token
+#' @description
+#' Issues a JWT token (session-based or expiry-based).
+#' Server enforces secret from env. Both user_id and role are required.
+#'
+#' @param req,res Plumber request/response objects
+#' @param user_id The subject/user for whom the token is issued (required)
+#' @param role The role assigned to the token (required)
+#' @param type Either "session" or "expiry" (default "session")
+#' @param session_id Required if type = "session"
+#' @param exp Expiration time (POSIXct or numeric), required if type = "expiry"
+#' @param ... Additional custom claims (forwarded to [issue_token()])
+#' @return JSON response containing token and metadata
+#'
+token_endpoint <- function(req, res,
+                           user_id = NULL,
+                           role = NULL,
+                           type = "Expiration",
+                           size = 256,
+                           header = NULL,
+                           iss = NULL,
+                           sub = NULL,
+                           aud = NULL,
+                           exp = NULL,
+                           nbf = NULL,
+                           iat = Sys.time(),
+                           jti = NULL,
+                           session_id = NULL,
+                           ...) {
+  timestamp <- Sys.time()
+  secret <- Sys.getenv("JWT_SECRET")
 
+  # --- Input validation ---------------------------------------------------
+  if (missing(user_id) || is.null(user_id) || user_id == "") {
+    res$status <- 400
+    return(list(
+      success = FALSE,
+      status = 400,
+      error = "user_id is required",
+      timestamp = format(timestamp, "%Y-%m-%dT%H:%M:%OS3Z")
+    ))
+  }
+
+  if (missing(role) || is.null(role) || role == "") {
+    res$status <- 400
+    return(list(
+      success = FALSE,
+      status = 400,
+      error = "role is required",
+      timestamp = format(timestamp, "%Y-%m-%dT%H:%M:%OS3Z")
+    ))
+  }
+
+  if (type == "session" && is.null(session_id)) {
+    res$status <- 400
+    return(list(
+      success = FALSE,
+      status = 400,
+      error = "session_id is required for session tokens",
+      timestamp = format(timestamp, "%Y-%m-%dT%H:%M:%OS3Z")
+    ))
+  }
+
+  if (type != "session" && is.null(exp)) {
+    res$status <- 400
+    return(list(
+      success = FALSE,
+      status = 400,
+      error = "exp is required for expiry tokens",
+      timestamp = format(timestamp, "%Y-%m-%dT%H:%M:%OS3Z")
+    ))
+  }
+
+  if (secret == "") {
+    res$status <- 500
+    return(list(
+      success = FALSE,
+      status = 500,
+      error = "Server misconfigured (missing JWT_SECRET)",
+      timestamp = format(timestamp, "%Y-%m-%dT%H:%M:%OS3Z")
+    ))
+  }
+
+  # --- Core handler -------------------------------------------------------
+  tryCatch({
+
+    # --- Normalize NumericDate claims ---------------------------------------
+    if (!is.null(exp)) exp <- coerce_numeric_date(exp)
+    if (!is.null(nbf)) nbf <- coerce_numeric_date(nbf)
+    if (!is.null(iat)) iat <- coerce_numeric_date(iat)
+
+    future_promise({
+      # Simulate a future failure for testing
+      library(tidyverse)
+      library(finman)
+
+      tryCatch({
+        token <- issue_token(
+          type = type,
+          secret=secret,
+          size = size,
+          header = header,
+          iss = iss,
+          sub = sub,
+          aud = aud,
+          exp = exp,
+          nbf = nbf,
+          iat = Sys.time(),
+          jti = jti,
+          session_id = session_id,
+          role = role,
+          user_id =user_id,
+          ...
+        )
+        res$status <- 200
+        list(
+          success = TRUE,
+          status = 200,
+          user_id = user_id,
+          token = token,
+          timestamp = format(timestamp, "%Y-%m-%dT%H:%M:%OS3Z")
+        )
+      }, error = function(e) {
+        res$status <- 500
+        list(
+          success = FALSE,
+          status = 500,
+          error = paste("Failed to issue token:", conditionMessage(e)),
+          timestamp = format(timestamp, "%Y-%m-%dT%H:%M:%OS3Z")
+        )
+      }
+      )
+    }) %...>% (function(result) {
+      res$status <- result$status %||% 500
+      result
+    }) %...!% (function(err) {
+      end_time <- Sys.time()
+      res$status <- 503
+      list(
+        success = FALSE,
+        status=503,
+        error = paste("Token generation Failed:", conditionMessage(err))
+      )
+    })
+  }, error = function(e) {
+    res$status <- 500
+    list(
+      success = FALSE,
+      error = paste("Failed to connect:", conditionMessage(e))
+    )
+  }
+  )
+}
 
 
 # =============================================================================
@@ -4031,16 +4186,16 @@ function(req, res, uuid = NULL, account_freq) {
 
   # Parse account_freq safely
   if(!is.null(account_freq)){
-  account_freq <- suppressWarnings(as.numeric(account_freq))
+    account_freq <- suppressWarnings(as.numeric(account_freq))
 
-  if (is.na(account_freq) || account_freq <= 0) {
-    res$status <- 400
-    return(list(
-      success = FALSE,
-      status = 400,
-      error = "account_freq must be a positive number"
-    ))
-  }
+    if (is.na(account_freq) || account_freq <= 0) {
+      res$status <- 400
+      return(list(
+        success = FALSE,
+        status = 400,
+        error = "account_freq must be a positive number"
+      ))
+    }
 
   }
   # -------- core logic ---------------------------------------------------
@@ -4061,8 +4216,8 @@ function(req, res, uuid = NULL, account_freq) {
                 success = FALSE,
                 status = 403,
                 error = "Account not found"
-                )
               )
+            )
           }
 
           # Validate class
@@ -4487,8 +4642,8 @@ delete <- function(req, res, uuid = NULL) {
         success = FALSE,
         status = 400,
         error = "Account UUID is required"
-        )
       )
+    )
   }
 
   tryCatch({
@@ -4496,50 +4651,50 @@ delete <- function(req, res, uuid = NULL) {
       tryCatch({
         # Ensure the user has a lock on their account
         # This prevents concurrent modifications to the account tree
-      with_account_lock(user_id, {
-        if (!user_file_exists(user_id)) {
-          return(list(success = FALSE,
-                      status = if (role == "admin") 404 else 403,
-                      error = sprintf(
-                        "Account for user_id '%s' does not exist.",
-                        user_id
+        with_account_lock(user_id, {
+          if (!user_file_exists(user_id)) {
+            return(list(success = FALSE,
+                        status = if (role == "admin") 404 else 403,
+                        error = sprintf(
+                          "Account for user_id '%s' does not exist.",
+                          user_id
                         )
-                      )
-                 )
-        }
-
-        tree <- load_user_file(user_id, "account_tree.Rds")
-        if (is.null(tree)) {
-          return(
-            list(
-              success = FALSE,
-              status = if (role == "admin") 404 else 403,
-              error = "User not found or unauthorized access")
             )
-        }
-
-        # core deletion
-        remove_account(tree, user_id, uuid)
-
-        message <- if (tree$uuid == uuid) {
-          sprintf(
-            "Account for user_id '%s' deleted successfully.",
-            user_id
             )
-        } else {
-          sprintf(
-            "Account with UUID '%s' deleted successfully.",
-            uuid
-            )
-        }
+          }
 
-        list(
-          success = TRUE,
-          status = 200,
-          uuid = uuid,
-          message = message
+          tree <- load_user_file(user_id, "account_tree.Rds")
+          if (is.null(tree)) {
+            return(
+              list(
+                success = FALSE,
+                status = if (role == "admin") 404 else 403,
+                error = "User not found or unauthorized access")
+            )
+          }
+
+          # core deletion
+          remove_account(tree, user_id, uuid)
+
+          message <- if (tree$uuid == uuid) {
+            sprintf(
+              "Account for user_id '%s' deleted successfully.",
+              user_id
+            )
+          } else {
+            sprintf(
+              "Account with UUID '%s' deleted successfully.",
+              uuid
+            )
+          }
+
+          list(
+            success = TRUE,
+            status = 200,
+            uuid = uuid,
+            message = message
           )
-      })
+        })
       }, error = function(e) {
         list(
           success = FALSE,

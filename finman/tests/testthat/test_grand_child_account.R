@@ -137,7 +137,7 @@ test_that("deposit assigns generated transaction_id when NULL", {
   acc <- GrandchildAccount$new("GeneratedIDTest")
   acc$deposit(70, channel = "MPESA")
   # Assuming sysX format
-  expect_true(grepl("sys", acc$transactions$TransactionID[1]))
+  expect_true(grepl("^SYS[A-F0-9]{10}$", acc$transactions$TransactionID[1]))
 })
 
 test_that("deposit respects inactive account status", {

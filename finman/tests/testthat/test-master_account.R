@@ -44,28 +44,18 @@ test_that("MainAccount initializes all fields correctly", {
 # generate_transaction_id creates unique incrementing IDs
 # =========================================================
 
-test_that("generate_transaction_id creates unique incrementing IDs", {
+test_that("generate_transaction_id creates unique, formatted IDs", {
   acc <- MainAccount$new(name = "Main")
 
-  # First transaction
-  id1 <- acc$generate_transaction_id()
-  expect_equal(id1, "sys1")
-  expect_equal(acc$transaction_counter, 2)
+  # Generate a few IDs
+  ids <- replicate(5, acc$generate_transaction_id())
 
-  # Second transaction
-  id2 <- acc$generate_transaction_id()
-  expect_equal(id2, "sys2")
-  expect_equal(acc$transaction_counter, 3)
+  # Check they all start with SYS + 10 uppercase hex chars
+  expect_true(all(grepl("^SYS[A-F0-9]{10}$", ids)))
 
-  # Third transaction
-  id3 <- acc$generate_transaction_id()
-  expect_equal(id3, "sys3")
-  expect_equal(acc$transaction_counter, 4)
-
-  # Format check
-  expect_true(all(grepl("^sys[0-9]+$", c(id1, id2, id3))))
+  # Check uniqueness
+  expect_equal(length(unique(ids)), length(ids))
 })
-
 # ======================================================================
 # Test for Duplicates
 # =====================================================================
@@ -135,8 +125,8 @@ test_that("Deposit requires a channel", {
 test_that("Transaction number is auto-generated if not provided", {
   acc <- MainAccount$new(name = "Main")
   acc$deposit(amount = 100, channel = "Bank")
-
-  expect_true(grepl("^sys", acc$transactions$TransactionID[1]))
+  # Check that the auto-generated ID matches the format
+  expect_true(grepl("^SYS[A-F0-9]{10}$", acc$transactions$TransactionID[1]))
 })
 
 test_that("Deposit prevents duplicate transaction numbers", {
@@ -534,9 +524,10 @@ test_that("withdraw: generates transaction ID if not provided", {
 
   last_txn <- tail(account$transactions, 1)
   expect_equal(last_txn$Amount, 10)
-  # Assuming sys-prefixed IDs
-  expect_true(grepl("^sys", last_txn$TransactionID))
+  # Check that the auto-generated ID matches the format
+  expect_true(grepl("^SYS[A-F0-9]{10}$",last_txn$TransactionID))
 })
+
 
 test_that("withdraw: logs the provided date correctly", {
   account <- MainAccount$new("Main")

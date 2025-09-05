@@ -151,9 +151,10 @@ MainAccount <- R6Class(
     #'   print(txn_id2)  # e.g., "sys2"
     #' }
     generate_transaction_id = function() {
-      transaction_id <- paste0("sys", self$transaction_counter)
-      self$transaction_counter <- self$transaction_counter + 1
-      transaction_id
+      raw_id <- paste(Sys.time(), runif(1))
+      hash <- substr(openssl::md5(charToRaw(raw_id)), 1, 10) # first 10 hex chars
+      transaction_id <- paste0("SYS", toupper(hash))
+      return(transaction_id)
     },
 
     # -------Check for Duplicate Transaction Number---------------------------

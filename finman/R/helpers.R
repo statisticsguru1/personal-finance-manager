@@ -776,6 +776,165 @@ verify_token <- function(token, secret) {
   }, error = function(e) NULL)
 }
 
+# ----------------encode JWT tokens --------------------------------
+#' Issue a Signed JWT Token
+#'
+#' Creates and signs a JSON Web Token (JWT) using HMAC with the specified secret.
+#' Supports both session-based tokens (identified by a `session_id`) and
+#' expiry-based tokens (with an `exp` claim).
+#'
+#' For session-based tokens, a `session_id` must be provided. The server is
+#' responsible for validating that the referenced session is active.
+#'
+#' For expiry-based tokens, an `exp` claim must be provided. The token will be
+#' automatically rejected by [jose::jwt_decode_hmac()] once expired.
+#'
+#' @param type Character string indicating the token type. Either `"session"`
+#'   (default) or `"expiry"`.
+#' @param secret A character or raw vector used as the HMAC secret for signing.
+#' @param size Integer, the SHA2 bitsize (256, 384, or 512). Defaults to `256`.
+#' @param header Optional named list with additional header fields for the JWT.
+#' @param iss (Issuer) Claim, optional.
+#' @param sub (Subject) Claim, optional.
+#' @param aud (Audience) Claim, optional.
+#' @param exp (Expiration Time) Claim, required for `"expiry"` tokens. Should be
+#'   a POSIXct time or numeric epoch seconds.
+#' @param nbf (Not Before) Claim, optional.
+#' @param iat (Issued At) Claim, defaults to `Sys.time()`.
+#' @param jti (JWT ID) Claim, optional.
+#' @param session_id A string identifying the session (required for `"session"`
+#'   tokens).
+#' @param ... Additional custom claims to include in the JWT payload.
+#'
+#' @return A signed JWT token (character string).
+#'
+#' @examples
+#' library(jose)
+#'
+#' # Session-based token
+#' tok1 <- issue_token(
+#'   secret = "supersecret",
+#'   sub = "user123",
+#'   session_id = "sess_456"
+#' )
+#'
+#' # Expiry-based token (valid for 1 hour)
+#' tok2 <- issue_token(
+#'   type = "expiry",
+#'   secret = "supersecret",
+#'   sub = "user123",
+#'   exp = Sys.time() + 3600
+#' )
+#'
+#' # Verification (will fail automatically if expired)
+#' verify_token(tok2, secret = "supersecret")
+#'
+#' @seealso [verify_token()], [jose::jwt_encode_hmac()], [jose::jwt_decode_hmac()]
+#' @export
+
+issue_token <- function(type = "session",
+                        secret,
+                        size = 256,
+                        header = NULL,
+                        iss = NULL,
+                        sub = NULL,
+                        aud = NULL,
+                        exp = NULL,
+                        nbf = NULL,
+                        iat = Sys.time(),
+                        jti = NULL,
+                        session_id = NULL,
+                        ...) {
+
+  # build base claims with jose::jwt_claim
+  claims <- jose::jwt_claim(
+    iss = iss,
+    sub = sub,
+    aud = aud,
+    exp = exp,
+    nbf = nbf,
+    iat = iat,
+    jti = jti,
+    ...
+  )
+
+  if (type == "session") {
+    if (is.null(session_id)) stop("Session-based token requires a `session_id`.")
+    claims$session_id <- session_id
+    claims$token_type <- "session"
+    # note: no exp required
+  } else {
+    if (is.null(exp)) stop("Non-session tokens must include `exp` claim.")
+    claims$token_type <- "expiry"
+  }
+
+  # encode
+  token <- jose::jwt_encode_hmac(
+    claim = claims,
+    secret = secret,
+    size = size,
+    header = header
+  )
+
+  return(token)
+}
+
+# ------------------ coerce numeric date --------------------------------
+#' Coerce JWT NumericDate claims into POSIXct
+#'
+#' NumericDate claims (RFC 7519) should be seconds since Unix epoch.
+#' This helper is flexible and accepts:
+#' - `POSIXct`: returned as-is
+#' - Numeric (>= 1e6): treated as epoch seconds (standard)
+#' - Numeric (< 1e6): treated as days since epoch (e.g., `as.numeric(Sys.Date())`)
+#' - Character digits: parsed as numeric using same rules
+#' - Character datetime string: parsed as ISO8601 (via lubridate::ymd_hms)
+#'
+#' @param x Value to coerce (for exp, iat, or nbf claims)
+#' @return POSIXct in UTC timezone
+#' @examples
+#' coerce_numeric_date(Sys.time())                # POSIXct
+#' coerce_numeric_date(as.numeric(Sys.time()))    # epoch seconds
+#' coerce_numeric_date(as.numeric(Sys.Date()))    # days since epoch
+#' coerce_numeric_date("2025-09-05 14:30:00")     # ISO8601 string
+#' coerce_numeric_date("1736160000")              # epoch seconds as string
+#' @export
+coerce_numeric_date <- function(x) {
+  if (is.null(x)) return(NULL)
+
+  # Already POSIXct
+  if (inherits(x, "POSIXct")) return(x)
+
+  # Numeric → could be seconds or days since epoch
+  if (is.numeric(x)) {
+    if (x > 1e6) {
+      return(as.POSIXct(x, origin = "1970-01-01", tz = "UTC"))
+    } else {
+      return(as.POSIXct(x * 86400, origin = "1970-01-01", tz = "UTC"))
+    }
+  }
+
+  # Character → try parse
+  if (is.character(x)) {
+    if (grepl("^[0-9]+$", x)) {
+      num <- as.numeric(x)
+      if (num > 1e6) {
+        return(as.POSIXct(num, origin = "1970-01-01", tz = "UTC"))
+      } else {
+        return(as.POSIXct(num * 86400, origin = "1970-01-01", tz = "UTC"))
+      }
+    }
+    parsed <- suppressWarnings(lubridate::ymd_hms(x, quiet = TRUE, tz = "UTC"))
+    if (is.na(parsed)) {
+      stop(
+        "Invalid NumericDate format: must be epoch seconds, days since epoch, or ISO8601 datetime string"
+        )
+    }
+    return(parsed)
+  }
+
+  stop("Unsupported type for NumericDate claim")
+}
 
 # -------------------- file lock ---------------------------------------------
 #' Acquire a Lock for a User's Account Tree using Plugin-Based File Access
@@ -959,7 +1118,6 @@ minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date(
   return(invisible(details))
 }
 
-###################### remove_account ##################################
 ###################### remove_account ##################################
 
 #' Remove an Account (Main or Sub-Account)
