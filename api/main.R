@@ -7,15 +7,16 @@ library(finman)
 library(tidyverse)
 
 # =============================================================================
-# Env variables these should be removed during hosting
-# tmp_dir <- tempfile("test-api-deposit-")
-# dir.create(tmp_dir, recursive = TRUE)
-# Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
-# Sys.setenv(ACCOUNT_BACKEND = "file")
-# Sys.setenv(MAX_REQUESTS = 1000000)
-# Sys.setenv(WINDOW_SIZE = 3600)
-# Sys.setenv(JWT_SECRET = "test-secret")
-# secret_key <- Sys.getenv("JWT_SECRET")
+ # Env variables these should be removed during hosting
+ #tmp_dir <- tempfile("test-api-deposit-")
+ #dir.create(tmp_dir, recursive = TRUE)
+ #Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
+ #Sys.setenv(ACCOUNT_BACKEND = "file")
+ #Sys.setenv(MAX_REQUESTS = 1000000)
+ #Sys.setenv(WINDOW_SIZE = 3600)
+ #Sys.setenv(JWT_SECRET = "test-secret")
+ #secret_key <- Sys.getenv("JWT_SECRET")
+ #Sys.setenv(HOST_URL = "http://127.0.0.1:8000/")
 
 # =============================================================================
 

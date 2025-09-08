@@ -2,22 +2,62 @@
 % Please edit documentation in R/helpers.R
 \name{with_account_lock}
 \alias{with_account_lock}
-\title{Acquire a Lock for a User's Account Tree using Plugin-Based File Access}
+\title{Acquire a Lock for a User's Account Tree}
 \usage{
-with_account_lock(user_id, expr, timeout = 1800)
+with_account_lock(
+  user_id,
+  expr,
+  file_name = "account_tree.Rds",
+  timeout = 1800
+)
 }
 \arguments{
 \item{user_id}{The user ID whose account tree should be locked.}
 
-\item{expr}{An expression to evaluate within the lock.}
+\item{expr}{An expression to evaluate once the lock has been acquired.}
 
-\item{timeout}{Maximum time in seconds to wait for the lock. Default is 1800.}
+\item{file_name}{Name of the account file to lock (default:
+\code{"account_tree.Rds"}). This is used to derive the corresponding
+lockfile (e.g., \code{account_tree.lock}).}
+
+\item{timeout}{Maximum time in seconds to wait for the lock before failing.
+Default is 1800 seconds (30 minutes).}
 }
 \value{
-Returns the result of evaluating `expr`.
+The result of evaluating \code{expr} once the lock is acquired.
 }
 \description{
-Ensures exclusive access to a user's account tree by creating a lock file.
-Waits until the lock is released or a timeout is reached. Uses the plugin
-architecture to support multiple storage backends.
+Provides exclusive access to a user's account tree across different storage
+backends (e.g., local files, MongoDB, Google Drive). The function ensures
+that only one process/thread can access and modify a user's account tree at
+a time. Lock acquisition and release are delegated to the appropriate
+backend plugin.
+}
+\details{
+The locking mechanism is backend-dependent:
+\itemize{
+  \item \strong{File backend:} A temporary \code{.lock} file is created in
+  the user's directory. Other processes wait until this file is removed.
+  \item \strong{MongoDB backend:} A lock flag is set in the document
+  associated with the given \code{file_name}. Other processes poll until the
+  lock is released.
+  \item \strong{Other backends (e.g., Google Drive):} The behavior is defined
+  by the respective plugin.
+}
+
+This function is designed to be backend-agnostic; it automatically
+dispatches to the correct lock plugin based on the \code{ACCOUNT_BACKEND}
+environment variable.
+}
+\examples{
+\dontrun{
+# Run a critical section safely under a lock
+result <- with_account_lock("user123", {
+  account <- load_user_file("user123", "account_tree.Rds")
+  account$balance <- account$balance + 100
+  save_user_file("user123", account, "account_tree.Rds")
+  account$balance
+})
+}
+
 }

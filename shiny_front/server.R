@@ -1,14 +1,6 @@
 currency<-"$"
-
-
-# ---- helpers ----
-host_url <- "http://127.0.0.1:8000/"
-user_id <- "86e99ab0-adae-46dc-84b1-851717ef6d44"
-token <- jwt_encode_hmac(
-  jwt_claim(user_id = user_id, role = "user"),
-  secret = secret_key
-)
-
+Sys.setenv(HOST_URL = "http://127.0.0.1:8000/")
+user_id<-"93d2f021-7b55-4ee7-b7d5-68a9e355a586"
 
 server <- function(input, output,session) {
 
@@ -23,6 +15,19 @@ server <- function(input, output,session) {
     #storage_mode = store_json()
     #storage_mode = store_rds(".")
   #)
+  host_url<-Sys.getenv("HOST_URL")
+  res2 <- httr::POST(
+    url = paste0(host_url,"/generate_access_token"),
+    query = list(
+      user_id = user_id,
+      role = "user",
+      type ="Testing",
+      exp = as.integer(Sys.time()) + 9000
+    )
+  )
+
+  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
+  token<-parsed2$token
 
 
     # keep whole account tree in memory
@@ -30,14 +35,15 @@ server <- function(input, output,session) {
 
   # initial fetch
   observe({
-    main_account(get_main_account_from_api())
+    main_account(get_main_account_from_api(token))
   })
 
   # background refresh every 2 min
   observe({
-    invalidateLater(30000, session)
-    main_account(get_main_account_from_api())
+    invalidateLater(10000, session)
+    main_account(get_main_account_from_api(token))
   })
+
 
   currency<-reactiveVal(currency)
 
@@ -1075,7 +1081,6 @@ server <- function(input, output,session) {
       req(main_account())
 
       datatable(
-        if()
         get_account_by_uuid(main_account(), input$selected_tab)$transactions%>%
           select(-c(amount_due, overall_balance)) %>%
           mutate(across(where(is.numeric), round, 2))%>%

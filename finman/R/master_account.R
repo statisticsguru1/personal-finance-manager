@@ -317,6 +317,13 @@ MainAccount <- R6Class(
         self$child_accounts, ~ .x$status == "active"
       )
 
+      # order active account by priority
+      active_accounts<-active_accounts[
+        order(
+          -purrr::map_dbl(active_accounts, "priority")
+        )
+      ]
+
       if (length(active_accounts) == 0) {
         message("No active child accounts available.")
         return()
@@ -352,29 +359,32 @@ MainAccount <- R6Class(
         purrr::map_dbl(active_accounts, "allocation")
       )
 
-      # Distribute funds to active children
-      for (
-        child_account in active_accounts[
-          order(
-            -purrr::map_dbl(active_accounts, "priority")
-          )
-        ]
-      ) {
-        allocation <- (
-          child_account$allocation / total_active_allocation
-        ) * amount
+      # allocations
+      raw_allocations<-purrr::map_dbl(active_accounts, "allocation")
+      allocations<-round(amount*raw_allocations/total_active_allocation,2) #normalize
 
-        self$withdraw(
-          amount = allocation,
-          by = by,
-          channel = paste("Allocation to", child_account$name)
-        )
-        child_account$deposit(
-          allocation,
-          transaction,
-          by = by,
-          channel = paste("Allocation from", self$name)
-        )
+      # Fix rounding drift: adjust last child
+      allocations[length(allocations)] <- amount - sum(
+        allocations[-length(allocations)]
+      )
+
+      # Distribute funds to active children
+      self$withdraw(
+        amount = amount,
+        by = by,
+        channel = paste("Allocation to child accounts")
+      )
+
+      for (i in seq_along(active_accounts)) {
+        child_account <- active_accounts[[i]]
+        allocation <- max(0,allocations[i])   # avoid tiny negatives
+
+          child_account$deposit(
+            allocation,
+            transaction,
+            by = by,
+            channel = paste("Allocation from", self$name)
+            )
       }
     },
 
@@ -516,7 +526,7 @@ MainAccount <- R6Class(
     ) {
       if (amount > 0) {
         if (self$balance < amount) {
-          stop("Insufficient balance! Your current balance is:", self$balance)
+          stop("Insufficient balance! Your current balance is:", self$balance,"withdrawal requested:",amount)
         }
 
         if (is.null(channel)) stop("Channel is required for withdrawals!")

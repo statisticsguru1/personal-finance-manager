@@ -29,69 +29,7 @@ wait_for_server_ready <- function(
   stop("Server did not become ready within timeout.")
 }
 
-# =========================================================
-# Setting up test user account (testuser)
-# =========================================================
-# Setup: start server, create user, etc.
-tmp_dir <- tempfile("test-api-deposit-")
-dir.create(tmp_dir, recursive = TRUE)
-Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
-Sys.setenv(ACCOUNT_BACKEND = "file")
-Sys.setenv(MAX_REQUESTS = 100000)
-Sys.setenv(WINDOW_SIZE = 3600)
-Sys.setenv(JWT_SECRET = "test-secret")
-Sys.setenv(HOST_URL = "http://127.0.0.1:8000/")
-secret_key <- Sys.getenv("JWT_SECRET")
-
-
-# ============================================================================
-# Setting up server background call function
-# this helps avoid blocking main R session which will be used to interact with
-# the server during testing(sending requests and getting responses)
-# ===========================================================================
-
-log_out <- tempfile("server-out-", fileext = ".log")
-log_err <- tempfile("server-err-", fileext = ".log")
-
-server <- callr::r_bg(
-  function(main_file, jwt, base_dir, project_dir) {
-    setwd(project_dir)
-    Sys.setenv(JWT_SECRET = jwt)
-    Sys.setenv(ACCOUNT_BASE_DIR = base_dir)
-    Sys.setenv(ACCOUNT_BACKEND = "file")
-    source(main_file)
-  },
-  args = list(
-    main_file = here("api", "main.R"),
-    jwt = secret_key,
-    base_dir = tmp_dir,
-    project_dir = here()
-  ),
-  stdout = log_out,
-  stderr = log_err
-)
-
-
-withr::defer({
-  if (server$is_alive()) server$kill()
-  cat("📤 Server stdout:\n")
-  cat(readLines(log_out, warn = FALSE), sep = "\n")
-  cat("\n📥 Server stderr:\n")
-  cat(readLines(log_err, warn = FALSE), sep = "\n")
-}, envir = parent.frame())
-
-# waiting server to get ready
-wait_for_server_ready(paste0(host_url,"__ping__"),timeout = 30)
-
-# ============================================================================
-# Generating dummy auth token for user account (testuser)
-# ============================================================================
-# Helper: auth token
 user_id <- uuid::UUIDgenerate()
-# token <- jwt_encode_hmac(
-#   jwt_claim(user_id = user_id , role = "user"),
-#   secret = secret_key
-# )
 
 res2 <- httr::POST(
   url = "http://127.0.0.1:8000/generate_access_token",
@@ -106,13 +44,16 @@ parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
 print(parsed2)
 token<-parsed2$token
 
+# register account
+
 res <- POST(
-    url = paste0(host_url,"register"),
-    httr::add_headers(Authorization = paste("Bearer", token)),
-    body = list(user_id = user_id),
-    encode = "json"
+  url = paste0(host_url,"register"),
+  httr::add_headers(Authorization = paste("Bearer", token)),
+  body = list(user_id = user_id),
+  encode = "json"
 )
 
+# add subaccounts
 parsed <- jsonlite::fromJSON(rawToChar(res$content))
 print(parsed)
 main_uuid<-parsed$uuid
@@ -172,12 +113,13 @@ res4 <- httr::POST(
   )
 )
 
+# get tree 
 parsed4 <- jsonlite::fromJSON(rawToChar(res4$content))
 print(parsed4)
 res6 <- httr::GET(
-    url = paste0(host_url, "get_minimal_tree"),
-    httr::add_headers(Authorization = paste("Bearer", token)),
-    query = list()
-  )
+  url = paste0(host_url, "get_minimal_tree"),
+  httr::add_headers(Authorization = paste("Bearer", token)),
+  query = list()
+)
 parsed6 <- jsonlite::fromJSON(rawToChar(res6$content))
 print(parsed6$minimal_tree)

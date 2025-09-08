@@ -1,5 +1,9 @@
 library(jose)
 library(tidyverse)
+
+#--------------------- global mongo connections env--------------------------------
+# mongo connection cache
+.mongo_conns <- new.env(parent = emptyenv())
 #--------------------- validates user id before creating base acc-------------
 #' Validate a User ID Format
 #'
@@ -36,9 +40,9 @@ is_valid_user_id <- function(user_id) {
 #'
 #' @export
 create_user_account_base <- function(
-  user_id,
-  base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts"),
-  initial_balance = 0
+    user_id,
+    base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts"),
+    initial_balance = 0
 ) {
   if (!is_valid_user_id(user_id)) {
     stop("Invalid user ID format")
@@ -115,7 +119,7 @@ load_user_file <- function(user_id, file_name = "account_tree.Rds") {
 
 
 
-# ------------ save account/lockfiles ---------------------------------------
+# ------------ save account files ---------------------------------------
 #' Save a User-Specific File via Plugin Backend
 #'
 #' Saves an R object to a user-specific location using the appropriate plugin
@@ -171,7 +175,8 @@ save_user_file <- function(user_id, object, file_name = "account_tree.Rds") {
   }
 
   args <- build_plugin_args(
-    backend, "save",
+    backend,
+    "save",
     user_id = user_id,
     object = object,
     file_name = file_name
@@ -181,7 +186,7 @@ save_user_file <- function(user_id, object, file_name = "account_tree.Rds") {
 }
 
 
-# -----------------------remove account/lockfile ------------------------
+# -----------------------remove account files ------------------------
 #' Remove a User File via Configured Storage Backend
 #'
 #' Deletes a specific user file using the appropriate backend plugin, based
@@ -227,7 +232,7 @@ remove_user_file <- function(user_id, file_name = "account_tree.Rds") {
 }
 
 
-# ---------------------- for checking account/lockfile existence ---------------
+# ---------------------- for checking account files existence ---------------
 #' Check If a User File Exists via Configured Storage Backend
 #'
 #' Checks whether a specific file (e.g., `account_tree.Rds`, lock file, etc.)
@@ -269,8 +274,85 @@ user_file_exists <- function(user_id, file_name = "account_tree.Rds") {
 }
 
 
-# --------------------- loading/saving plugins /checking existence--------------
+
+# -------------------- file lock ---------------------------------------------
+#' Acquire a Lock for a User's Account Tree
+#'
+#' Provides exclusive access to a user's account tree across different storage
+#' backends (e.g., local files, MongoDB, Google Drive). The function ensures
+#' that only one process/thread can access and modify a user's account tree at
+#' a time. Lock acquisition and release are delegated to the appropriate
+#' backend plugin.
+#'
+#' @param user_id The user ID whose account tree should be locked.
+#' @param expr An expression to evaluate once the lock has been acquired.
+#' @param file_name Name of the account file to lock (default:
+#'   \code{"account_tree.Rds"}). This is used to derive the corresponding
+#'   lockfile (e.g., \code{account_tree.lock}).
+#' @param timeout Maximum time in seconds to wait for the lock before failing.
+#'   Default is 1800 seconds (30 minutes).
+#'
+#' @details
+#' The locking mechanism is backend-dependent:
+#' \itemize{
+#'   \item \strong{File backend:} A temporary \code{.lock} file is created in
+#'   the user's directory. Other processes wait until this file is removed.
+#'   \item \strong{MongoDB backend:} A lock flag is set in the document
+#'   associated with the given \code{file_name}. Other processes poll until the
+#'   lock is released.
+#'   \item \strong{Other backends (e.g., Google Drive):} The behavior is defined
+#'   by the respective plugin.
+#' }
+#'
+#' This function is designed to be backend-agnostic; it automatically
+#' dispatches to the correct lock plugin based on the \code{ACCOUNT_BACKEND}
+#' environment variable.
+#'
+#' @return The result of evaluating \code{expr} once the lock is acquired.
+#'
+#' @examples
+#' \dontrun{
+#' # Run a critical section safely under a lock
+#' result <- with_account_lock("user123", {
+#'   account <- load_user_file("user123", "account_tree.Rds")
+#'   account$balance <- account$balance + 100
+#'   save_user_file("user123", account, "account_tree.Rds")
+#'   account$balance
+#' })
+#' }
+#'
+#' @export
+with_account_lock <- function(
+    user_id,
+    expr,
+    file_name = "account_tree.Rds",
+    timeout = 1800
+    ) {
+  backend <- Sys.getenv("ACCOUNT_BACKEND", "file")
+  fn_name <- paste0("with_lock_", backend)
+
+  if (!exists(fn_name, mode = "function")) {
+    stop("No lock plugin found for backend: ", backend)
+  }
+
+  args <- build_plugin_args(
+    backend,
+    "lock",
+    user_id = user_id,
+    expr = substitute(expr),
+    file_name = file_name,
+    timeout = timeout
+  )
+
+  do.call(fn_name, args)
+}
+
+
+# --------------------- plugins--------------------------------------------
+
 ####################### loading ####################################
+
+# ============================ loading from file based storage ========
 #' Retry reading RDS file
 #'
 #' Attempts to read an RDS file multiple times before failing.
@@ -287,7 +369,11 @@ retry_read_rds <- function(file, max_tries = 3, delay = 0.3) {
       return(readRDS(file))
     }, error = function(e) {
       if (i == max_tries) {
-        message(sprintf("Failed to read RDS after %d attempts: %s", max_tries, e$message))
+        message(
+          sprintf(
+            "Failed to read RDS after %d attempts: %s", max_tries, e$message
+            )
+          )
         stop(e)
       } else {
         Sys.sleep(delay)
@@ -348,8 +434,8 @@ load_from_file <- function(user_id, file_name, base_dir) {
             "Error loading RDS file: %s\nFile: %s",
             conditionMessage(e),
             file_path
+          )
         )
-       )
       }),
 
       "json" = tryCatch({
@@ -391,22 +477,72 @@ load_from_file <- function(user_id, file_name, base_dir) {
         file_name,
         user_id,
         conditionMessage(e)
+      )
     )
-   )
   })
 
   return(result)
 }
 
+# ============================ loading from mongo based storage =============
+#' Load a File from MongoDB
+#'
+#' This function loads a previously saved R object from a MongoDB collection.
+#' It retrieves the document matching a specific user ID and file name,
+#' then unserializes the stored raw data back into an R object.
+#'
+#' @param user_id A string specifying the unique user ID.
+#' @param file_name The name of the file to load (e.g., `"account_tree.Rds"`).
+#' @param db The MongoDB database name.
+#' @param uri The MongoDB connection URI.
+#' @param collection The MongoDB collection name. Defaults to `"accounts"`.
+#'
+#' @return The R object stored in MongoDB, or `NULL` if no matching file was found.
+#'
+#' @examples
+#' \dontrun{
+#' # Load a saved object for a user
+#' obj <- load_from_mongo(
+#'   user_id = "user123",
+#'   file_name = "account_tree.Rds",
+#'   db = "mydb",
+#'   uri = "mongodb://localhost:27017"
+#' )
+#' }
+#'
+#' @seealso [save_to_mongo()], [file_exists_mongo()], [remove_from_mongo()]
+#'
+#' @export
+load_from_mongo <- function(
+    user_id,
+    file_name,
+    db,
+    uri,
+    collection = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
+) {
+  con <- get_mongo_conn(db = db, collection = collection, uri = uri)
 
+  query <- sprintf('{"user_id":"%s","filename":"%s"}', user_id, file_name)
+  doc <- con$find(query, limit = 1)
+  if (nrow(doc) == 0) {
+    return(NULL)  # or stop("File not found in MongoDB")
+  }
+
+  # Convert raw data back to R object
+  raw_data <- jsonlite::base64_dec(doc$data[[1]])
+  unserialize(raw_data)
+}
 
 ####################### saving #####################################
 
+# ================== save to file based storage =================
 ## saving with retries
 #' Retry saveRDS with Delay and Limited Attempts
 #'
-#' Attempts to save an R object to a file using `saveRDS()`, retrying on error up to a maximum number of tries.
-#' This is useful in scenarios with high concurrency or potential file system contention, such as APIs or parallel processes.
+#' Attempts to save an R object to a file using `saveRDS()`,
+#' retrying on error up to a maximum number of tries.
+#' This is useful in scenarios with high concurrency or
+#' potential file system contention, such as APIs or parallel processes.
 #'
 #' @param object An R object to save.
 #' @param file A character string naming the file to save the R object to.
@@ -428,7 +564,9 @@ retry_save_rds <- function(object, file, max_tries = 3, delay = 0.3) {
       return(invisible(TRUE))
     }, error = function(e) {
       if (i == max_tries) {
-        message(sprintf("Failed to save RDS after %d attempts: %s", max_tries, e$message))
+        message(
+          sprintf("Failed to save RDS after %d attempts: %s", max_tries, e$message)
+          )
         stop(e)
       } else {
         Sys.sleep(delay)
@@ -601,9 +739,77 @@ save_to_file <- function(user_id, object, file_name, base_dir) {
   invisible(file_path)
 }
 
+# ====================== save to mongo based storage ==========================
+#' Save an R Object to MongoDB
+#'
+#' This function saves an R object to a MongoDB collection for a specific user.
+#' If a document with the same user ID and file name already exists, it updates
+#' only the data field. Otherwise, it inserts a new document with metadata.
+#'
+#' @param user_id A string specifying the unique user ID.
+#' @param object The R object to save.
+#' @param file_name The name of the file to save (e.g., `"account_tree.Rds"`).
+#' @param db The MongoDB database name.
+#' @param uri The MongoDB connection URI.
+#' @param collection The MongoDB collection name. Defaults to `"user_accounts"`.
+#'
+#' @return Invisibly returns `NULL`. The object is stored in MongoDB.
+#'
+#' @examples
+#' \dontrun{
+#' save_to_mongo(
+#'   user_id = "user123",
+#'   object = list(a = 1, b = 2),
+#'   file_name = "account_tree.Rds",
+#'   db = "mydb",
+#'   uri = "mongodb://localhost:27017"
+#'   collection = "user_accounts"
+#' )
+#' }
+#'
+#' @seealso [get_mongo_conn()], [file_exists_mongo()], [remove_from_mongo()]
+#'
+#' @export
+save_to_mongo <- function(
+    user_id,
+    object,
+    file_name,
+    db,
+    uri,
+    collection = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
+) {
+  con <- get_mongo_conn(db = db, collection = collection, uri = uri)
 
+  raw_data <- serialize(object, NULL)
+  b64_data <- jsonlite::base64_enc(raw_data)
 
-###################### Removing ##################################
+  if (file_exists_mongo(user_id, file_name, db, uri, collection)) {
+    # File exists → update only data
+    con$update(
+      query  = sprintf('{"user_id":"%s","filename":"%s"}', user_id, file_name),
+      update = jsonlite::toJSON(
+        list("$set" = list(data = b64_data)),
+        auto_unbox = TRUE
+      ),
+      upsert = FALSE
+    )
+
+  } else {
+    # File doesn't exist → insert new doc with metadata
+    con$insert(list(
+      user_id   = user_id,
+      filename  = file_name,
+      data      = b64_data,
+      lock      = FALSE,
+      locked_by = NULL,
+      timestamp = NULL
+    ))
+  }
+}
+
+###################### Removing #####################################
+
+# ========================= remove from file based storage =================
 ## removing from local file
 #' Remove a File from the Local File System
 #'
@@ -639,21 +845,374 @@ remove_from_file <- function(user_id, file_name, base_dir) {
   }
 }
 
-###################### checking file existence #######################
-## checking file in local dir
-#' Check if a user file exists on the local file system
+
+# ========================= remove from mongo based storage =================
+#' Remove a File from MongoDB
 #'
-#' @param user_id The user ID
-#' @param file_name The file name to check
-#' @param base_dir The base directory for user data
+#' This function removes a specified file (document) from a MongoDB collection
+#' based on the user ID and file name. If no matching document is found,
+#' it returns `FALSE` without throwing an error.
 #'
-#' @return Logical TRUE/FALSE
-file_exists_file <- function(user_id, file_name, base_dir) {
-  file.exists(file.path(base_dir, user_id, file_name))
+#' @param user_id A string specifying the unique user ID.
+#' @param file_name The name of the file to remove (e.g., `"account_tree.Rds"`).
+#' @param db The MongoDB database name.
+#' @param uri The MongoDB connection URI.
+#' @param collection The MongoDB collection name. Defaults to `"accounts"`.
+#'
+#' @return Logical `TRUE` if the file was successfully removed, or `FALSE`
+#'   if no matching file was found.
+#'
+#' @examples
+#' \dontrun{
+#' # Remove a file from MongoDB
+#' removed <- remove_from_mongo(
+#'   user_id = "user123",
+#'   file_name = "account_tree.Rds",
+#'   db = "mydb",
+#'   uri = "mongodb://localhost:27017"
+#' )
+#' if (removed) message("File removed!") else message("File not found.")
+#' }
+#'
+#' @seealso [save_to_mongo()], [load_from_mongo()], [file_exists_mongo()]
+#'
+#' @export
+remove_from_mongo <- function(
+    user_id,
+    file_name,
+    db,
+    uri,
+    collection = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
+) {
+  con <- get_mongo_conn(db = db, collection = collection, uri = uri)
+
+  query <- sprintf('{"user_id":"%s","filename":"%s"}', user_id, file_name)
+  result <- con$remove(query)
+
+  # Case 1: result is a JSON string
+  if (is.character(result)) {
+    parsed <- jsonlite::fromJSON(result)
+    return(parsed$nRemoved > 0)
+  }
+
+  # Case 2: result is already a list
+  if (is.list(result) && !is.null(result$nRemoved)) {
+    return(result$nRemoved > 0)
+  }
+
+  # Case 3: some versions return TRUE/FALSE directly
+  if (is.logical(result)) {
+    return(result)
+  }
+
+  stop(
+    "Unexpected return type from con$remove(): ",
+    paste(class(result), collapse = ", ")
+    )
 }
 
 
-# -------------------- build plugin arg -----------------------
+
+
+###################### checking file existence #######################
+
+# =============== check file existence from file based storage =================
+
+#' Check if a User File Exists on the Local File System
+#'
+#' This function checks whether a specified file exists in a user's directory
+#' on the local file system. It is a plugin for the `"file"` backend, used
+#' via the generic interface `file_exists_user_file()`.
+#'
+#' @param user_id A string specifying the unique user ID.
+#' @param file_name The name of the file to check (e.g., `"account_tree.Rds"`).
+#' @param base_dir The root directory containing all user folders.
+#'
+#' @return Logical `TRUE` if the file exists, `FALSE` otherwise.
+#'
+#' @examples
+#' \dontrun{
+#' file_exists_file("user123", "account_tree.Rds", base_dir = "user_data")
+#' }
+#'
+#' @seealso [remove_from_file()], [save_to_file()], [load_from_file()]
+#'
+#' @export
+file_exists_file <- function(user_id, file_name, base_dir) {
+  file.exists(file.path(base_dir, user_id, file_name))
+}
+# =============== check file existence from mongo based storage =================
+#' Get or Create a MongoDB Connection
+#'
+#' This function retrieves a cached MongoDB connection for a given database
+#' and collection. If the connection does not exist, it creates a new one
+#' using the `mongolite` package and stores it in a private environment
+#' for reuse.
+#'
+#' @param db A string specifying the MongoDB database name.
+#' @param collection A string specifying the MongoDB collection name.
+#' @param uri A string specifying the MongoDB connection URI.
+#'
+#' @return A `mongolite::mongo` connection object.
+#'
+#' @examples
+#' \dontrun{
+#' # Connect to the "users" collection in the "mydb" database
+#' conn <- get_mongo_conn("mydb", "users", "mongodb://localhost:27017")
+#' conn$find('{}')  # Query all documents
+#' }
+#'
+#' @seealso [mongolite::mongo()]
+#'
+#' @export
+get_mongo_conn <- function(db, collection, uri) {
+  key <- paste(db, collection, sep = "_")
+  if (!exists(key, envir = .mongo_conns)) {
+    .mongo_conns[[key]] <- mongolite::mongo(
+      collection = collection,
+      db = db,
+      url = uri
+    )
+  }
+  .mongo_conns[[key]]
+}
+
+
+#' Check if a User File Exists in MongoDB
+#'
+#' This function checks whether a specific file exists for a user in a MongoDB
+#' collection. It uses a cached connection (or creates a new one) via
+#' `get_mongo_conn()` and queries documents matching the user ID and file name.
+#'
+#' @param user_id A string specifying the unique user ID.
+#' @param file_name The name of the file to check (e.g., `"account_tree.Rds"`).
+#' @param db The MongoDB database name.
+#' @param uri The MongoDB connection URI.
+#' @param collection The MongoDB collection name. Defaults to `"accounts"`.
+#'
+#' @return Logical `TRUE` if the file exists, `FALSE` otherwise.
+#'
+#' @examples
+#' \dontrun{
+#' # Check if the user has the file in MongoDB
+#' file_exists_mongo("user123", "account_tree.Rds",
+#'                   db = "mydb", uri = "mongodb://localhost:27017")
+#' }
+#'
+#' @seealso [get_mongo_conn()], [remove_from_file()], [file_exists_file()]
+#'
+#' @export
+file_exists_mongo <- function(
+    user_id,
+    file_name,
+    db,
+    uri,
+    collection = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
+) {
+  # Get cached or new connection
+  con <- get_mongo_conn(db = db, collection = collection, uri = uri)
+
+  # Query for this user's file
+  query <- sprintf(
+    '{"user_id": "%s", "filename": "%s"}',
+    user_id, file_name
+  )
+
+  # Count documents
+  count <- con$count(query)
+
+  count > 0
+}
+
+
+
+
+
+
+###################### file locking ################################
+
+# ================= file locking for file based storage =================
+#' Acquire a File-Based Lock for a User's Account File
+#'
+#' Provides exclusive access to a user's account file using a file-based lock.
+#' A temporary lock file is created in the user's directory to signal that the
+#' account file is in use. Other processes wait until this lock file is removed
+#' or a timeout is reached.
+#'
+#' @param user_id The user ID whose account file should be locked.
+#' @param expr An expression to evaluate once the lock has been acquired.
+#' @param base_dir Base directory where user files are stored.
+#' @param file_name Name of the account file to lock (default:
+#'   \code{"account_tree.Rds"}). The lock file is automatically derived by
+#'   replacing the extension with \code{.lock}, e.g.,
+#'   \code{"account_tree.lock"}.
+#' @param timeout Maximum time in seconds to wait for the lock before failing.
+#'   Default is 1800 seconds (30 minutes).
+#'
+#' @details
+#' The lock is implemented by creating a file with the same base name as
+#' \code{file_name}, but with a \code{.lock} extension.
+#' If the lock file already exists, the function waits until it is removed.
+#' The process ID of the locking process is written to the lock file for
+#' debugging purposes.
+#'
+#' When the expression finishes (normally or due to an error), the lock file is
+#' automatically removed via \code{on.exit()}, ensuring the lock is released.
+#'
+#' @return The result of evaluating \code{expr} once the lock is acquired.
+#'
+#' @examples
+#' \dontrun{
+#' # Run a critical section safely under a file lock
+#' result <- with_lock_file("user123", {
+#'   account <- load_user_file("user123", "account_tree.Rds")
+#'   account$balance <- account$balance + 50
+#'   save_user_file("user123", account, "account_tree.Rds")
+#'   account$balance
+#' }, base_dir = "/data/accounts")
+#' }
+#'
+#' @export
+with_lock_file <- function(
+    user_id,
+    expr,
+    base_dir,
+    file_name = "account_tree.Rds",
+    timeout = 1800
+    ) {
+  lockfile <- sub("\\.[^.]*$", ".lock", file_name)
+  if (identical(lockfile, file_name)) {
+    lockfile <- paste0(file_name, ".lock")  # fallback if no extension
+  }
+  start_time <- Sys.time()
+
+  while (user_file_exists(user_id, lockfile)) {
+    if (difftime(Sys.time(), start_time, units = "secs") > timeout) {
+      stop("Could not acquire lock for user [", user_id, "]: timeout reached")
+    }
+    Sys.sleep(0.1)
+  }
+
+  save_user_file(
+    user_id,
+    object = as.character(Sys.getpid()),
+    file_name = lockfile
+    )
+
+  on.exit({
+    remove_user_file(user_id, file_name = lockfile)
+  }, add = TRUE)
+
+  force(expr)
+}
+
+
+# ================= file locking for mongo based storage ======================
+#' Acquire a MongoDB-Based Lock for a User's Account Tree
+#'
+#' Provides exclusive access to a user's account tree using a MongoDB collection
+#' as the locking mechanism. A document in the collection is updated atomically
+#' to indicate that the account tree is locked by a specific process. Other
+#' processes wait until the lock is released or a timeout is reached.
+#'
+#' @param user_id The user ID whose account tree should be locked.
+#' @param expr An expression to evaluate once the lock has been acquired.
+#' @param db The MongoDB database name.
+#' @param uri The MongoDB connection URI.
+#' @param collection The collection used to store lock metadata.
+#'   Default is \code{"accounts"}.
+#' @param file_name Logical identifier for the locked resource.
+#'   Default is \code{"account_tree"}.
+#' @param timeout Maximum time in seconds to wait for the lock before failing.
+#'   Default is 1800 seconds (30 minutes).
+#'
+#' @details
+#' The lock is implemented by atomically updating a MongoDB document
+#' with \code{lock = false} to set \code{lock = true}, along with the process ID
+#' and a timestamp.
+#'
+#' If another process already holds the lock, this function retries until either
+#' the lock is acquired or the timeout is reached.
+#'
+#' When the expression finishes (normally or due to an error), the lock is
+#' automatically released via \code{on.exit()}, ensuring the document is reset
+#' to \code{lock = false}.
+#'
+#' @return The result of evaluating \code{expr} once the lock is acquired.
+#'
+#' @examples
+#' \dontrun{
+#' # Run a critical section safely under a MongoDB lock
+#' result <- with_lock_mongo(
+#'   user_id = "user123",
+#'   expr = {
+#'     account <- load_from_mongo("user123", "account_tree",
+#'                                db = "mydb", uri = "mongodb://localhost")
+#'     account$balance <- account$balance + 100
+#'     save_to_mongo("user123", account, "account_tree",
+#'                   db = "mydb", uri = "mongodb://localhost")
+#'     account$balance
+#'   },
+#'   db = "mydb",
+#'   uri = "mongodb://localhost"
+#' )
+#' }
+#'
+#' @export
+with_lock_mongo <- function(user_id,
+                            expr,
+                            db,
+                            uri,
+                            collection = "user_accounts",
+                            file_name = "account_tree.Rds",
+                            timeout = 1800
+) {
+  con <- get_mongo_conn(db, collection, uri)
+  query <- sprintf('{"user_id":"%s","filename":"%s"}', user_id, file_name)
+  pid <- as.character(Sys.getpid())
+  start_time <- Sys.time()
+
+  repeat {
+    res <- con$update(
+      query = sprintf(
+        '{"user_id":"%s","filename":"%s","lock":false}',
+        user_id,
+        file_name
+      ),
+      update = sprintf('{"$set":{"lock":true,"locked_by":"%s","timestamp":"%s"}}',
+                       pid, Sys.time()),
+      upsert = FALSE
+    )
+
+    nModified <- rlang::`%||%`(
+      res$nModified,
+      rlang::`%||%`(res$modifiedCount, 0)
+    )
+
+    if (nModified == 1) {
+      break
+    }
+
+    if (difftime(Sys.time(), start_time, units = "secs") > timeout) {
+      stop("Could not acquire lock for user [", user_id, "]: timeout reached")
+    }
+    Sys.sleep(0.1)
+  }
+
+  on.exit({
+    con$update(
+      query = query,
+      update = '{"$set":{"lock":false,"locked_by":null,"timestamp":null}}',
+      upsert = FALSE
+    )
+  }, add = TRUE)
+
+  force(expr)
+}
+
+
+
+# -------------------------- build plugin arg ---------------------------------
 #' Build Plugin Arguments for Storage Backend Functions
 #'
 #' Constructs a list of arguments for storage plugin functions (e.g.,
@@ -703,23 +1262,35 @@ build_plugin_args <- function(backend, mode = "load", ...) {
     "remove_file" = list(
       base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
     ),
+    "lock_file" = list( # new
+      base_dir = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
+    ),
 
     # ==== Mongo Backend ====
     "load_mongo" = list(
       uri = Sys.getenv("MONGO_URI"),
-      db = Sys.getenv("MONGO_DB")
+      db = Sys.getenv("MONGO_DB"),
+      collection = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
     ),
     "save_mongo" = list(
       uri = Sys.getenv("MONGO_URI"),
-      db = Sys.getenv("MONGO_DB")
+      db = Sys.getenv("MONGO_DB"),
+      collection = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
     ),
     "file_exists_mongo" = list(
       uri = Sys.getenv("MONGO_URI"),
-      db = Sys.getenv("MONGO_DB")
+      db = Sys.getenv("MONGO_DB"),
+      collection = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
     ),
     "remove_mongo" = list(
       uri = Sys.getenv("MONGO_URI"),
-      db = Sys.getenv("MONGO_DB")
+      db = Sys.getenv("MONGO_DB"),
+      collection = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
+    ),
+    "lock_mongo" = list( # new
+      uri = Sys.getenv("MONGO_URI"),
+      db = Sys.getenv("MONGO_DB"),
+      collection = Sys.getenv("ACCOUNT_BASE_DIR", "user_accounts")
     ),
 
     # ==== Google Drive Backend ====
@@ -735,12 +1306,16 @@ build_plugin_args <- function(backend, mode = "load", ...) {
     "remove_gdrive" = list(
       folder_id = Sys.getenv("GDRIVE_FOLDER_ID")
     ),
+    "lock_gdrive" = list( # future-proof
+      folder_id = Sys.getenv("GDRIVE_FOLDER_ID")
+    ),
 
     stop("Unknown plugin configuration for backend: ", backend)
   )
 
   c(base_args, plugin_args)
 }
+
 
 
 # ----------------decodes JWT tokens --------------------------------
@@ -927,8 +1502,9 @@ coerce_numeric_date <- function(x) {
     parsed <- suppressWarnings(lubridate::ymd_hms(x, quiet = TRUE, tz = "UTC"))
     if (is.na(parsed)) {
       stop(
-        "Invalid NumericDate format: must be epoch seconds, days since epoch, or ISO8601 datetime string"
-        )
+        "Invalid NumericDate format: must be epoch seconds, days since epoch",
+        "or ISO8601 datetime string"
+      )
     }
     return(parsed)
   }
@@ -936,50 +1512,7 @@ coerce_numeric_date <- function(x) {
   stop("Unsupported type for NumericDate claim")
 }
 
-# -------------------- file lock ---------------------------------------------
-#' Acquire a Lock for a User's Account Tree using Plugin-Based File Access
-#'
-#' Ensures exclusive access to a user's account tree by creating a lock file.
-#' Waits until the lock is released or a timeout is reached. Uses the plugin
-#' architecture to support multiple storage backends.
-#'
-#' @param user_id The user ID whose account tree should be locked.
-#' @param expr An expression to evaluate within the lock.
-#' @param timeout Maximum time in seconds to wait for the lock. Default is 1800.
-#'
-#' @return Returns the result of evaluating `expr`.
-#' @export
-with_account_lock <- function(
-  user_id,
-  expr,
-  timeout = 1800
-) {
-  if (!is_valid_user_id(user_id)) {
-    stop("Invalid user ID format")
-  }
 
-  lockfile <- "account_tree.lock"
-  start_time <- Sys.time()
-
-  while (user_file_exists(user_id, lockfile)) {
-    if (difftime(Sys.time(), start_time, units = "secs") > timeout) {
-      stop("Could not acquire lock for user [", user_id, "]: timeout reached")
-    }
-    Sys.sleep(0.1)
-  }
-
-  # Create the lock file using the plugin
-  save_user_file(
-    user_id, object = as.character(Sys.getpid()), file_name = lockfile
-  )
-
-  # Ensure lock is removed after execution
-  on.exit({
-    remove_user_file(user_id, file_name = lockfile)
-  }, add = TRUE)
-
-  force(expr)
-}
 
 ###################### Get minimal tree ##################################
 
@@ -1070,8 +1603,8 @@ minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date(
       account$child_accounts,
       function(acc){
         list(
-        name = acc$name,
-        uuid =acc$uuid
+          name = acc$name,
+          uuid =acc$uuid
         )
       },
       simplify = F
@@ -1088,23 +1621,23 @@ minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date(
     walking_balance = account$walking_amount(amt_type = "Balance", daterange=daterange)
   )
 
-    #add tier 2 details
-    if(inherits(account,"ChildAccount")){
-      details$parent_uuid = account$parent$uuid
-      details$parent_name = account$parent$name
-      details$allocation = account$allocation
-      details$account_status = account$get_account_status()
-      details$priority = account$get_priority()
-    }
+  #add tier 2 details
+  if(inherits(account,"ChildAccount")){
+    details$parent_uuid = account$parent$uuid
+    details$parent_name = account$parent$name
+    details$allocation = account$allocation
+    details$account_status = account$get_account_status()
+    details$priority = account$get_priority()
+  }
 
-    # tier 3
-    if(inherits(account,"GrandchildAccount")){
-      details$due_date = account$get_due_date()
-      details$fixed_amount= account$get_fixed_amount()
-      details$account_type = account$get_account_type()
-      details$account_freq = account$get_account_freq()
-      details$account_periods = account$get_account_periods()
-    }
+  # tier 3
+  if(inherits(account,"GrandchildAccount")){
+    details$due_date = account$get_due_date()
+    details$fixed_amount= account$get_fixed_amount()
+    details$account_type = account$get_account_type()
+    details$account_freq = account$get_account_freq()
+    details$account_periods = account$get_account_periods()
+  }
   if(length(account$child_accounts)==0 || is.null(account$child_accounts)){
     details$child_accounts<-list()
   } else{

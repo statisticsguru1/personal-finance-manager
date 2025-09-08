@@ -1,5 +1,5 @@
 # fetch the whole account tree
-get_main_account_from_api <- function() {
+get_main_account_from_api <- function(token) {
   res <- GET(
     url = paste0(host_url, "get_minimal_tree"),
     add_headers(Authorization = paste("Bearer", token))
@@ -9,7 +9,7 @@ get_main_account_from_api <- function() {
 }
 
 # deposit
-post_deposit <- function(uuid, amount, channel, transaction_number = NULL) {
+post_deposit <- function(uuid, amount, channel, transaction_number = NULL,token) {
   res <- POST(
     url = paste0(host_url, "deposit"),
     add_headers(Authorization = paste("Bearer", token)),

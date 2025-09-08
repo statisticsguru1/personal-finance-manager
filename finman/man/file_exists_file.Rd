@@ -2,20 +2,31 @@
 % Please edit documentation in R/helpers.R
 \name{file_exists_file}
 \alias{file_exists_file}
-\title{Check if a user file exists on the local file system}
+\title{Check if a User File Exists on the Local File System}
 \usage{
 file_exists_file(user_id, file_name, base_dir)
 }
 \arguments{
-\item{user_id}{The user ID}
+\item{user_id}{A string specifying the unique user ID.}
 
-\item{file_name}{The file name to check}
+\item{file_name}{The name of the file to check (e.g., `"account_tree.Rds"`).}
 
-\item{base_dir}{The base directory for user data}
+\item{base_dir}{The root directory containing all user folders.}
 }
 \value{
-Logical TRUE/FALSE
+Logical `TRUE` if the file exists, `FALSE` otherwise.
 }
 \description{
-Check if a user file exists on the local file system
+This function checks whether a specified file exists in a user's directory
+on the local file system. It is a plugin for the `"file"` backend, used
+via the generic interface `file_exists_user_file()`.
+}
+\examples{
+\dontrun{
+file_exists_file("user123", "account_tree.Rds", base_dir = "user_data")
+}
+
+}
+\seealso{
+[remove_from_file()], [save_to_file()], [load_from_file()]
 }

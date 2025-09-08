@@ -19,8 +19,10 @@ retry_save_rds(object, file, max_tries = 3, delay = 0.3)
 `invisible(TRUE)` if successful. If all attempts fail, an error is raised.
 }
 \description{
-Attempts to save an R object to a file using `saveRDS()`, retrying on error up to a maximum number of tries.
-This is useful in scenarios with high concurrency or potential file system contention, such as APIs or parallel processes.
+Attempts to save an R object to a file using `saveRDS()`,
+retrying on error up to a maximum number of tries.
+This is useful in scenarios with high concurrency or
+potential file system contention, such as APIs or parallel processes.
 }
 \examples{
 \dontrun{
