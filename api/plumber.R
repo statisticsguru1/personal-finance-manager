@@ -302,7 +302,7 @@ token_endpoint <- function(req, res,
           aud = aud,
           exp = exp,
           nbf = nbf,
-          iat = Sys.time(),
+          iat = iat,
           jti = jti,
           session_id = session_id,
           role = role,
@@ -459,18 +459,21 @@ register <- function(req, res, user_id = NULL, initial_balance = 0) {
 #* @param amount:float* Deposit amount (required)
 #* @param channel:str* Deposit channel (required)
 #* @param transaction_number:str Optional transaction number
-#* @param by:str Who performed the deposit (default = "User")
-#* @param date:str Timestamp of deposit (default = now)
+#* @param initiated_by:str Who performed the deposit (default = "User")
+#* @param transaction_date:str Optional timestamp of deposit
 #* @json
 deposit <- function(req, res,
                     uuid,
                     amount,
                     channel,
                     transaction_number = NULL,
-                    by = "User",
-                    date = Sys.time()) {
+                    initiated_by = "User",
+                    transaction_date = NULL) {
 
   start_time <- Sys.time()
+
+  user_id <- req$user_id
+  role    <- req$role
 
   # --- Input validation BEFORE future --------------------------------------
   if (missing(uuid) || is.null(uuid) || uuid == "") {
@@ -499,15 +502,17 @@ deposit <- function(req, res,
     return(list(success = FALSE,status=400, error = "channel is required"))
   }
 
+   # Parse dates safely
+  transaction_date <- tryCatch(
+    safe_parse_date(transaction_date),
+    error = function(e) Sys.time()  # fallback to now
+  )
+
   # --- Future starts after inputs validated -------------------------------
   tryCatch({
     future_promise({
       library(tidyverse)
       library(finman)
-
-      user_id <- req$user_id
-      role    <- req$role
-
       result <- tryCatch({
         with_account_lock(user_id, {
           tree <- load_user_file(user_id, "account_tree.Rds")
@@ -523,9 +528,9 @@ deposit <- function(req, res,
             account$deposit(
               amount = amt,
               transaction_number = transaction_number,
-              by = by,
+              by = initiated_by,
               channel = channel,
-              date = date
+              transaction_date = transaction_date
             )
 
             save_user_file(user_id, tree, "account_tree.Rds")
@@ -543,7 +548,12 @@ deposit <- function(req, res,
         list(
           success = FALSE,
           status  = 500,
-          error   = paste("Deposit failed:", conditionMessage(e))
+          error   = paste("Deposit failed:", conditionMessage(e)),
+          debug   = list(
+            date_class = class(transaction_date),
+            date_value = transaction_date,
+            data_value1 = as.POSIXct(transaction_date)
+          )
         )
       })
 
@@ -590,15 +600,15 @@ deposit <- function(req, res,
 #* @param amount:float* Withdrawal amount (required)
 #* @param channel:str* Withdrawal channel (required)
 #* @param transaction_number:str Optional transaction number
-#* @param by:str Who performed the withdrawal (default = "User")
-#* @param date:str Timestamp of withdrawal (default = now)
+#* @param initiated_by:str Who performed the withdrawal (default = "User")
+#* @param transaction_date:str Timestamp of withdrawal (default = now)
 withdraw <- function(req, res,
                      uuid,
                      amount,
                      channel,
                      transaction_number = NULL,
-                     by = "User",
-                     date = Sys.time()) {
+                     initiated_by = "User",
+                     transaction_date = Sys.time()) {
   start_time <- Sys.time()
   user_id <- req$user_id
   role <- req$role
@@ -649,6 +659,12 @@ withdraw <- function(req, res,
       execution_time = as.numeric(difftime(Sys.time(), start_time, units = "secs"))
     ))
   }
+  # Safe date parsing
+  #  Date parsing
+  transaction_date <- tryCatch(
+    safe_parse_date(transaction_date),
+    error = function(e) Sys.time()  # fallback to now
+  )
 
   # --- Core Handler ---------------------------------------------------
 
@@ -670,9 +686,9 @@ withdraw <- function(req, res,
             account$withdraw(
               amount = amount,
               transaction_number = transaction_number,
-              by = by,
+              by = initiated_by,
               channel = channel,
-              date = date
+              transaction_date = transaction_date
             )
             save_user_file(user_id, tree, "account_tree.Rds")
 
@@ -684,8 +700,30 @@ withdraw <- function(req, res,
             )
           }
         })
-      }, error = function(e) {
-        list(success = FALSE, status = 400, error = conditionMessage(e))
+      }, , error = function(e) {
+        error_message <- conditionMessage(e)
+        if (
+          grepl(
+            "Total allocation exceeds 100%", error_message,
+            ignore.case = TRUE
+          )|
+          grepl(
+            "Insufficient balance! Your current balance",
+            error_message,
+            ignore.case = TRUE
+          )
+        ) {
+          return(list(
+            success = FALSE,
+            status = 400,
+            error = paste("Failed:", error_message)
+          ))
+        }
+        return(list(
+          success = FALSE,
+          status = 500,
+          error = paste("Failed:", error_message)
+        ))
       })
     }) %...>% (function(result) {
       end_time <- Sys.time()
@@ -736,13 +774,13 @@ withdraw <- function(req, res,
 #* @param uuid:str* UUID of the parent account
 #* @param amount:float* Amount to distribute (must be > 0)
 #* @param transaction:str Optional transaction reference
-#* @param by:str Initiator of the distribution (default: "System")
+#* @param initiated_by:str Initiator of the distribution (default: "System")
 #* @json
 distribute <- function(req, res,
                        uuid,
                        amount = NULL,
                        transaction = NULL,
-                       by = "System") {
+                       initiated_by = "System") {
   start_time <- Sys.time()
 
   user_id <- req$user_id
@@ -792,7 +830,7 @@ distribute <- function(req, res,
             account$distribute_to_children(
               amount = amt,
               transaction = transaction,
-              by = by
+              by = initiated_by
             )
             save_user_file(user_id, tree, "account_tree.Rds")
 
@@ -943,7 +981,10 @@ add_child_account <- function(req, res,
       error = "Invalid frequency: must be a non-negative integer"
     ))
   }
-  due_date <-  if (!is.null(due_date)) lubridate::as_date(due_date) else NULL
+  due_date <-  if (!is.null(due_date)) tryCatch(
+    safe_parse_date(due_date), error = function(e)
+      NA
+    ) else NULL
 
   if (!is.null(due_date) && is.na(due_date)) {
     res$status <- 400
@@ -1912,15 +1953,12 @@ move_balance <- function(
             ignore.case = TRUE
           )
         ) {
-          #res$status <- 400
           return(list(
             success = FALSE,
             status = 400,
             error = paste("Failed:", error_message)
           ))
         }
-
-        #res$status <- 500
         return(list(
           success = FALSE,
           status = 500,
@@ -2306,8 +2344,11 @@ spending <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
   # Parse date range
   if (!is.null(from) && !is.null(to)) {
     daterange <- tryCatch({
-      c(as.POSIXct(from), as.POSIXct(to))
-    }, error = function(e) NULL)
+      c(
+        safe_parse_date(from),
+        safe_parse_date(to)
+      )
+    }, error = function(e) NULL)  # catch parsing errors and return NULL
 
     if (is.null(daterange)) {
       res$status <- 400
@@ -2316,6 +2357,7 @@ spending <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
       )
     }
   } else {
+    # If from/to are missing, use a very wide default range
     daterange <- c(Sys.Date() - 365000, Sys.Date())
   }
 
@@ -2432,8 +2474,15 @@ total_income <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
   }
 
   # Handle date range
-  from_date <- tryCatch(as.POSIXct(from), error = function(e) NA)
-  to_date <- tryCatch(as.POSIXct(to), error = function(e) NA)
+  from_date <- tryCatch(
+    safe_parse_date(from),
+    error = function(e) NA
+  )
+
+  to_date <- tryCatch(
+    safe_parse_date(to),
+    error = function(e) NA
+  )
 
   if (length(from_date) == 0 || is.na(from_date)) {
     from_date <- Sys.Date() - 365000
@@ -2554,8 +2603,18 @@ allocated_amount <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
     ))
   }
   # Parse and validate date range
-  from_date <- tryCatch(as.POSIXct(from), error = function(e) NA)
-  to_date <- tryCatch(as.POSIXct(to), error = function(e) NA)
+  from_date <- tryCatch(
+    safe_parse_date(from),
+    error = function(e) NA
+  )
+
+  to_date <- tryCatch(
+    safe_parse_date(to),
+    error = function(e) NA
+  )
+
+
+
   if (length(from_date) == 0 || is.na(from_date)) {
     from_date <- Sys.Date() - 365000
   }
@@ -2680,8 +2739,15 @@ income_utilization <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
 
 
   # Parse dates safely
-  from_date <- tryCatch(as.POSIXct(from), error = function(e) NA)
-  to_date <- tryCatch(as.POSIXct(to), error = function(e) NA)
+  from_date <- tryCatch(
+    safe_parse_date(from),
+    error = function(e) NA
+  )
+
+  to_date <- tryCatch(
+    safe_parse_date(to),
+    error = function(e) NA
+  )
 
   if (length(from_date) == 0 || is.na(from_date)) {
     from_date <- Sys.Date() - 365000
@@ -2820,12 +2886,20 @@ walking_amount <- function(
   }
 
   # Parse and validate dates
-  from_date <- tryCatch(as.POSIXct(from), error = function(e) NA)
-  to_date <- tryCatch(as.POSIXct(to), error = function(e) NA)
+  from_date <- tryCatch(
+    safe_parse_date(from),
+    error = function(e) NA
+  )
+
+  to_date <- tryCatch(
+    safe_parse_date(to),
+    error = function(e) NA
+  )
   if (length(from_date) == 0 || is.na(from_date)) {
     from_date <- Sys.Date() - 365000
   }
   if (length(to_date) == 0 || is.na(to_date)) to_date <- Sys.Date()
+
   daterange <- c(from_date, to_date)
 
   # avoid to_date earlier than from_date
@@ -3483,7 +3557,7 @@ set_due_date <- function(req, res, uuid = NULL, due_date = NULL) {
 
   # Parse due date
   parsed_date <- if(!is.null(due_date)){
-    tryCatch(as.POSIXct(due_date), error = function(e) NA)
+    tryCatch(safe_parse_date(due_date), error = function(e) NA)
   } else {
     NULL
   }
@@ -4775,15 +4849,15 @@ get_minimal_tree <- function(req, res, uuid = NULL, n = 30,
   if (is.null(end_date)) end_date <- Sys.Date()
 
   # Convert to Date
-  start_date <- tryCatch(as.Date(start_date), error = function(e) NA)
-  end_date <- tryCatch(as.Date(end_date), error = function(e) NA)
+  start_date <- tryCatch(safe_parse_date(start_date), error = function(e) NA)
+  end_date <- tryCatch(safe_parse_date(end_date), error = function(e) NA)
 
   if (is.na(start_date) || is.na(end_date)) {
     res$status <- 400
     return(list(
       success = FALSE,
       status = 400,
-      error = "Invalid date format. Use YYYY-MM-DD."
+      error = "Invalid date format"
     ))
   }
 

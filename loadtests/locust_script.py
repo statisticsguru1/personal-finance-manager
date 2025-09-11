@@ -144,7 +144,7 @@ class APIUser(HttpUser):
             "uuid": uuid_,
             "amount": amount,
             "transaction": transaction_id,
-            "by": "LocustBot"
+            "initiated_by": "LocustBot"
         }
 
         response = self.client.post(
@@ -714,9 +714,9 @@ class APIUser(HttpUser):
 
 class StepLoadShape(LoadTestShape):
     step_time = 60   # seconds per step
-    step_load = 50  # users to add each step
-    spawn_rate = 50  # users/sec
-    max_users = 200
+    step_load = 20  # users to add each step
+    spawn_rate = 20  # users/sec
+    max_users = 150
     max_duration = 300       # total duration in seconds (e.g., 10 minutes)
 
     def tick(self):

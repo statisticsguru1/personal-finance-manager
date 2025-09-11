@@ -206,7 +206,6 @@ rent$withdraw(5000,channel="ABSA")      # paid rent
 savings$withdraw(6000,channel="ABSA")   # withdraw to pay savings the specifics
                                         # Not known we can specify this by attaching
                                         # which are the specific savings
-
 debt$withdraw(4000,channel="ABSA")      # withdraw to pay savings the specifics
 ```
 

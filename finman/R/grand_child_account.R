@@ -162,7 +162,7 @@ GrandchildAccount <- R6Class(
       self$num_periods <- 1
       self$priority <- priority
       self$Track_dues_and_balance <- data.frame(
-        Date = POSIXct(),
+        Date = as.POSIXct(character()),
         Amount_due = numeric(),
         Balance = numeric(),
         stringsAsFactors = FALSE
@@ -320,7 +320,7 @@ GrandchildAccount <- R6Class(
     #' (default is "User").
     #' @param channel Character or NULL. The method or channel used for the
     #' transaction (e.g., "Mobile Money").
-    #' @param date POSIXct. The timestamp for the transaction (defaults to
+    #' @param transaction_date POSIXct. The timestamp for the transaction (defaults to
     #' current system time).
     #'
     #' @details
@@ -387,16 +387,17 @@ GrandchildAccount <- R6Class(
       transaction_number = NULL,
       by = "User",
       channel = NULL,
-      date = Sys.time()
+      transaction_date = Sys.time()
     ) {
 
       if (missing(channel) || is.null(channel)) {
         stop("`channel` is required and cannot be NULL.")
       }
 
+      transaction_date <- tryCatch(as.POSIXct(transaction_date), error = function(e) as.POSIXct(NA))
       # Check if bill is overdue and update periods
       if (self$account_type == "Bill" & !is.null(self$due_date)) {
-        if (date > self$due_date) {
+        if (transaction_date > self$due_date) {
           # Extend due date by frequency and increment periods
           self$due_date <- self$due_date + lubridate::days(self$freq)
           self$num_periods <- self$num_periods + 1
@@ -424,7 +425,7 @@ GrandchildAccount <- R6Class(
             transaction_number,
             by = by,
             channel,
-            date
+            transaction_date
           )
           self$change_status("inactive") # Fully funded for the period
 
@@ -470,7 +471,7 @@ GrandchildAccount <- R6Class(
         transaction_number = transaction_number,
         by = by,
         channel = channel,
-        date = date
+        transaction_date = transaction_date
       )
 
       if (self$fixed_amount >  0) {
@@ -512,7 +513,7 @@ GrandchildAccount <- R6Class(
     #' "User").
     #' @param channel Character or NULL. Source or medium of the transaction
     #' (e.g., "Mobile Money").
-    #' @param date POSIXct. The date and time of withdrawal (default is current
+    #' @param transaction_date POSIXct. The date and time of withdrawal (default is current
     #' system time).
     #'
     #' @details
@@ -555,7 +556,7 @@ GrandchildAccount <- R6Class(
       transaction_number = NULL,
       by = "User",
       channel = NULL,
-      date = Sys.time()
+      transaction_date = Sys.time()
     ) {
       if (amount > 0) {
         if (amount > self$balance) {

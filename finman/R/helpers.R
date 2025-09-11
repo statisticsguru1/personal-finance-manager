@@ -1514,6 +1514,68 @@ coerce_numeric_date <- function(x) {
 
 
 
+#' Safely Parse Flexible Date Inputs
+#'
+#' This helper attempts to robustly coerce various date-like inputs into a
+#' standardized `POSIXct` object. It is designed for user-facing APIs where
+#' dates may arrive in different formats (character, `Date`, or `POSIXct`).
+#'
+#' Supported formats include common ISO and ambiguous styles, for example:
+#' - `"2025-11-16"` → `2025-11-16 UTC`
+#' - `"11-16-2025"` → `2025-11-16 UTC`
+#' - `"16/11/2025 14:30"` → `2025-11-16 14:30 UTC`
+#' - `"Nov 16 2025 14:30:15"` → `2025-11-16 14:30:15 UTC`
+#'
+#' If a vector of inputs is provided, only the first element is parsed.
+#' If `NULL`, empty, or `NA`, the current system time is returned.
+#'
+#' @param x A date input. Accepts:
+#'   * `POSIXct`: returned unchanged
+#'   * `Date`: coerced to `POSIXct`
+#'   * `character`: parsed with multiple orders (`ymd`, `dmy`, `mdy` with optional
+#'   hour-minute-second extensions)
+#' @param tz Timezone to apply when parsing (default `"UTC"`).
+#'
+#' @return A `POSIXct` object representing the parsed date.
+#'
+#' @examples
+#' safe_parse_date("2025-11-16")
+#' safe_parse_date("11/16/2025 14:30")
+#' safe_parse_date(Sys.Date())
+#' safe_parse_date(Sys.time())
+#'
+#' @seealso [lubridate::parse_date_time()]
+#' @export
+safe_parse_date <- function(x, tz = "UTC") {
+  if (is.null(x) || length(x) == 0 || is.na(x)) return(Sys.time())
+  if (length(x) > 1) x <- x[1]   # take first if vector
+
+  if (inherits(x, "POSIXct")) return(x)
+  if (inherits(x, "Date")) return(as.POSIXct(x, tz = tz))
+
+  orders <- c(
+    "ymd", "ymd_HM", "ymd_HMS",
+    "dmy", "dmy_HM", "dmy_HMS",
+    "mdy", "mdy_HM", "mdy_HMS"
+  )
+
+  parsed <- suppressWarnings(
+    lubridate::parse_date_time(x, orders = orders, tz = tz)
+  )
+
+  if (is.na(parsed)) {
+    stop(sprintf(
+      paste("Invalid date format '%s'.",
+      "Please provide a valid ISO8601 date (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)."
+      ),
+      x
+    ))
+  }
+
+  parsed
+}
+
+
 ###################### Get minimal tree ##################################
 
 #' Get a Minimal Version of the Account Tree

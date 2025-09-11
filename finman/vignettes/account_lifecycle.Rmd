@@ -81,13 +81,13 @@ rent$status
 When a deposit is made for bills and the due date has passed, the account will automatically extend the due period and reactivate itself:
 
 ```{r, auto_reactivation}
-rent$deposit(10000, channel = "Bank",date = Sys.Date() - 8) # funded days before due
+rent$deposit(10000, channel = "Bank",transaction_date = Sys.Date() - 8) # funded days before due
 rent$get_account_status()
 rent$get_account_periods()
 ```
 
 ```{r}
-rent$deposit(1000, channel = "Bank",date = Sys.Date() - 3)
+rent$deposit(1000, channel = "Bank",transaction_date = Sys.Date() - 3)
 rent$get_account_status()
 rent$get_account_periods()
 ```

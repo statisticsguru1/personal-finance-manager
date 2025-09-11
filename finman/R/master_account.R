@@ -128,7 +128,7 @@ MainAccount <- R6Class(
         Balance = numeric(),
         amount_due = numeric(),
         overall_balance = numeric(),
-        Date = POSIXct(),
+        Date = as.POSIXct(character()),
         stringsAsFactors = FALSE
       )
     },
@@ -210,7 +210,7 @@ MainAccount <- R6Class(
     #' @param by Character. Identifier of the depositor (default is `"User"`).
     #' @param channel Character. The source of funds
     #' (e.g., `"ABSA"`, `"MPESA"`). Required.
-    #' @param date POSIXct or character. The timestamp of the transaction
+    #' @param transaction_date POSIXct or character. The timestamp of the transaction
     #' (defaults to current time).
     #'
     #' @return No return value. The method updates the account balance,
@@ -230,7 +230,7 @@ MainAccount <- R6Class(
       transaction_number = NULL,
       by = "User",
       channel = NULL,
-      date = Sys.time()
+      transaction_date = Sys.time()
     ) {
       if (amount <= 0) stop("Deposit amount must be greater than zero!")
       if (is.null(channel)) stop("Channel is required for deposits!")
@@ -249,7 +249,7 @@ MainAccount <- R6Class(
       balance <- self$balance
       amount_due <- self$compute_total_due()
       overall_balance <- self$compute_total_balance()
-      date <- as.POSIXct(date)
+      transaction_date <- as.POSIXct(transaction_date)
       self$transactions <- rbind(
         self$transactions,
         data.frame(
@@ -261,10 +261,11 @@ MainAccount <- R6Class(
           Balance = as.numeric(balance),
           amount_due = as.numeric(amount_due),
           overall_balance = as.numeric(overall_balance),
-          Date = as.POSIXct(date),
+          Date = transaction_date,
           stringsAsFactors = FALSE
         )
       )
+
 
       # Distribute funds to child accounts and reset balance
       self$distribute_to_children(amount, transaction_number)
@@ -505,7 +506,7 @@ MainAccount <- R6Class(
     #' `"User"`.
     #' @param channel Character. The withdrawal channel (e.g., "Bank Transfer").
     #' Required.
-    #' @param date POSIXct. Timestamp for the transaction. Defaults to
+    #' @param transaction_date POSIXct. Timestamp for the transaction. Defaults to
     #' `Sys.time()`.
     #'
     #' @return None. Modifies the object's internal state by reducing the
@@ -522,11 +523,11 @@ MainAccount <- R6Class(
       transaction_number = NULL,
       by = "User",
       channel = NULL,
-      date = Sys.time()
+      transaction_date = Sys.time()
     ) {
       if (amount > 0) {
         if (self$balance < amount) {
-          stop("Insufficient balance! Your current balance is:", self$balance,"withdrawal requested:",amount)
+          stop("Insufficient balance! Your current balance is:", self$balance)
         }
 
         if (is.null(channel)) stop("Channel is required for withdrawals!")
@@ -541,7 +542,7 @@ MainAccount <- R6Class(
         balance <- self$balance
         amount_due <- self$compute_total_due()
         overall_balance <- self$compute_total_balance()
-        date <- as.POSIXct(date)
+        transaction_date <- as.POSIXct(transaction_date)
         self$transactions <- rbind(
           self$transactions,
           data.frame(
@@ -553,7 +554,7 @@ MainAccount <- R6Class(
             Balance = balance,
             amount_due = amount_due,
             overall_balance = overall_balance,
-            Date = date,
+            Date = transaction_date,
             stringsAsFactors = FALSE
           )
         )
@@ -1097,10 +1098,10 @@ MainAccount <- R6Class(
     #'   # Simulate some deposits and withdrawals
     #'   main_acc$deposit(500, "T1", By = "User", channel = "Cash")
     #'   main_acc$withdraw(200, By = "User", channel = "Spending",
-    #'   date = Sys.time() - 10)
+    #'   transaction_date = Sys.time() - 10)
     #'   child1$deposit(300, "T2", By = "User", channel = "Mobile")
     #'   child1$withdraw(100, By = "User", channel = "Shopping",
-    #'   date = Sys.time() - 5)
+    #'   transaction_date = Sys.time() - 5)
     #'
     #'   # Get total user spending in last 30 days
     #'   main_acc$spending(c(Sys.Date() - 30, Sys.Date()))
@@ -1158,9 +1159,9 @@ MainAccount <- R6Class(
     #'
     #'   # Simulate some deposits
     #'   main_acc$deposit(500, "TX01", By = "User", channel = "Cash",
-    #'   date = Sys.time() - 7)
+    #'   transaction_date = Sys.time() - 7)
     #'   child1$deposit(300, "TX02", By = "User", channel = "Mobile",
-    #'   date = Sys.time() - 3)
+    #'   transaction_date = Sys.time() - 3)
     #'
     #'   # Get total income in last 10 days
     #'   main_acc$total_income(c(Sys.Date() - 10, Sys.Date()))
@@ -1218,11 +1219,11 @@ MainAccount <- R6Class(
     #'   main_acc$add_child_account(child2)
     #'
     #'   main_acc$deposit(1000, "TX001", By = "System", channel = "Bank",
-    #'   date = Sys.time() - 5)
+    #'   transaction_date = Sys.time() - 5)
     #'   child1$deposit(300, "TX002", By = "User", channel = "Mobile",
-    #'   date = Sys.time() - 3)
+    #'   transaction_date = Sys.time() - 3)
     #'   child2$deposit(200, "TX003", By = "User", channel = "Cash",
-    #'   date = Sys.time() - 2)
+    #'   transaction_date = Sys.time() - 2)
     #'
     #'   # Get total allocated amount within last 7 days
     #'   main_acc$allocated_amount(c(Sys.Date() - 7, Sys.Date()))

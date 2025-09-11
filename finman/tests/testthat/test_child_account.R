@@ -86,7 +86,7 @@ test_that("deposit: logs full transaction info", {
 test_that("deposit: accepts custom date", {
   acc <- ChildAccount$new("Child", allocation = 1, priority = 1)
   custom_date <- as.POSIXct("2024-01-01 12:00:00", tz = "UTC")
-  acc$deposit(100, date = custom_date, channel = "Test")
+  acc$deposit(100, transaction_date = custom_date, channel = "Test")
   expect_equal(acc$transactions$Date[1], custom_date)
 })
 

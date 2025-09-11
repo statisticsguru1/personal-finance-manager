@@ -9,14 +9,18 @@ library(tidyverse)
 # =============================================================================
  # Env variables these should be removed during hosting
  #tmp_dir <- tempfile("test-api-deposit-")
+ Sys.setenv("ACCOUNT_BASE_DIR"="user_accounts")
  #dir.create(tmp_dir, recursive = TRUE)
- #Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
- #Sys.setenv(ACCOUNT_BACKEND = "file")
- #Sys.setenv(MAX_REQUESTS = 1000000)
- #Sys.setenv(WINDOW_SIZE = 3600)
- #Sys.setenv(JWT_SECRET = "test-secret")
- #secret_key <- Sys.getenv("JWT_SECRET")
+ Sys.setenv(ACCOUNT_BACKEND = "mongo")
+ Sys.setenv(MAX_REQUESTS = 1000000)
+ Sys.setenv(WINDOW_SIZE = 3600)
+ Sys.setenv(JWT_SECRET = "test-secret")
+ secret_key <- Sys.getenv("JWT_SECRET")
  #Sys.setenv(HOST_URL = "http://127.0.0.1:8000/")
+uri ="mongodb+srv://fesnicresearchsolutions:pIOE6OzeyvwJgpCJ@cluster0.fg7jeml.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+Sys.setenv("MONGO_URI"=uri)
+Sys.setenv("MONGO_DB"="Finman")
+
 
 # =============================================================================
 

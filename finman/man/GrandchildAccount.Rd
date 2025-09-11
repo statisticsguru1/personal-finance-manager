@@ -607,7 +607,7 @@ surplus reallocation, and account status updates.
   transaction_number = NULL,
   by = "User",
   channel = NULL,
-  date = Sys.time()
+  transaction_date = Sys.time()
 )}\if{html}{\out{</div>}}
 }
 
@@ -626,7 +626,7 @@ for the transaction. If NULL, a new one is generated.}
 \item{\code{channel}}{Character or NULL. The method or channel used for the
 transaction (e.g., "Mobile Money").}
 
-\item{\code{date}}{POSIXct. The timestamp for the transaction (defaults to
+\item{\code{transaction_date}}{POSIXct. The timestamp for the transaction (defaults to
 current system time).}
 }
 \if{html}{\out{</div>}}
@@ -713,7 +713,7 @@ number of periods.
   transaction_number = NULL,
   by = "User",
   channel = NULL,
-  date = Sys.time()
+  transaction_date = Sys.time()
 )}\if{html}{\out{</div>}}
 }
 
@@ -731,7 +731,7 @@ reference ID.}
 \item{\code{channel}}{Character or NULL. Source or medium of the transaction
 (e.g., "Mobile Money").}
 
-\item{\code{date}}{POSIXct. The date and time of withdrawal (default is current
+\item{\code{transaction_date}}{POSIXct. The date and time of withdrawal (default is current
 system time).}
 }
 \if{html}{\out{</div>}}

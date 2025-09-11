@@ -25,7 +25,7 @@ priority levels for fund distribution.
   priority)}}{
     Constructor method.
   }
-  \item{\code{deposit(amount, transaction_number, by, channel, date)}}{
+  \item{\code{deposit(amount, transaction_number, by, channel, transaction_date)}}{
     Overridden deposit method with status check.
   }
   \item{\code{change_status(status)}}{
@@ -292,7 +292,7 @@ nested child accounts, if applicable.
   transaction_number = NULL,
   by = "User",
   channel = NULL,
-  date = Sys.time()
+  transaction_date = Sys.time()
 )}\if{html}{\out{</div>}}
 }
 
@@ -311,7 +311,7 @@ NULL, an ID is generated automatically.}
 \item{\code{channel}}{Character or NULL. Channel through which the deposit
 is made (e.g., "Mobile", "Bank").}
 
-\item{\code{date}}{POSIXct. Timestamp of the transaction
+\item{\code{transaction_date}}{POSIXct. Timestamp of the transaction
 (default is current time).}
 }
 \if{html}{\out{</div>}}

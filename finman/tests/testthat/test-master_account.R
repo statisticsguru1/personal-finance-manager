@@ -142,7 +142,7 @@ test_that("Deposit prevents duplicate transaction numbers", {
 test_that("Deposit handles custom date input correctly", {
   acc <- MainAccount$new(name = "Main")
   custom_date <- as.POSIXct("2024-01-01 12:00:00")
-  acc$deposit(amount = 100, channel = "Mobile", date = custom_date)
+  acc$deposit(amount = 100, channel = "Mobile", transaction_date = custom_date)
 
   expect_equal(as.Date(acc$transactions$Date[1]), as.Date(custom_date))
 })
@@ -538,7 +538,7 @@ test_that("withdraw: logs the provided date correctly", {
     50,
     channel = "Bank",
     transaction_number = "TXN900",
-    date = date_used
+    transaction_date = date_used
   )
 
   last_txn <- tail(account$transactions, 1)

@@ -38,7 +38,7 @@ library(uuid)
 #'   priority)}}{
 #'     Constructor method.
 #'   }
-#'   \item{\code{deposit(amount, transaction_number, by, channel, date)}}{
+#'   \item{\code{deposit(amount, transaction_number, by, channel, transaction_date)}}{
 #'     Overridden deposit method with status check.
 #'   }
 #'   \item{\code{change_status(status)}}{
@@ -164,7 +164,7 @@ ChildAccount <- R6Class(
     #' (default is "User").
     #' @param channel Character or NULL. Channel through which the deposit
     #' is made (e.g., "Mobile", "Bank").
-    #' @param date POSIXct. Timestamp of the transaction
+    #' @param transaction_date POSIXct. Timestamp of the transaction
     #' (default is current time).
     #'
     #' @details
@@ -191,7 +191,7 @@ ChildAccount <- R6Class(
       transaction_number = NULL,
       by = "User",
       channel = NULL,
-      date = Sys.time()
+      transaction_date = Sys.time()
     ) {
       if (self$status == "active") {
         if (is.null(transaction_number)) {
@@ -203,7 +203,7 @@ ChildAccount <- R6Class(
         balance <- self$balance
         amount_due <- self$compute_total_due()
         overall_balance <- self$compute_total_balance()
-        date <- as.POSIXct(date)
+        transaction_date <- as.POSIXct(transaction_date)
         self$transactions <- rbind(
           self$transactions,
           data.frame(
@@ -215,7 +215,7 @@ ChildAccount <- R6Class(
             Balance = as.numeric(balance),
             amount_due = as.numeric(amount_due),
             overall_balance = as.numeric(overall_balance),
-            Date = as.POSIXct(date),
+            Date = transaction_date,
             stringsAsFactors = FALSE
           )
         )

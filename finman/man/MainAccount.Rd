@@ -362,10 +362,10 @@ print(main_acc$transactions)
   # Simulate some deposits and withdrawals
   main_acc$deposit(500, "T1", By = "User", channel = "Cash")
   main_acc$withdraw(200, By = "User", channel = "Spending",
-  date = Sys.time() - 10)
+  transaction_date = Sys.time() - 10)
   child1$deposit(300, "T2", By = "User", channel = "Mobile")
   child1$withdraw(100, By = "User", channel = "Shopping",
-  date = Sys.time() - 5)
+  transaction_date = Sys.time() - 5)
 
   # Get total user spending in last 30 days
   main_acc$spending(c(Sys.Date() - 30, Sys.Date()))
@@ -386,9 +386,9 @@ print(main_acc$transactions)
 
   # Simulate some deposits
   main_acc$deposit(500, "TX01", By = "User", channel = "Cash",
-  date = Sys.time() - 7)
+  transaction_date = Sys.time() - 7)
   child1$deposit(300, "TX02", By = "User", channel = "Mobile",
-  date = Sys.time() - 3)
+  transaction_date = Sys.time() - 3)
 
   # Get total income in last 10 days
   main_acc$total_income(c(Sys.Date() - 10, Sys.Date()))
@@ -408,11 +408,11 @@ print(main_acc$transactions)
   main_acc$add_child_account(child2)
 
   main_acc$deposit(1000, "TX001", By = "System", channel = "Bank",
-  date = Sys.time() - 5)
+  transaction_date = Sys.time() - 5)
   child1$deposit(300, "TX002", By = "User", channel = "Mobile",
-  date = Sys.time() - 3)
+  transaction_date = Sys.time() - 3)
   child2$deposit(200, "TX003", By = "User", channel = "Cash",
-  date = Sys.time() - 2)
+  transaction_date = Sys.time() - 2)
 
   # Get total allocated amount within last 7 days
   main_acc$allocated_amount(c(Sys.Date() - 7, Sys.Date()))
@@ -627,7 +627,7 @@ the transaction in the internal ledger.
   transaction_number = NULL,
   by = "User",
   channel = NULL,
-  date = Sys.time()
+  transaction_date = Sys.time()
 )}\if{html}{\out{</div>}}
 }
 
@@ -646,7 +646,7 @@ automatically.}
 \item{\code{channel}}{Character. The source of funds
 (e.g., `"ABSA"`, `"MPESA"`). Required.}
 
-\item{\code{date}}{POSIXct or character. The timestamp of the transaction
+\item{\code{transaction_date}}{POSIXct or character. The timestamp of the transaction
 (defaults to current time).}
 }
 \if{html}{\out{</div>}}
@@ -824,7 +824,7 @@ transaction. A transaction number is generated automatically if not
   transaction_number = NULL,
   by = "User",
   channel = NULL,
-  date = Sys.time()
+  transaction_date = Sys.time()
 )}\if{html}{\out{</div>}}
 }
 
@@ -845,7 +845,7 @@ a system-generated ID will be used.}
 \item{\code{channel}}{Character. The withdrawal channel (e.g., "Bank Transfer").
 Required.}
 
-\item{\code{date}}{POSIXct. Timestamp for the transaction. Defaults to
+\item{\code{transaction_date}}{POSIXct. Timestamp for the transaction. Defaults to
 `Sys.time()`.}
 }
 \if{html}{\out{</div>}}
@@ -1325,10 +1325,10 @@ Numeric. The total spending amount over the specified date range.
   # Simulate some deposits and withdrawals
   main_acc$deposit(500, "T1", By = "User", channel = "Cash")
   main_acc$withdraw(200, By = "User", channel = "Spending",
-  date = Sys.time() - 10)
+  transaction_date = Sys.time() - 10)
   child1$deposit(300, "T2", By = "User", channel = "Mobile")
   child1$withdraw(100, By = "User", channel = "Shopping",
-  date = Sys.time() - 5)
+  transaction_date = Sys.time() - 5)
 
   # Get total user spending in last 30 days
   main_acc$spending(c(Sys.Date() - 30, Sys.Date()))
@@ -1380,9 +1380,9 @@ accounts within the specified date range.
 
   # Simulate some deposits
   main_acc$deposit(500, "TX01", By = "User", channel = "Cash",
-  date = Sys.time() - 7)
+  transaction_date = Sys.time() - 7)
   child1$deposit(300, "TX02", By = "User", channel = "Mobile",
-  date = Sys.time() - 3)
+  transaction_date = Sys.time() - 3)
 
   # Get total income in last 10 days
   main_acc$total_income(c(Sys.Date() - 10, Sys.Date()))
@@ -1434,11 +1434,11 @@ the account and its descendants within the specified date range.
   main_acc$add_child_account(child2)
 
   main_acc$deposit(1000, "TX001", By = "System", channel = "Bank",
-  date = Sys.time() - 5)
+  transaction_date = Sys.time() - 5)
   child1$deposit(300, "TX002", By = "User", channel = "Mobile",
-  date = Sys.time() - 3)
+  transaction_date = Sys.time() - 3)
   child2$deposit(200, "TX003", By = "User", channel = "Cash",
-  date = Sys.time() - 2)
+  transaction_date = Sys.time() - 2)
 
   # Get total allocated amount within last 7 days
   main_acc$allocated_amount(c(Sys.Date() - 7, Sys.Date()))
