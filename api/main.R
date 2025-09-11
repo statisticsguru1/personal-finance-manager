@@ -17,7 +17,6 @@ library(tidyverse)
  Sys.setenv(JWT_SECRET = "test-secret")
  secret_key <- Sys.getenv("JWT_SECRET")
  #Sys.setenv(HOST_URL = "http://127.0.0.1:8000/")
-uri ="mongodb+srv://fesnicresearchsolutions:pIOE6OzeyvwJgpCJ@cluster0.fg7jeml.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 Sys.setenv("MONGO_URI"=uri)
 Sys.setenv("MONGO_DB"="Finman")
 
