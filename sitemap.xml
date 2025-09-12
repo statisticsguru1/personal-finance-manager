@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://your-username.github.io/personal-finance-manager/reference.html</loc>
-    <lastmod>2025-08-01T19:18:51.729Z</lastmod>
-  </url>
-  <url>
-    <loc>https://your-username.github.io/personal-finance-manager/index.html</loc>
-    <lastmod>2025-08-01T19:18:51.725Z</lastmod>
-  </url>
-  <url>
     <loc>https://your-username.github.io/personal-finance-manager/modules.html</loc>
-    <lastmod>2025-08-01T19:18:51.727Z</lastmod>
+    <lastmod>2025-09-12T09:58:53.801Z</lastmod>
   </url>
   <url>
     <loc>https://your-username.github.io/personal-finance-manager/news.html</loc>
-    <lastmod>2025-08-01T19:18:51.727Z</lastmod>
+    <lastmod>2025-09-12T09:58:53.801Z</lastmod>
+  </url>
+  <url>
+    <loc>https://your-username.github.io/personal-finance-manager/index.html</loc>
+    <lastmod>2025-09-12T09:58:53.799Z</lastmod>
+  </url>
+  <url>
+    <loc>https://your-username.github.io/personal-finance-manager/reference.html</loc>
+    <lastmod>2025-09-12T09:58:53.803Z</lastmod>
   </url>
 </urlset>

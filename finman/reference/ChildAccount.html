@@ -73,7 +73,7 @@ priority levels for fund distribution.</p>
   priority)</code></dt>
 <dd><p>Constructor method.</p></dd>
 
-  <dt><code>deposit(amount, transaction_number, by, channel, date)</code></dt>
+  <dt><code>deposit(amount, transaction_number, by, channel, transaction_date)</code></dt>
 <dd><p>Overridden deposit method with status check.</p></dd>
 
   <dt><code>change_status(status)</code></dt>
@@ -236,7 +236,7 @@ nested child accounts, if applicable.</p><div class="section">
 <span>  transaction_number <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  by <span class="op">=</span> <span class="st">"User"</span>,</span>
 <span>  channel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -262,7 +262,7 @@ NULL, an ID is generated automatically.</p></dd>
 is made (e.g., "Mobile", "Bank").</p></dd>
 
 
-<dt><code>date</code></dt>
+<dt><code>transaction_date</code></dt>
 <dd><p>POSIXct. Timestamp of the transaction
 (default is current time).</p></dd>
 
@@ -439,7 +439,7 @@ during distribution.</p><div class="section">
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Attaching core tidyverse packages</span> ──────────────────────── tidyverse 2.0.0 ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.5</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.5.1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.5.2</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2  </span> 3.5.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble   </span> 3.3.0</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">lubridate</span> 1.9.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr    </span> 1.3.1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr    </span> 1.1.0     </span>
@@ -466,7 +466,7 @@ during distribution.</p><div class="section">
 <span class="r-in"><span>  amount <span class="op">=</span> <span class="fl">1000</span>,</span></span>
 <span class="r-in"><span>  channel <span class="op">=</span> <span class="st">"Bank Transfer"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 1000 via Bank Transfer - Transaction ID: sys1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 1000 via Bank Transfer - Transaction ID: SYSCDBED17A46 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Change account status to inactive</span></span></span>
 <span class="r-in"><span><span class="va">child</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"inactive"</span><span class="op">)</span></span></span>
@@ -484,7 +484,7 @@ during distribution.</p><div class="section">
 <span class="r-in"><span>  amount <span class="op">=</span> <span class="va">child</span><span class="op">$</span><span class="va">balance</span>,</span></span>
 <span class="r-in"><span>  channel <span class="op">=</span> <span class="st">"Transfer to Main"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 1000 via Transfer to Main - Transaction ID: sys2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 1000 via Transfer to Main - Transaction ID: SYSEBC598EB8B </span>
 <span class="r-in"><span><span class="va">child</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"closed"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Emergency Fund has been closed.</span>
 <span class="r-in"><span></span></span>
@@ -519,7 +519,7 @@ during distribution.</p><div class="section">
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Deposit funds into the account</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span>amount <span class="op">=</span> <span class="fl">100</span>, channel <span class="op">=</span> <span class="st">"Mobile"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 100 via Mobile - Transaction ID: sys1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 100 via Mobile - Transaction ID: SYSBDBD29271A </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Attempting to deposit into an inactive account</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"inactive"</span><span class="op">)</span></span></span>
@@ -539,14 +539,14 @@ during distribution.</p><div class="section">
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Attempting to close with non-zero balance triggers error</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">100</span>, channel <span class="op">=</span> <span class="st">"Mobile"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 100 via Mobile - Transaction ID: sys1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 100 via Mobile - Transaction ID: SYSB207E9AC23 </span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"closed"</span><span class="op">)</span>    <span class="co"># Will raise an error</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Withdraw funds then close</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">100</span>, channel <span class="op">=</span> <span class="st">"Transfer"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 100 via Transfer - Transaction ID: sys2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 100 via Transfer - Transaction ID: SYSDCE97D6230 </span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"closed"</span><span class="op">)</span>    <span class="co"># Successful closure</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Emergency Fund has been closed.</span>
 <span class="r-in"><span></span></span>

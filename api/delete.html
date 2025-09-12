@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.34">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,10 +71,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-025db3b089a7e65f2676a8a92be6aa8b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-94599a0eca3b0000ac8b8cb7c63e4b76.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -496,7 +496,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="delete-delete" class="level1">
 <h1>🗑️ DELETE /delete</h1>
-<p>Deletes a user account and its associated data file. Requires a valid user_id parameter. Returns success message or appropriate error if the user doesn’t exist or deletion fails.</p>
+<p>Deletes a user account/sub accounts. If the target account is the root account its associated data file is removed, if a sub-account, only the account node is removed. Requires a valid uuid for target account parameter. Returns success message or appropriate error if the user doesn’t exist or deletion fails.</p>
 <hr>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">📌 Summary</h2>
@@ -521,17 +521,17 @@ Content-Type: application/json</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>user_id</code></td>
+<td><code>uuid</code></td>
 <td>string</td>
 <td>✅</td>
-<td>Unique ID of the user to be deleted</td>
+<td>Unique account identifier uuid</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="example-request-query-parameter" class="level2">
 <h2 class="anchored" data-anchor-id="example-request-query-parameter">📥 Example Request (Query Parameter)</h2>
-<pre><code>DELETE /delete?user_id=4a76343a-e971-4bd7-b8c4-5fa9fccee433</code></pre>
+<pre><code>DELETE /delete?uuid=4a76343a-e971-4bd7-b8c4-5fa9fccee433</code></pre>
 <hr>
 </section>
 <section id="success-response" class="level2">
