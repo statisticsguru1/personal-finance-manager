@@ -642,13 +642,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$user_id
+[1] "00392010-3a62-4fd9-9809-547bd26eb9eb"
+
+$uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$start_time
+[1] "2025-09-12T12:43:03.106Z"
+
+$end_time
+[1] "2025-09-12T12:43:03.430Z"
+
+$execution_time
+[1] 0.3236</code></pre>
 </div>
 </div>
 </section>
@@ -667,13 +679,25 @@ $error
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$balance
+[1] 0
+
+$start_time
+[1] "2025-09-12T12:43:03.489Z"
+
+$end_time
+[1] "2025-09-12T12:43:03.719Z"
+
+$execution_time
+[1] 0.2295</code></pre>
 </div>
 </div>
 </section>
@@ -690,13 +714,28 @@ $error
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$transaction_count
+[1] 0
+
+$transactions
+list()
+
+$start_time
+[1] "2025-09-12T12:43:03.778Z"
+
+$end_time
+[1] "2025-09-12T12:43:04.023Z"
+
+$execution_time
+[1] 0.2446</code></pre>
 </div>
 </div>
 </section>
@@ -713,13 +752,31 @@ $error
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$account_name
+[1] "Main"
+
+$child_account_names
+list()
+
+$child_count
+[1] 0
+
+$start_time
+[1] "2025-09-12T12:43:04.082Z"
+
+$end_time
+[1] "2025-09-12T12:43:04.313Z"
+
+$execution_time
+[1] 0.2315</code></pre>
 </div>
 </div>
 </section>
@@ -741,13 +798,31 @@ $error
 <span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$message
+[1] "Needs added under Main"
+
+$uuid
+[1] "accc82a0ee3-5f08-42ee-b6e2-39efce0b0c38"
+
+$child_type
+[1] "ChildAccount"
+
+$allocation
+[1] 0.5
+
+$start_time
+[1] "2025-09-12T12:43:04.375Z"
+
+$end_time
+[1] "2025-09-12T12:43:05.034Z"
+
+$execution_time
+[1] 0.659</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>res2 <span class="ot">&lt;-</span> httr<span class="sc">::</span><span class="fu">POST</span>(</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">url =</span> <span class="st">"http://127.0.0.1:8000/add_sub_account"</span>,</span>
@@ -763,13 +838,31 @@ $error
 <span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$message
+[1] "Wants added under Main"
+
+$uuid
+[1] "acc9865b58d-8abc-4cca-9060-f9a909f84fe9"
+
+$child_type
+[1] "ChildAccount"
+
+$allocation
+[1] 0.3
+
+$start_time
+[1] "2025-09-12T12:43:05.086Z"
+
+$end_time
+[1] "2025-09-12T12:43:05.738Z"
+
+$execution_time
+[1] 0.6517</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>res3 <span class="ot">&lt;-</span> httr<span class="sc">::</span><span class="fu">POST</span>(</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">url =</span> <span class="st">"http://127.0.0.1:8000/add_sub_account"</span>,</span>
@@ -785,13 +878,31 @@ $error
 <span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$message
+[1] "Savings added under Main"
+
+$uuid
+[1] "acc6ce450f5-8c1b-449a-8dd3-1d9283f2fc2a"
+
+$child_type
+[1] "ChildAccount"
+
+$allocation
+[1] 0.2
+
+$start_time
+[1] "2025-09-12T12:43:05.789Z"
+
+$end_time
+[1] "2025-09-12T12:43:06.436Z"
+
+$execution_time
+[1] 0.6471</code></pre>
 </div>
 </div>
 </section>
@@ -808,13 +919,28 @@ $error
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(parsed4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$account_uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$amount
+[1] 40000
+
+$balance
+[1] 0
+
+$start_time
+[1] "2025-09-12T12:43:06.499Z"
+
+$end_time
+[1] "2025-09-12T12:43:07.063Z"
+
+$execution_time
+[1] 0.5646</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -828,13 +954,28 @@ $error
 <span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(parsed4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$account_uuid
+[1] "accc82a0ee3-5f08-42ee-b6e2-39efce0b0c38"
+
+$amount
+[1] 20000
+
+$balance
+[1] 40000
+
+$start_time
+[1] "2025-09-12T12:43:07.123Z"
+
+$end_time
+[1] "2025-09-12T12:43:07.689Z"
+
+$execution_time
+[1] 0.5654</code></pre>
 </div>
 </div>
 </section>
@@ -851,13 +992,25 @@ $error
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed5)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$account_uuid
+[1] "accc82a0ee3-5f08-42ee-b6e2-39efce0b0c38"
+
+$balance
+[1] 20000
+
+$start_time
+[1] "2025-09-12T12:43:07.747Z"
+
+$end_time
+[1] "2025-09-12T12:43:08.345Z"
+
+$execution_time
+[1] 0.598</code></pre>
 </div>
 </div>
 </section>
@@ -873,13 +1026,25 @@ $error
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed6)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$uuid
+[1] "accc82a0ee3-5f08-42ee-b6e2-39efce0b0c38"
+
+$balance
+[1] 20000
+
+$start_time
+[1] "2025-09-12T12:43:08.406Z"
+
+$end_time
+[1] "2025-09-12T12:43:08.657Z"
+
+$execution_time
+[1] 0.251</code></pre>
 </div>
 </div>
 </section>
@@ -895,13 +1060,25 @@ $error
 <span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed7)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$total_balance
+[1] 40000
+
+$start_time
+[1] "2025-09-12T12:43:08.715Z"
+
+$end_time
+[1] "2025-09-12T12:43:08.947Z"
+
+$execution_time
+[1] 0.2319</code></pre>
 </div>
 </div>
 </section>
@@ -918,13 +1095,25 @@ $error
 <span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(parsed8)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$total_due
+[1] 0
+
+$start_time
+[1] "2025-09-12T12:43:09.005Z"
+
+$end_time
+[1] "2025-09-12T12:43:09.271Z"
+
+$execution_time
+[1] 0.2667</code></pre>
 </div>
 </div>
 </section>
@@ -940,13 +1129,31 @@ $error
 <span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed9)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$from
+[1] "2025-09-12 12:43:09.335622"
+
+$to
+[1] "2025-09-12 12:43:09.335638"
+
+$total_income
+[1] 0
+
+$start_time
+[1] "2025-09-12T12:43:09.335Z"
+
+$end_time
+[1] "2025-09-12T12:43:09.594Z"
+
+$execution_time
+[1] 0.2585</code></pre>
 </div>
 </div>
 </section>
@@ -962,13 +1169,31 @@ $error
 <span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed11)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$from
+[1] "1026-05-13"
+
+$to
+[1] "2025-09-12"
+
+$total_spending
+[1] 20000
+
+$start_time
+[1] "2025-09-12T12:43:09.653Z"
+
+$end_time
+[1] "2025-09-12T12:43:09.929Z"
+
+$execution_time
+[1] 0.2764</code></pre>
 </div>
 </div>
 </section>
@@ -984,13 +1209,31 @@ $error
 <span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(parsed10)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$success
-[1] FALSE
+[1] TRUE
 
 $status
-[1] 500
+[1] 200
 
-$error
-[1] "Server misconfigured (missing JWT_SECRET)"</code></pre>
+$uuid
+[1] "acc2e9f5920-f8b9-4836-8eb3-df76565796f8"
+
+$from
+[1] "2025-09-12 12:43:09.991782"
+
+$to
+[1] "2025-09-12 12:43:09.991792"
+
+$utilization
+[1] 0
+
+$start_time
+[1] "2025-09-12T12:43:09.991Z"
+
+$end_time
+[1] "2025-09-12T12:43:10.362Z"
+
+$execution_time
+[1] 0.3709</code></pre>
 </div>
 </div>
 
