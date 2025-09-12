@@ -1,0 +1,108 @@
+# 🔑 POST /generate_access_token
+Generates a signed JWT access token for a given `user_id` and `role`.  
+Supports session-based tokens and expiry-based tokens.
+
+---
+
+## 📌 Summary
+
+**Method:** `POST`  
+**URL:** `/generate_access_token`  
+**Auth:** Not Required (usually called during login / auth handshake)  
+**Tag:** `authorization`
+
+---
+
+## 🔐 Headers
+
+```
+Content-Type: application/json
+```
+---
+
+## 📤 Request Body
+
+| Name         | Type     | Required | Default      | Description                                   |
+| ------------ | -------- | -------- | ------------ | --------------------------------------------- |
+| `user_id`    | string   | ✅       | —            | Subject (user) for whom the token is issued    |
+| `role`       | string   | ✅       | —            | Role assigned to the token (e.g. "admin")      |
+| `type`       | string   | ❌       | `session`    | Either `"session"` or `"expiry"`              |
+| `session_id` | string   | ⚠️ Yes*  | —            | Required if `type = "session"`                |
+| `exp`        | string/number | ⚠️ Yes*  | —            | Required if `type != "session"` (POSIXct or Unix time) |
+| `iss`        | string   | ❌       | —            | Issuer claim                                  |
+| `sub`        | string   | ❌       | —            | Subject claim (often same as `user_id`)        |
+| `aud`        | string   | ❌       | —            | Audience claim                                |
+| `nbf`        | string/number | ❌ | —            | Not-before claim (NumericDate)                |
+| `iat`        | string/number | ❌ | `now()`      | Issued-at claim                               |
+| `jti`        | string   | ❌       | —            | Unique token ID                               |
+| `...`        | any      | ❌       | —            | Additional custom claims forwarded to `issue_token()` |
+
+> **⚠️ Note:**  
+> - If `type = "session"`, you **must** supply `session_id`.  
+> - If `type = "expiry"`, you **must** supply `exp`.  
+
+```
+POST /generate_access_token
+Content-Type: application/json
+
+{
+  "user_id": "user123",
+  "role": "admin",
+  "type": "expiry",
+  "exp": "2025-09-12T12:00:00Z",
+  "iss": "my-api",
+  "aud": "my-client"
+}
+```
+---
+
+## 📤 Success Response
+
+```json
+{
+  "success": true,
+  "status": 200,
+  "user_id": "user123",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "timestamp": "2025-09-11T08:34:02.123Z"
+}
+
+```
+---
+
+## ❌ Failure Response Examples
+
+| Status | Reason                                       |
+| ------ | -------------------------------------------- |
+| `400`  | Missing `user_id`, `role`, or required claim |
+| `500`  | Server misconfigured (missing JWT\_SECRET)   |
+| `503`  | Token generation failed (future rejected)    |
+
+```json
+{
+  "success": false,
+  "status": 400,
+  "error": "`n` must be a positive number",
+  "start_time": "2025-09-11T08:34:02.123Z",
+  "end_time": "2025-09-11T08:34:02.150Z",
+  "execution_time": 0.027
+}
+
+```
+
+---
+
+## 🧠 Notes
+
+
+- JWT secret is loaded from environment (`JWT_SECRET`), must be set in server config.
+- `iat`, `nbf`, and `exp` are coerced to [RFC 7519 NumericDate](https://www.rfc-editor.org/rfc/rfc7519)
+ internally.
+- Returned `token` can be used in `Authorization: Bearer <token>` header for protected endpoints.
+---
+
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

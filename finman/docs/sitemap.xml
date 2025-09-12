@@ -37,10 +37,19 @@
     <loc>/reference/ChildAccount.html</loc>
   </url>
   <url>
+    <loc>/reference/coerce_numeric_date.html</loc>
+  </url>
+  <url>
     <loc>/reference/create_user_account_base.html</loc>
   </url>
   <url>
     <loc>/reference/file_exists_file.html</loc>
+  </url>
+  <url>
+    <loc>/reference/file_exists_mongo.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_mongo_conn.html</loc>
   </url>
   <url>
     <loc>/reference/GrandchildAccount.html</loc>
@@ -49,10 +58,16 @@
     <loc>/reference/index.html</loc>
   </url>
   <url>
+    <loc>/reference/issue_token.html</loc>
+  </url>
+  <url>
     <loc>/reference/is_valid_user_id.html</loc>
   </url>
   <url>
     <loc>/reference/load_from_file.html</loc>
+  </url>
+  <url>
+    <loc>/reference/load_from_mongo.html</loc>
   </url>
   <url>
     <loc>/reference/load_user_file.html</loc>
@@ -61,13 +76,34 @@
     <loc>/reference/MainAccount.html</loc>
   </url>
   <url>
+    <loc>/reference/minimal_tree.html</loc>
+  </url>
+  <url>
+    <loc>/reference/remove_account.html</loc>
+  </url>
+  <url>
     <loc>/reference/remove_from_file.html</loc>
+  </url>
+  <url>
+    <loc>/reference/remove_from_mongo.html</loc>
   </url>
   <url>
     <loc>/reference/remove_user_file.html</loc>
   </url>
   <url>
+    <loc>/reference/retry_read_rds.html</loc>
+  </url>
+  <url>
+    <loc>/reference/retry_save_rds.html</loc>
+  </url>
+  <url>
+    <loc>/reference/safe_parse_date.html</loc>
+  </url>
+  <url>
     <loc>/reference/save_to_file.html</loc>
+  </url>
+  <url>
+    <loc>/reference/save_to_mongo.html</loc>
   </url>
   <url>
     <loc>/reference/save_user_file.html</loc>
@@ -80,5 +116,11 @@
   </url>
   <url>
     <loc>/reference/with_account_lock.html</loc>
+  </url>
+  <url>
+    <loc>/reference/with_lock_file.html</loc>
+  </url>
+  <url>
+    <loc>/reference/with_lock_mongo.html</loc>
   </url>
 </urlset>

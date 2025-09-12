@@ -24,14 +24,14 @@ Content-Type: application/json
 
 ## 📤 Request Parameters
 
-| Name                | Type     | Required | Description                              |
-|---------------------|----------|----------|------------------------------------------|
-| `uuid`              | string   | ✅       | UUID of the account to deposit into      |
-| `amount`            | float    | ✅       | Amount to deposit                        |
-| `channel`           | string   | ✅       | Deposit channel (e.g., M-Pesa, Bank)     |
-| `transaction_number`| string   | ❌       | Optional reference number                |
-| `by`                | string   | ❌       | Who performed the deposit (default = User) |
-| `date`              | string   | ❌       | Deposit timestamp (default = now)        |
+| Name                | Type     | Required | Description                               |
+|---------------------|----------|-----------|-------------------------------------------|
+| `uuid`              | string   | ✅       | UUID of the account to deposit into       |
+| `amount`            | float    | ✅       | Amount to deposit                         |
+| `channel`           | string   | ✅       | Deposit channel (e.g., M-Pesa, Bank)      |
+| `transaction_number`| string   | ❌       | Optional reference number                 |
+| `initiated_by`      | string   | ❌       | Who performed the deposit (default = User)|
+| `transaction_date`  | string   | ❌       | Deposit timestamp (default = now)         |
 
 ---
 
@@ -43,7 +43,7 @@ Content-Type: application/json
   "amount": 1500,
   "channel": "mpesa",
   "transaction_number": "MPESA123456",
-  "by": "User"
+  "initiated_by": "User"
 }
 ```
 

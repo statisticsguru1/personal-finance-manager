@@ -1,5 +1,5 @@
 # 🗑️ DELETE /delete
-Deletes a user account and its associated data file. Requires a valid user_id parameter. Returns success message or appropriate error if the user doesn't exist or deletion fails.
+Deletes a user account/sub accounts. If the target account is the root account its associated data file is removed, if a sub-account, only the account node is removed. Requires a valid uuid for target account parameter. Returns success message or appropriate error if the user doesn't exist or deletion fails.
 
 ---
 
@@ -23,13 +23,13 @@ Content-Type: application/json
 
 | Name      | Type   | Required | Description                         |
 | --------- | ------ | -------- | ----------------------------------- |
-| `user_id` | string | ✅        | Unique ID of the user to be deleted |
+| `uuid` | string | ✅        | Unique account identifier uuid        |
 
 
 ## 📥 Example Request (Query Parameter)
 
 ```
-DELETE /delete?user_id=4a76343a-e971-4bd7-b8c4-5fa9fccee433
+DELETE /delete?uuid=4a76343a-e971-4bd7-b8c4-5fa9fccee433
 ```
 ---
 

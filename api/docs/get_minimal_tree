@@ -1,0 +1,99 @@
+# 🌳 GET /get_minimal_tree
+Returns a simplified version of an account tree for the specified account UUID.  
+This endpoint is designed to minimize payload size and speed up client startup time.
+---
+
+## 📌 Summary
+
+**Method:** `GET`  
+**URL:** `/get_minimal_tree`  
+**Auth:** Required (User or Admin context)  
+**Tag:** `accounts`
+---
+
+## 🔐 Headers
+
+```
+Authorization: Bearer <your-token>
+Content-Type: application/json
+```
+---
+
+## 📤 Query Parameters
+
+| Name         | Type   | Required | Default | Description                                      |
+| ------------ | ------ | -------- | ------- | ------------------------------------------------ |
+| `uuid`       | string | ❌       | main    | UUID of the account (main, child, or grandchild) |
+| `n`          | int    | ❌       | `30`    | Number of days to compute total due within       |
+| `start_date` | string | ❌       | `-1000y`| Start date (`YYYY-MM-DD`)                       |
+| `end_date`   | string | ❌       | today   | End date (`YYYY-MM-DD`)                         |
+
+## 📥 Example Request (Query Parameter)
+
+```
+GET /get_minimal_tree?uuid=4a76343a-e971-4bd7-b8c4-5fa9fccee433&n=60&start_date=2025-01-01&end_date=2025-09-01
+```
+---
+
+## 📤 Success Response
+
+```json
+{
+  "success": true,
+  "status": 200,
+  "uuid": "4a76343a-e971-4bd7-b8c4-5fa9fccee433",
+  "minimal_tree": {
+    "uuid": "4a76343a-e971-4bd7-b8c4-5fa9fccee433",
+    "name": "Main Account",
+    "total_due": 1234.56,
+    "children": [...]
+    ...
+  },
+  "start_time": "2025-09-11T08:34:02.123Z",
+  "end_time": "2025-09-11T08:34:02.160Z",
+  "execution_time": 0.037
+}
+```
+---
+
+## ❌ Failure Response Examples
+
+| Status | Reason                               |
+| ------ | ------------------------------------ |
+| `400`  | Invalid `n` or invalid date format   |
+| `400`  | `end_date` earlier than `start_date` |
+| `403`  | Account not found (or unauthorized)  |
+| `404`  | User account tree not found          |
+| `500`  | Internal server error                |
+
+```json
+{
+  "success": false,
+  "status": 400,
+  "error": "`n` must be a positive number",
+  "start_time": "2025-09-11T08:34:02.123Z",
+  "end_time": "2025-09-11T08:34:02.150Z",
+  "execution_time": 0.027
+}
+
+```
+
+---
+
+## 🧠 Notes
+- The user ID is used to identify the user's account file (e.g., account_tree.Rds) in persistent storage.
+- The operation is wrapped in a file lock to ensure safe concurrent access.
+- No JWT token required, but the endpoint is still protected by rate limiting and exponential backoff to prevent abuse.
+- This is a destructive operation and should be called with caution.
+
+- If uuid is omitted, the main account tree is returned.
+- Dates are inclusive, and if start_date > end_date, the request fails with a 400.
+- minimal_tree output is smaller than a full account_tree object — intended for dashboards.
+
+---
+
+## 💖 Sponsors
+
+Support my work through [GitHub Sponsors](https://github.com/sponsors/statisticsguru1)!
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/statisticsguru1?style=flat-square)](https://github.com/sponsors/statisticsguru1)

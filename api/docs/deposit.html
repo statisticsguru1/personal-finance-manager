@@ -134,11 +134,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="dropdown-menu" aria-labelledby="nav-menu-articles">    
         <li>
     <a class="dropdown-item" href="./articles/overview.html">
- <span class="dropdown-text">Using the API</span></a>
+ <span class="dropdown-text">API overview</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-load-test-reports" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Load Test Reports</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-load-test-reports">    
+        <li>
+    <a class="dropdown-item" href="./locust-report-x.html">
+ <span class="dropdown-text">Single Instance</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./articles/account-lifecycle.qmd">
- <span class="dropdown-text">Account Lifecycle</span></a>
+    <a class="dropdown-item" href="./locust-results-Nginx-x.html">
+ <span class="dropdown-text">Behind Nginx (3 Instances)</span></a>
   </li>  
     </ul>
   </li>
@@ -507,8 +518,8 @@ Content-Type: application/json</code></pre>
 <h2 class="anchored" data-anchor-id="request-parameters">📤 Request Parameters</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 25%">
-<col style="width: 12%">
+<col style="width: 24%">
+<col style="width: 11%">
 <col style="width: 12%">
 <col style="width: 50%">
 </colgroup>
@@ -546,13 +557,13 @@ Content-Type: application/json</code></pre>
 <td>Optional reference number</td>
 </tr>
 <tr class="odd">
-<td><code>by</code></td>
+<td><code>initiated_by</code></td>
 <td>string</td>
 <td>❌</td>
 <td>Who performed the deposit (default = User)</td>
 </tr>
 <tr class="even">
-<td><code>date</code></td>
+<td><code>transaction_date</code></td>
 <td>string</td>
 <td>❌</td>
 <td>Deposit timestamp (default = now)</td>
@@ -568,7 +579,7 @@ Content-Type: application/json</code></pre>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"amount"</span><span class="fu">:</span> <span class="dv">1500</span><span class="fu">,</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"channel"</span><span class="fu">:</span> <span class="st">"mpesa"</span><span class="fu">,</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"transaction_number"</span><span class="fu">:</span> <span class="st">"MPESA123456"</span><span class="fu">,</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"by"</span><span class="fu">:</span> <span class="st">"User"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"initiated_by"</span><span class="fu">:</span> <span class="st">"User"</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <hr>
 </section>

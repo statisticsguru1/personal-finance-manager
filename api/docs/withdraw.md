@@ -30,8 +30,8 @@ Content-Type: application/json
 | `amount`             | float    | ✅       | Amount to withdraw                         |
 | `channel`            | string   | ✅       | Withdrawal channel (e.g., mpesa, bank)     |
 | `transaction_number` | string   | ❌       | Optional reference number                  |
-| `by`                 | string   | ❌       | Who initiated the withdrawal (default = "User") |
-| `date`               | string   | ❌       | Timestamp of withdrawal (default = now)    |
+| `initiated_by`       | string   | ❌       | Who initiated the withdrawal (default = "User") |
+| `transaction_date`   | string   | ❌       | Timestamp of withdrawal (default = now)    |
 
 ---
 
@@ -43,7 +43,7 @@ Content-Type: application/json
   "amount": 1000,
   "channel": "bank",
   "transaction_number": "BANK54321",
-  "by": "User"
+  "initiated_by": "User"
 }
 ```
 

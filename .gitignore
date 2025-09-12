@@ -6,3 +6,5 @@ app.R
 trialchild.R
 trialreports.R
 /.quarto/
+.Renviron
+/user_accounts

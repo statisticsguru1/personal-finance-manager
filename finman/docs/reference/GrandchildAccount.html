@@ -494,7 +494,7 @@ surplus reallocation, and account status updates.</p><div class="section">
 <span>  transaction_number <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  by <span class="op">=</span> <span class="st">"User"</span>,</span>
 <span>  channel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -520,7 +520,7 @@ for the transaction. If NULL, a new one is generated.</p></dd>
 transaction (e.g., "Mobile Money").</p></dd>
 
 
-<dt><code>date</code></dt>
+<dt><code>transaction_date</code></dt>
 <dd><p>POSIXct. The timestamp for the transaction (defaults to
 current system time).</p></dd>
 
@@ -603,7 +603,7 @@ number of periods.</p><div class="section">
 <span>  transaction_number <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  by <span class="op">=</span> <span class="st">"User"</span>,</span>
 <span>  channel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -628,7 +628,7 @@ reference ID.</p></dd>
 (e.g., "Mobile Money").</p></dd>
 
 
-<dt><code>date</code></dt>
+<dt><code>transaction_date</code></dt>
 <dd><p>POSIXct. The date and time of withdrawal (default is current
 system time).</p></dd>
 
@@ -878,7 +878,7 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span>  due_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rent</span><span class="op">$</span><span class="fu">get_due_date</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2025-08-17"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2025-10-12"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
 <span class="r-in"><span><span class="co">## Method `GrandchildAccount$set_due_date`</span></span></span>
@@ -886,7 +886,7 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">bill</span> <span class="op">&lt;-</span> <span class="va">GrandchildAccount</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Electricity"</span>, fixed_amount <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">bill</span><span class="op">$</span><span class="fu">set_due_date</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">15</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Due date for Electricity set to 20302 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Due date for Electricity set to 20358 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
 <span class="r-in"><span><span class="co">## Method `GrandchildAccount$get_fixed_amount`</span></span></span>
@@ -953,11 +953,11 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span><span class="va">bill</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">75000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Due date extended. Number of periods unpaid: 2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent reactivated. Outstanding balance due: 150000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: sys1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: SYS0E2640A323 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example with surplus being returned to parent:</span></span></span>
 <span class="r-in"><span><span class="va">bill</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">80000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: sys2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: SYSAA4EDFF520 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent has become inactive .</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Extra amount of 5000 moved to Emergency Fund </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent fully funded for 2 period(s)</span>
@@ -977,12 +977,12 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span><span class="va">rent</span> <span class="op">&lt;-</span> <span class="va">GrandchildAccount</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"Rent"</span>, fixed_amount <span class="op">=</span> <span class="fl">75000</span>,</span></span>
 <span class="r-in"><span>account_type <span class="op">=</span> <span class="st">"Bill"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rent</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">75000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: sys1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: SYS330CC28394 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent has become inactive .</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent fully funded for 1 period(s)</span>
 <span class="r-in"><span><span class="co"># Now equivalent to 0.53 of the rent period remaining.</span></span></span>
 <span class="r-in"><span><span class="va">rent</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">35000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 35000 via ABSA - Transaction ID: sys2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 35000 via ABSA - Transaction ID: SYS90A51BD0FD </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>

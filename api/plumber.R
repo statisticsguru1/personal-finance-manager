@@ -1,11 +1,10 @@
-
 library(plumber)
 library(future)
 library(promises)
 library(tidyverse)
 library(rlang)
 plan(multisession)
-
+pkgs_required <- c("tidyverse", "rlang","finman")
 
 #* @apiTitle Personal Finance Manager API
 #* @apiDescription Secure API for managing user accounts, transactions, and balances.
@@ -32,7 +31,7 @@ if (!exists("request_tracker", inherits = FALSE)) {
   request_tracker <- new.env()
 }
 
-MAX_REQUESTS <- as.numeric(Sys.getenv("MAX_REQUESTS", unset = 1000000000))
+MAX_REQUESTS <- as.numeric(Sys.getenv("MAX_REQUESTS", unset = 180000))
 WINDOW_SIZE <- as.numeric(Sys.getenv("WINDOW_SIZE", unset = 3600))
 
 
@@ -131,7 +130,6 @@ function(req, res) {
 
   token <- sub("Bearer ", "", auth_header)
   decoded <- verify_token(token, secret = secret_key)
-
   # ─────── Failed Auth: Apply Exponential Backoff ───────
   if (is.null(decoded)) {
     user_id <- token  # fallback identifier
@@ -287,10 +285,6 @@ token_endpoint <- function(req, res,
     if (!is.null(iat)) iat <- coerce_numeric_date(iat)
 
     future_promise({
-      # Simulate a future failure for testing
-      library(tidyverse)
-      library(finman)
-
       tryCatch({
         token <- issue_token(
           type = type,
@@ -327,7 +321,8 @@ token_endpoint <- function(req, res,
         )
       }
       )
-    }) %...>% (function(result) {
+    }, packages=pkgs_required
+    ) %...>% (function(result) {
       res$status <- result$status %||% 500
       result
     }) %...!% (function(err) {
@@ -395,10 +390,6 @@ register <- function(req, res, user_id = NULL, initial_balance = 0) {
   # ---- core handler ------------------------------------------------------
   tryCatch({
     future_promise({
-      # Simulate a future failure for testing
-      library(tidyverse)
-      library(finman)
-
       result <- tryCatch({
         uuid <- create_user_account_base(
           user_id = user_id,
@@ -419,7 +410,7 @@ register <- function(req, res, user_id = NULL, initial_balance = 0) {
       })
 
       result
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result){
       end_time <- Sys.time()
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
@@ -511,8 +502,6 @@ deposit <- function(req, res,
   # --- Future starts after inputs validated -------------------------------
   tryCatch({
     future_promise({
-      library(tidyverse)
-      library(finman)
       result <- tryCatch({
         with_account_lock(user_id, {
           tree <- load_user_file(user_id, "account_tree.Rds")
@@ -558,7 +547,7 @@ deposit <- function(req, res,
       })
 
       result
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       end_time <- Sys.time()
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(end_time,   "%Y-%m-%dT%H:%M:%OS3Z")
@@ -670,7 +659,6 @@ withdraw <- function(req, res,
 
   tryCatch({
     future_promise({
-      library(magrittr)
       tryCatch({
         with_account_lock(user_id, {
           tree <- load_user_file(user_id, "account_tree.Rds")
@@ -700,7 +688,7 @@ withdraw <- function(req, res,
             )
           }
         })
-      }, , error = function(e) {
+      }, error = function(e) {
         error_message <- conditionMessage(e)
         if (
           grepl(
@@ -709,6 +697,11 @@ withdraw <- function(req, res,
           )|
           grepl(
             "Insufficient balance! Your current balance",
+            error_message,
+            ignore.case = TRUE
+          )|
+          grepl(
+            "Insufficient balance in",
             error_message,
             ignore.case = TRUE
           )
@@ -725,7 +718,8 @@ withdraw <- function(req, res,
           error = paste("Failed:", error_message)
         ))
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required
+    ) %...>% (function(result) {
       end_time <- Sys.time()
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
@@ -812,9 +806,6 @@ distribute <- function(req, res,
   # --- Core Handler -------------------------------------------
   tryCatch({
     future_promise({
-      library(tidyverse)
-      library(finman)
-
       tryCatch({
         with_account_lock(user_id, {
           tree    <- load_user_file(user_id, "account_tree.Rds")
@@ -861,7 +852,8 @@ distribute <- function(req, res,
           ))
         }
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required
+    ) %...>% (function(result) {
       end_time <- Sys.time()
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
@@ -998,7 +990,6 @@ add_child_account <- function(req, res,
   # --- Core Handler -------------------------------------------
   tryCatch({
     future_promise({
-      library(tidyverse)
       tryCatch({
         with_account_lock(user_id, {
           tree <- load_user_file(user_id, "account_tree.Rds")
@@ -1078,7 +1069,7 @@ add_child_account <- function(req, res,
           error = paste("Child account not added:", error_message)
         ))
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -1227,7 +1218,7 @@ set_child_allocation <- function(req, res,
         ))
       })
 
-    }) %...>% (function(result) {
+    },packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -1320,7 +1311,7 @@ get_balance <- function(req, res, uuid = NULL) {
 
       })
 
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -1412,7 +1403,8 @@ get_transactions <- function(req, res, uuid = NULL) {
         )
       })
 
-    }) %...>% (function(result) {
+    }, packages=pkgs_required
+    ) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -1504,7 +1496,8 @@ list_child_accounts <- function(req, res, uuid = NULL) {
         )
       })
 
-    }) %...>% (function(result) {
+    },packages=pkgs_required
+    ) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -1592,7 +1585,8 @@ list_all_accounts <- function(req, res, uuid = NULL) {
           error = paste("Failed to list accounts:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required
+    ) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -1682,7 +1676,7 @@ find_account_by_name <- function(req, res, name = NULL) {
           error = paste("Failed to retrieve accounts:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -1786,7 +1780,7 @@ find_account_by_uuid <- function(req, res, uuid = NULL) {
           error = paste("Failed to retrieve account:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -1967,7 +1961,7 @@ move_balance <- function(
       })
 
 
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -2062,7 +2056,7 @@ compute_total_balance <- function(req, res, uuid = NULL) {
       })
 
 
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -2120,7 +2114,6 @@ compute_total_due <- function(req, res, uuid = NULL) {
   # --- Core Handler -------------------------------------------
   tryCatch({
     future({
-      library(tidyverse)
       tryCatch({
 
         tree <- load_user_file(user_id, "account_tree.Rds")
@@ -2156,7 +2149,7 @@ compute_total_due <- function(req, res, uuid = NULL) {
           error = paste("Failed to compute amount due:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -2280,7 +2273,7 @@ compute_total_due_within_days <- function(req, res, uuid = NULL, days = NULL) {
         )
       })
 
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -2375,8 +2368,6 @@ spending <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
   # -----------------------core logic------------------------------------------
   tryCatch({
     future({
-      library(tidyverse)
-
       tryCatch({
         tree <- load_user_file(user_id, "account_tree.Rds")
         if (is.null(tree)) {
@@ -2413,7 +2404,7 @@ spending <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
           error = paste("Failed to compute spending:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -2504,8 +2495,6 @@ total_income <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
   # -------- core logic  ------------------------------------------------
   tryCatch({
     future({
-      library(tidyverse)
-
       tryCatch({
         tree <- load_user_file(user_id, "account_tree.Rds")
         if (is.null(tree)) {
@@ -2545,7 +2534,7 @@ total_income <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
           error = paste("Failed to compute total income:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -2675,7 +2664,7 @@ allocated_amount <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
           error = paste("Failed to compute allocated amount:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    },, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -2772,8 +2761,6 @@ income_utilization <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
 
   tryCatch({
     future({
-      library(tidyverse)
-
       tryCatch({
         # Load account tree
 
@@ -2814,7 +2801,7 @@ income_utilization <- function(req, res, uuid = NULL, from = NULL, to = NULL) {
           error = paste("Failed to compute utilization:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -2957,7 +2944,7 @@ walking_amount <- function(
         )
       })
 
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -3114,7 +3101,7 @@ change_account_status <- function(req, res, uuid = NULL, status = NULL) {
           error = paste("Failed to change account status:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -3225,7 +3212,7 @@ get_account_status <- function(req, res, uuid = NULL) {
           error = paste("Failed to get account status:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -3374,7 +3361,7 @@ set_priority <- function(req, res, uuid = NULL, priority = NULL) {
           error = paste("Failed to set priority:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -3488,7 +3475,7 @@ get_priority <- function(req, res, uuid = NULL) {
         )
       })
 
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -3626,7 +3613,7 @@ set_due_date <- function(req, res, uuid = NULL, due_date = NULL) {
           error = paste("Failed to set due date:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -3738,7 +3725,7 @@ get_due_date <- function(req, res, uuid = NULL) {
           error = paste("Failed to get due date:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -3871,7 +3858,7 @@ set_fixed_amount <- function(req, res, uuid = NULL, fixed_amount = NULL) {
           error = paste("Failed to set fixed amount:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -3974,7 +3961,7 @@ get_fixed_amount <- function(req, res, uuid = NULL) {
           error = paste("Failed to get fixed amount:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -4095,7 +4082,7 @@ set_account_type <- function(req, res, uuid = NULL, account_type = NULL) {
           error = paste("Failed to set account type:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -4193,7 +4180,7 @@ get_account_type <- function(req, res, uuid = NULL) {
           error = paste("Failed to get account type:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -4327,7 +4314,7 @@ function(req, res, uuid = NULL, account_freq) {
           error = paste("Failed to set frequency:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -4427,7 +4414,7 @@ get_account_freq <- function(req, res, uuid = NULL) {
           error = paste("Failed to get frequency:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -4555,7 +4542,7 @@ set_account_periods <- function(req, res, uuid = NULL, periods = NULL) {
           error = paste("Failed to set account periods:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -4658,7 +4645,7 @@ get_account_periods <- function(req, res, uuid = NULL) {
           error = paste("Failed to get account periods:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")
       result$execution_time <- as.numeric(
@@ -4776,7 +4763,7 @@ delete <- function(req, res, uuid = NULL) {
           error = paste("Failed to delete account:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       end_time <- Sys.time()
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time   <- format(end_time, "%Y-%m-%dT%H:%M:%OS3Z")
@@ -4926,7 +4913,7 @@ get_minimal_tree <- function(req, res, uuid = NULL, n = 30,
           error = paste("Failed to get minimal tree:", conditionMessage(e))
         )
       })
-    }) %...>% (function(result) {
+    }, packages=pkgs_required) %...>% (function(result) {
       # Add metadata
       result$start_time <- format(start_time, "%Y-%m-%dT%H:%M:%OS3Z")
       result$end_time <- format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z")

@@ -138,6 +138,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
     </ul>
   </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-load-test-reports" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Load Test Reports</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-load-test-reports">    
+        <li>
+    <a class="dropdown-item" href="../locust-report-x.html">
+ <span class="dropdown-text">Single Instance</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../locust-results-Nginx-x.html">
+ <span class="dropdown-text">Behind Nginx (3 Instances)</span></a>
+  </li>  
+    </ul>
+  </li>
   <li class="nav-item">
     <a class="nav-link" href="../../"> 
 <span class="menu-text">Main Docs</span></a>
@@ -475,6 +490,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#see-transaction-list" id="toc-see-transaction-list" class="nav-link" data-scroll-target="#see-transaction-list">see transaction list</a></li>
   <li><a href="#list-child-accounts" id="toc-list-child-accounts" class="nav-link" data-scroll-target="#list-child-accounts">list child accounts</a></li>
   <li><a href="#attach-child-accounts" id="toc-attach-child-accounts" class="nav-link" data-scroll-target="#attach-child-accounts">attach child accounts</a></li>
+  <li><a href="#deposit-to-main" id="toc-deposit-to-main" class="nav-link" data-scroll-target="#deposit-to-main">deposit to main</a></li>
   <li><a href="#withdraw-from-needs-account" id="toc-withdraw-from-needs-account" class="nav-link" data-scroll-target="#withdraw-from-needs-account">Withdraw from needs account</a></li>
   <li><a href="#check-needs-balance" id="toc-check-needs-balance" class="nav-link" data-scroll-target="#check-needs-balance">Check needs balance</a></li>
   <li><a href="#compute-total-balance" id="toc-compute-total-balance" class="nav-link" data-scroll-target="#compute-total-balance">compute total balance</a></li>
@@ -633,19 +649,19 @@ $status
 [1] 200
 
 $user_id
-[1] "700ea057-e217-4d8e-bd08-09fc2bcbe15a"
+[1] "8e9fd68c-9502-4b77-af69-0b88f543dee0"
 
 $uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $start_time
-[1] "2025-07-18T23:16:38.903Z"
+[1] "2025-09-12T12:35:15.332Z"
 
 $end_time
-[1] "2025-07-18T23:16:39.157Z"
+[1] "2025-09-12T12:35:15.668Z"
 
 $execution_time
-[1] 0.2536</code></pre>
+[1] 0.3365</code></pre>
 </div>
 </div>
 </section>
@@ -670,19 +686,19 @@ $status
 [1] 200
 
 $uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $balance
 [1] 0
 
 $start_time
-[1] "2025-07-18T23:16:39.239Z"
+[1] "2025-09-12T12:35:15.737Z"
 
 $end_time
-[1] "2025-07-18T23:16:39.426Z"
+[1] "2025-09-12T12:35:15.984Z"
 
 $execution_time
-[1] 0.187</code></pre>
+[1] 0.2469</code></pre>
 </div>
 </div>
 </section>
@@ -705,7 +721,7 @@ $status
 [1] 200
 
 $uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $transaction_count
 [1] 0
@@ -714,13 +730,13 @@ $transactions
 list()
 
 $start_time
-[1] "2025-07-18T23:16:39.501Z"
+[1] "2025-09-12T12:35:16.051Z"
 
 $end_time
-[1] "2025-07-18T23:16:39.659Z"
+[1] "2025-09-12T12:35:16.308Z"
 
 $execution_time
-[1] 0.1573</code></pre>
+[1] 0.2575</code></pre>
 </div>
 </div>
 </section>
@@ -743,7 +759,7 @@ $status
 [1] 200
 
 $uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $account_name
 [1] "Main"
@@ -755,13 +771,13 @@ $child_count
 [1] 0
 
 $start_time
-[1] "2025-07-18T23:16:39.724Z"
+[1] "2025-09-12T12:35:16.366Z"
 
 $end_time
-[1] "2025-07-18T23:16:40.180Z"
+[1] "2025-09-12T12:35:16.522Z"
 
 $execution_time
-[1] 0.4563</code></pre>
+[1] 0.1559</code></pre>
 </div>
 </div>
 </section>
@@ -792,7 +808,7 @@ $message
 [1] "Needs added under Main"
 
 $uuid
-[1] "acc409e907c-c744-42dd-a780-4d5088dc4bde"
+[1] "acc39f4f82a-7545-45b4-bf1c-9f15d675c00a"
 
 $child_type
 [1] "ChildAccount"
@@ -801,13 +817,13 @@ $allocation
 [1] 0.5
 
 $start_time
-[1] "2025-07-18T23:16:40.259Z"
+[1] "2025-09-12T12:35:16.590Z"
 
 $end_time
-[1] "2025-07-18T23:16:40.796Z"
+[1] "2025-09-12T12:35:17.004Z"
 
 $execution_time
-[1] 0.5371</code></pre>
+[1] 0.414</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>res2 <span class="ot">&lt;-</span> httr<span class="sc">::</span><span class="fu">POST</span>(</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">url =</span> <span class="st">"http://127.0.0.1:8000/add_sub_account"</span>,</span>
@@ -832,7 +848,7 @@ $message
 [1] "Wants added under Main"
 
 $uuid
-[1] "acc6cae6cbe-361a-4448-ac42-a71dae1f8d3c"
+[1] "acc44ae9b02-3176-4e60-82af-12e6ea46d40f"
 
 $child_type
 [1] "ChildAccount"
@@ -841,13 +857,13 @@ $allocation
 [1] 0.3
 
 $start_time
-[1] "2025-07-18T23:16:40.813Z"
+[1] "2025-09-12T12:35:17.025Z"
 
 $end_time
-[1] "2025-07-18T23:16:41.036Z"
+[1] "2025-09-12T12:35:17.590Z"
 
 $execution_time
-[1] 0.2228</code></pre>
+[1] 0.5649</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>res3 <span class="ot">&lt;-</span> httr<span class="sc">::</span><span class="fu">POST</span>(</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">url =</span> <span class="st">"http://127.0.0.1:8000/add_sub_account"</span>,</span>
@@ -872,7 +888,7 @@ $message
 [1] "Savings added under Main"
 
 $uuid
-[1] "acc3c3c4d60-ea11-443e-a015-622063bd4a0b"
+[1] "acc01fbd297-155c-4cc6-885f-58056dca32dd"
 
 $child_type
 [1] "ChildAccount"
@@ -881,15 +897,18 @@ $allocation
 [1] 0.2
 
 $start_time
-[1] "2025-07-18T23:16:41.063Z"
+[1] "2025-09-12T12:35:17.610Z"
 
 $end_time
-[1] "2025-07-18T23:16:41.542Z"
+[1] "2025-09-12T12:35:18.235Z"
 
 $execution_time
-[1] 0.4787</code></pre>
+[1] 0.6251</code></pre>
 </div>
 </div>
+</section>
+<section id="deposit-to-main" class="level3">
+<h3 class="anchored" data-anchor-id="deposit-to-main">deposit to main</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>res4 <span class="ot">&lt;-</span> httr<span class="sc">::</span><span class="fu">POST</span>(</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">url =</span> <span class="st">"http://127.0.0.1:8000/deposit"</span>,</span>
@@ -907,7 +926,7 @@ $status
 [1] 200
 
 $account_uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $amount
 [1] 40000
@@ -916,13 +935,13 @@ $balance
 [1] 0
 
 $start_time
-[1] "2025-07-18T23:16:41.623Z"
+[1] "2025-09-12T12:35:18.302Z"
 
 $end_time
-[1] "2025-07-18T23:16:41.890Z"
+[1] "2025-09-12T12:35:18.726Z"
 
 $execution_time
-[1] 0.267</code></pre>
+[1] 0.4238</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -942,7 +961,7 @@ $status
 [1] 200
 
 $account_uuid
-[1] "acc409e907c-c744-42dd-a780-4d5088dc4bde"
+[1] "acc39f4f82a-7545-45b4-bf1c-9f15d675c00a"
 
 $amount
 [1] 20000
@@ -951,13 +970,13 @@ $balance
 [1] 40000
 
 $start_time
-[1] "2025-07-18T23:16:41.973Z"
+[1] "2025-09-12T12:35:18.785Z"
 
 $end_time
-[1] "2025-07-18T23:16:42.184Z"
+[1] "2025-09-12T12:35:19.210Z"
 
 $execution_time
-[1] 0.2114</code></pre>
+[1] 0.4254</code></pre>
 </div>
 </div>
 </section>
@@ -980,19 +999,19 @@ $status
 [1] 200
 
 $account_uuid
-[1] "acc409e907c-c744-42dd-a780-4d5088dc4bde"
+[1] "acc39f4f82a-7545-45b4-bf1c-9f15d675c00a"
 
 $balance
 [1] 20000
 
 $start_time
-[1] "2025-07-18T23:16:42.257Z"
+[1] "2025-09-12T12:35:19.275Z"
 
 $end_time
-[1] "2025-07-18T23:16:42.487Z"
+[1] "2025-09-12T12:35:19.701Z"
 
 $execution_time
-[1] 0.2303</code></pre>
+[1] 0.4257</code></pre>
 </div>
 </div>
 </section>
@@ -1014,19 +1033,19 @@ $status
 [1] 200
 
 $uuid
-[1] "acc409e907c-c744-42dd-a780-4d5088dc4bde"
+[1] "acc39f4f82a-7545-45b4-bf1c-9f15d675c00a"
 
 $balance
 [1] 20000
 
 $start_time
-[1] "2025-07-18T23:16:42.577Z"
+[1] "2025-09-12T12:35:19.761Z"
 
 $end_time
-[1] "2025-07-18T23:16:42.753Z"
+[1] "2025-09-12T12:35:20.025Z"
 
 $execution_time
-[1] 0.1756</code></pre>
+[1] 0.2635</code></pre>
 </div>
 </div>
 </section>
@@ -1048,19 +1067,19 @@ $status
 [1] 200
 
 $uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $total_balance
 [1] 40000
 
 $start_time
-[1] "2025-07-18T23:16:42.820Z"
+[1] "2025-09-12T12:35:20.083Z"
 
 $end_time
-[1] "2025-07-18T23:16:42.984Z"
+[1] "2025-09-12T12:35:20.251Z"
 
 $execution_time
-[1] 0.1645</code></pre>
+[1] 0.1684</code></pre>
 </div>
 </div>
 </section>
@@ -1083,19 +1102,19 @@ $status
 [1] 200
 
 $uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $total_due
 [1] 0
 
 $start_time
-[1] "2025-07-18T23:16:43.050Z"
+[1] "2025-09-12T12:35:20.311Z"
 
 $end_time
-[1] "2025-07-18T23:16:43.223Z"
+[1] "2025-09-12T12:35:20.482Z"
 
 $execution_time
-[1] 0.173</code></pre>
+[1] 0.1713</code></pre>
 </div>
 </div>
 </section>
@@ -1117,25 +1136,25 @@ $status
 [1] 200
 
 $uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $from
-[1] "1026-03-18"
+[1] "2025-09-12 12:35:20.541548"
 
 $to
-[1] "2025-07-18"
+[1] "2025-09-12 12:35:20.54157"
 
 $total_income
-[1] 60000
+[1] 0
 
 $start_time
-[1] "2025-07-18T23:16:43.293Z"
+[1] "2025-09-12T12:35:20.541Z"
 
 $end_time
-[1] "2025-07-18T23:16:43.517Z"
+[1] "2025-09-12T12:35:20.730Z"
 
 $execution_time
-[1] 0.2241</code></pre>
+[1] 0.1886</code></pre>
 </div>
 </div>
 </section>
@@ -1157,25 +1176,25 @@ $status
 [1] 200
 
 $uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $from
-[1] "1026-03-18"
+[1] "1026-05-13"
 
 $to
-[1] "2025-07-18"
+[1] "2025-09-12"
 
 $total_spending
 [1] 20000
 
 $start_time
-[1] "2025-07-18T23:16:43.586Z"
+[1] "2025-09-12T12:35:20.800Z"
 
 $end_time
-[1] "2025-07-18T23:16:43.794Z"
+[1] "2025-09-12T12:35:20.986Z"
 
 $execution_time
-[1] 0.2085</code></pre>
+[1] 0.1854</code></pre>
 </div>
 </div>
 </section>
@@ -1197,25 +1216,25 @@ $status
 [1] 200
 
 $uuid
-[1] "acc2b85106c-1589-4386-8910-c7e9ec189516"
+[1] "acc05999ee0-9fdc-4659-97ce-5502b176a448"
 
 $from
-[1] "1026-03-18"
+[1] "2025-09-12 12:35:21.043573"
 
 $to
-[1] "2025-07-18"
+[1] "2025-09-12 12:35:21.043595"
 
 $utilization
-[1] 0.3333
+[1] 0
 
 $start_time
-[1] "2025-07-18T23:16:43.860Z"
+[1] "2025-09-12T12:35:21.043Z"
 
 $end_time
-[1] "2025-07-18T23:16:44.081Z"
+[1] "2025-09-12T12:35:21.268Z"
 
 $execution_time
-[1] 0.2214</code></pre>
+[1] 0.2246</code></pre>
 </div>
 </div>
 

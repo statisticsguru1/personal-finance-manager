@@ -134,6 +134,11 @@ for distributing funds to its child accounts based on allocation rules.</p>
   (e.g., rent, savings) and has due dates, frequency, and priority logic.</p></li>
 </ul></div>
     <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>[remove_account()]
+# Move balance to another account (by UUID)</p></div>
+    </div>
+    <div class="section level2">
     <h2 id="public-fields">Public fields<a class="anchor" aria-label="anchor" href="#public-fields"></a></h2>
     <p></p><div class="r6-fields"><dl><dt><code>uuid</code></dt>
 <dd><p>Auto-generated unique identifier.</p></dd>
@@ -321,7 +326,7 @@ the transaction in the internal ledger.</p><div class="section">
 <span>  transaction_number <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  by <span class="op">=</span> <span class="st">"User"</span>,</span>
 <span>  channel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -347,7 +352,7 @@ automatically.</p></dd>
 (e.g., `"ABSA"`, `"MPESA"`). Required.</p></dd>
 
 
-<dt><code>date</code></dt>
+<dt><code>transaction_date</code></dt>
 <dd><p>POSIXct or character. The timestamp of the transaction
 (defaults to current time).</p></dd>
 
@@ -525,7 +530,7 @@ transaction. A transaction number is generated automatically if not
 <span>  transaction_number <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  by <span class="op">=</span> <span class="st">"User"</span>,</span>
 <span>  channel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -553,7 +558,7 @@ a system-generated ID will be used.</p></dd>
 Required.</p></dd>
 
 
-<dt><code>date</code></dt>
+<dt><code>transaction_date</code></dt>
 <dd><p>POSIXct. Timestamp for the transaction. Defaults to
 `Sys.time()`.</p></dd>
 
@@ -740,8 +745,6 @@ if no match is found.</p>
   found &lt;- main_acc$find_account_by_uuid(groceries$uuid)
   if (!is.null(found)) cat("Found UUID:", found$uuid)
 }
-# Move balance to another account (by UUID)
-
 </code></pre></div><p></p></div>
 </div>
 
@@ -1012,10 +1015,10 @@ the entire timeline.</p></dd>
   # Simulate some deposits and withdrawals
   main_acc$deposit(500, "T1", By = "User", channel = "Cash")
   main_acc$withdraw(200, By = "User", channel = "Spending",
-  date = Sys.time() - 10)
+  transaction_date = Sys.time() - 10)
   child1$deposit(300, "T2", By = "User", channel = "Mobile")
   child1$withdraw(100, By = "User", channel = "Shopping",
-  date = Sys.time() - 5)
+  transaction_date = Sys.time() - 5)
 
   # Get total user spending in last 30 days
   main_acc$spending(c(Sys.Date() - 30, Sys.Date()))
@@ -1064,9 +1067,9 @@ accounts within the specified date range.</p>
 
   # Simulate some deposits
   main_acc$deposit(500, "TX01", By = "User", channel = "Cash",
-  date = Sys.time() - 7)
+  transaction_date = Sys.time() - 7)
   child1$deposit(300, "TX02", By = "User", channel = "Mobile",
-  date = Sys.time() - 3)
+  transaction_date = Sys.time() - 3)
 
   # Get total income in last 10 days
   main_acc$total_income(c(Sys.Date() - 10, Sys.Date()))
@@ -1115,11 +1118,11 @@ the account and its descendants within the specified date range.</p>
   main_acc$add_child_account(child2)
 
   main_acc$deposit(1000, "TX001", By = "System", channel = "Bank",
-  date = Sys.time() - 5)
+  transaction_date = Sys.time() - 5)
   child1$deposit(300, "TX002", By = "User", channel = "Mobile",
-  date = Sys.time() - 3)
+  transaction_date = Sys.time() - 3)
   child2$deposit(200, "TX003", By = "User", channel = "Cash",
-  date = Sys.time() - 2)
+  transaction_date = Sys.time() - 2)
 
   # Get total allocated amount within last 7 days
   main_acc$allocated_amount(c(Sys.Date() - 7, Sys.Date()))
@@ -1249,7 +1252,7 @@ account$walking_amount("Balance", c(Sys.Date() - 7, Sys.Date()))
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Generate a system transaction ID</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">generate_transaction_id</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "sys1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "SYS454FD2D091"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Check for duplicate transaction ID</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">is_duplicate_transaction</span><span class="op">(</span><span class="st">"sys1"</span><span class="op">)</span></span></span>
@@ -1261,7 +1264,7 @@ account$walking_amount("Balance", c(Sys.Date() - 7, Sys.Date()))
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Inspect UUID</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="va">uuid</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "acca4f0fe8e-947f-4540-b0d6-cd78f046656c"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "acc77f76907-e67b-48f8-ae7c-6081b401906a"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
@@ -1433,8 +1436,6 @@ account$walking_amount("Balance", c(Sys.Date() - 7, Sys.Date()))
 <span class="r-in"><span>  <span class="va">found</span> <span class="op">&lt;-</span> <span class="va">main_acc</span><span class="op">$</span><span class="fu">find_account_by_uuid</span><span class="op">(</span><span class="va">groceries</span><span class="op">$</span><span class="va">uuid</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">found</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Found UUID:"</span>, <span class="va">found</span><span class="op">$</span><span class="va">uuid</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span><span class="co"># Move balance to another account (by UUID)</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
 <span class="r-in"><span><span class="co">## Method `MainAccount$move_balance`</span></span></span>
@@ -1561,10 +1562,10 @@ account$walking_amount("Balance", c(Sys.Date() - 7, Sys.Date()))
 <span class="r-in"><span>  <span class="co"># Simulate some deposits and withdrawals</span></span></span>
 <span class="r-in"><span>  <span class="va">main_acc</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">500</span>, <span class="st">"T1"</span>, By <span class="op">=</span> <span class="st">"User"</span>, channel <span class="op">=</span> <span class="st">"Cash"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">main_acc</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">200</span>, By <span class="op">=</span> <span class="st">"User"</span>, channel <span class="op">=</span> <span class="st">"Spending"</span>,</span></span>
-<span class="r-in"><span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">child1</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">300</span>, <span class="st">"T2"</span>, By <span class="op">=</span> <span class="st">"User"</span>, channel <span class="op">=</span> <span class="st">"Mobile"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">child1</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">100</span>, By <span class="op">=</span> <span class="st">"User"</span>, channel <span class="op">=</span> <span class="st">"Shopping"</span>,</span></span>
-<span class="r-in"><span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Get total user spending in last 30 days</span></span></span>
 <span class="r-in"><span>  <span class="va">main_acc</span><span class="op">$</span><span class="fu">spending</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">30</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -1585,9 +1586,9 @@ account$walking_amount("Balance", c(Sys.Date() - 7, Sys.Date()))
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Simulate some deposits</span></span></span>
 <span class="r-in"><span>  <span class="va">main_acc</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">500</span>, <span class="st">"TX01"</span>, By <span class="op">=</span> <span class="st">"User"</span>, channel <span class="op">=</span> <span class="st">"Cash"</span>,</span></span>
-<span class="r-in"><span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">7</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">7</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">child1</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">300</span>, <span class="st">"TX02"</span>, By <span class="op">=</span> <span class="st">"User"</span>, channel <span class="op">=</span> <span class="st">"Mobile"</span>,</span></span>
-<span class="r-in"><span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Get total income in last 10 days</span></span></span>
 <span class="r-in"><span>  <span class="va">main_acc</span><span class="op">$</span><span class="fu">total_income</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">10</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -1607,11 +1608,11 @@ account$walking_amount("Balance", c(Sys.Date() - 7, Sys.Date()))
 <span class="r-in"><span>  <span class="va">main_acc</span><span class="op">$</span><span class="fu">add_child_account</span><span class="op">(</span><span class="va">child2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="va">main_acc</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">1000</span>, <span class="st">"TX001"</span>, By <span class="op">=</span> <span class="st">"System"</span>, channel <span class="op">=</span> <span class="st">"Bank"</span>,</span></span>
-<span class="r-in"><span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">child1</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">300</span>, <span class="st">"TX002"</span>, By <span class="op">=</span> <span class="st">"User"</span>, channel <span class="op">=</span> <span class="st">"Mobile"</span>,</span></span>
-<span class="r-in"><span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">child2</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">200</span>, <span class="st">"TX003"</span>, By <span class="op">=</span> <span class="st">"User"</span>, channel <span class="op">=</span> <span class="st">"Cash"</span>,</span></span>
-<span class="r-in"><span>  date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Get total allocated amount within last 7 days</span></span></span>
 <span class="r-in"><span>  <span class="va">main_acc</span><span class="op">$</span><span class="fu">allocated_amount</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">7</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>

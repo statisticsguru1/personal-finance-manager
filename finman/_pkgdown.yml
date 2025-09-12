@@ -29,7 +29,6 @@ authors:
     orcid: 0009-0001-7640-4955
     comment: "Creator and maintainer of the Personal Finance Manager project"
 
-
 reference:
   - title: "💼 Account Classes"
     desc: >
@@ -71,3 +70,32 @@ reference:
     contents:
       - verify_token
       - with_account_lock
+
+  - title: "📦 MongoDB Storage Helpers"
+    desc: >
+      Functions for interacting with MongoDB storage backend.
+    contents:
+      - get_mongo_conn
+      - file_exists_mongo
+      - load_from_mongo
+      - save_to_mongo
+      - remove_from_mongo
+      - with_lock_mongo
+
+  - title: "🧰 Utility Functions"
+    desc: >
+      General-purpose utility functions used throughout the package.
+    contents:
+      - coerce_numeric_date
+      - safe_parse_date
+      - retry_read_rds
+      - retry_save_rds
+
+  - title: "🔑 Token & Tree Operations"
+    desc: >
+      Token issuing and minimal tree building helpers.
+    contents:
+      - issue_token
+      - minimal_tree
+      - remove_account
+      - with_lock_file
