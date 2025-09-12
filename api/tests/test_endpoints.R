@@ -34,13 +34,8 @@ wait_for_server_ready <- function(
 # Setup: start server, create user, etc.
 tmp_dir <- tempfile("test-api-deposit-")
 dir.create(tmp_dir, recursive = TRUE)
-Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)
-Sys.setenv(ACCOUNT_BACKEND = "file")
-Sys.setenv(MAX_REQUESTS = 100000)
-Sys.setenv(WINDOW_SIZE = 3600)
-Sys.setenv(JWT_SECRET = "test-secret")
+Sys.setenv(ACCOUNT_BASE_DIR = tmp_dir)   # use tempfile to avoid contamination
 secret_key <- Sys.getenv("JWT_SECRET")
-
 
 uuid <- create_user_account_base(
   user_id = "testuser",
@@ -59,16 +54,14 @@ log_out <- tempfile("server-out-", fileext = ".log")
 log_err <- tempfile("server-err-", fileext = ".log")
 
 server <- callr::r_bg(
-  function(main_file, jwt, base_dir, project_dir) {
+  function(main_file,base_dir, project_dir) {
     setwd(project_dir)
-    Sys.setenv(JWT_SECRET = jwt)
     Sys.setenv(ACCOUNT_BASE_DIR = base_dir)
     Sys.setenv(ACCOUNT_BACKEND = "file")
     source(main_file)
   },
   args = list(
     main_file = here("api", "main.R"),
-    jwt = secret_key,
     base_dir = tmp_dir,
     project_dir = here()
   ),
