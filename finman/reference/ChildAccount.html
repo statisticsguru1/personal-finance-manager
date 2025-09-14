@@ -466,7 +466,7 @@ during distribution.</p><div class="section">
 <span class="r-in"><span>  amount <span class="op">=</span> <span class="fl">1000</span>,</span></span>
 <span class="r-in"><span>  channel <span class="op">=</span> <span class="st">"Bank Transfer"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 1000 via Bank Transfer - Transaction ID: SYS93D0378BCE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 1000 via Bank Transfer - Transaction ID: SYSA48BD51250 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Change account status to inactive</span></span></span>
 <span class="r-in"><span><span class="va">child</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"inactive"</span><span class="op">)</span></span></span>
@@ -484,7 +484,7 @@ during distribution.</p><div class="section">
 <span class="r-in"><span>  amount <span class="op">=</span> <span class="va">child</span><span class="op">$</span><span class="va">balance</span>,</span></span>
 <span class="r-in"><span>  channel <span class="op">=</span> <span class="st">"Transfer to Main"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 1000 via Transfer to Main - Transaction ID: SYS300EE42816 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 1000 via Transfer to Main - Transaction ID: SYSC6FB744D0B </span>
 <span class="r-in"><span><span class="va">child</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"closed"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Emergency Fund has been closed.</span>
 <span class="r-in"><span></span></span>
@@ -519,7 +519,7 @@ during distribution.</p><div class="section">
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Deposit funds into the account</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span>amount <span class="op">=</span> <span class="fl">100</span>, channel <span class="op">=</span> <span class="st">"Mobile"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 100 via Mobile - Transaction ID: SYSE2B67DB79C </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 100 via Mobile - Transaction ID: SYSBC6AE50C85 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Attempting to deposit into an inactive account</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"inactive"</span><span class="op">)</span></span></span>
@@ -539,14 +539,14 @@ during distribution.</p><div class="section">
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Attempting to close with non-zero balance triggers error</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">100</span>, channel <span class="op">=</span> <span class="st">"Mobile"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 100 via Mobile - Transaction ID: SYS426601D3DE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 100 via Mobile - Transaction ID: SYS709629943F </span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"closed"</span><span class="op">)</span>    <span class="co"># Will raise an error</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Withdraw funds then close</span></span></span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">100</span>, channel <span class="op">=</span> <span class="st">"Transfer"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 100 via Transfer - Transaction ID: SYSBE19EB62FF </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 100 via Transfer - Transaction ID: SYS2869980CB3 </span>
 <span class="r-in"><span><span class="va">acc</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"closed"</span><span class="op">)</span>    <span class="co"># Successful closure</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Emergency Fund has been closed.</span>
 <span class="r-in"><span></span></span>
