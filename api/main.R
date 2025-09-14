@@ -7,8 +7,6 @@ library(finman)
 library(tidyverse)
 
 
-# =============================================================================
-
 pr <- plumb(file = "api/plumber.R")
 pr$run(
   host = "0.0.0.0",
