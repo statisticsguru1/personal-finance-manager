@@ -24,5 +24,5 @@ RUN Rscript api/requirements.R
 # Expose plumber port
 EXPOSE 8000
 
-WORKDIR /personal-finance-manager/api
-CMD ["Rscript", "main.R"]
+# Start the API
+CMD ["Rscript", "./api/main.R"]
