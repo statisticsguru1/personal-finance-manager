@@ -25,4 +25,5 @@ RUN Rscript api/requirements.R
 EXPOSE 8000
 
 # Start the API
-CMD ["Rscript", "./api/main.R"]
+ENTRYPOINT []
+CMD ["Rscript", "api/main.R"]
