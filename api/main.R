@@ -6,10 +6,7 @@ library(jose)
 library(finman)
 library(tidyverse)
 
-# =============================================================================
- # Env variables these should be removed during hosting
- secret_key <- Sys.getenv("JWT_SECRET")
- uri<-Sys.getenv("MONGO_URI")
+
 # =============================================================================
 
 pr <- plumb(file = "api/plumber.R")
