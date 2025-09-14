@@ -81,10 +81,6 @@ GET /get_minimal_tree?uuid=4a76343a-e971-4bd7-b8c4-5fa9fccee433&n=60&start_date=
 ---
 
 ## 🧠 Notes
-- The user ID is used to identify the user's account file (e.g., account_tree.Rds) in persistent storage.
-- The operation is wrapped in a file lock to ensure safe concurrent access.
-- No JWT token required, but the endpoint is still protected by rate limiting and exponential backoff to prevent abuse.
-- This is a destructive operation and should be called with caution.
 
 - If uuid is omitted, the main account tree is returned.
 - Dates are inclusive, and if start_date > end_date, the request fails with a 400.
