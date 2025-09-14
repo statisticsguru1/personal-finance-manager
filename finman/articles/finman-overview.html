@@ -161,12 +161,12 @@ accounts are inactive.</p></li>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Deposit income (in other words allocate money to main account)</span></span>
 <span><span class="va">main</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">20000</span>, channel <span class="op">=</span> <span class="st">"ABSA"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Withdrew: 20000 via Allocation to child accounts - Transaction ID: SYSB7CCF4B7D0</span></span>
+<span><span class="co">#&gt; Withdrew: 20000 via Allocation to child accounts - Transaction ID: SYS52D58BF5D1</span></span>
 <span><span class="co">#&gt; No active child accounts available.</span></span>
-<span><span class="co">#&gt; Deposited: 10000 via Allocation from Main - Transaction ID: SYSBEFF11EEB3 </span></span>
-<span><span class="co">#&gt; Deposited: 6000 via Allocation from Main - Transaction ID: SYSBEFF11EEB3 </span></span>
-<span><span class="co">#&gt; Deposited: 4000 via Allocation from Main - Transaction ID: SYSBEFF11EEB3 </span></span>
-<span><span class="co">#&gt; Deposited: 20000 via ABSA - Transaction ID: SYSBEFF11EEB3</span></span></code></pre></div>
+<span><span class="co">#&gt; Deposited: 10000 via Allocation from Main - Transaction ID: SYS02C34D5F23 </span></span>
+<span><span class="co">#&gt; Deposited: 6000 via Allocation from Main - Transaction ID: SYS02C34D5F23 </span></span>
+<span><span class="co">#&gt; Deposited: 4000 via Allocation from Main - Transaction ID: SYS02C34D5F23 </span></span>
+<span><span class="co">#&gt; Deposited: 20000 via ABSA - Transaction ID: SYS02C34D5F23</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="viewing-allocation-results">📊 Viewing Allocation Results<a class="anchor" aria-label="anchor" href="#viewing-allocation-results"></a>
@@ -260,7 +260,7 @@ inactive — this tells the system not to fund them.</p>
 account.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rent</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">20000</span>, channel <span class="op">=</span> <span class="st">"Barclays"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Deposited: 5000 via Barclays - Transaction ID: SYSF03E7E9049 </span></span>
+<span><span class="co">#&gt; Deposited: 5000 via Barclays - Transaction ID: SYS979C03727B </span></span>
 <span><span class="co">#&gt; Rent has become inactive .</span></span>
 <span><span class="co">#&gt; Extra amount of 15000 moved to Needs </span></span>
 <span><span class="co">#&gt; Rent fully funded for 1 period(s)</span></span></code></pre></div>
@@ -334,13 +334,13 @@ haven’t actually spent the money.</p>
 <p>Let’s simulate spending:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rent</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">5000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span>      <span class="co"># paid rent</span></span>
-<span><span class="co">#&gt; Withdrew: 5000 via ABSA - Transaction ID: SYSBBE3C49D36</span></span>
+<span><span class="co">#&gt; Withdrew: 5000 via ABSA - Transaction ID: SYS7AD46C91B0</span></span>
 <span><span class="va">savings</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">6000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span>   <span class="co"># withdraw to pay savings the specifics</span></span>
-<span><span class="co">#&gt; Withdrew: 6000 via ABSA - Transaction ID: SYSA405FE953B</span></span>
+<span><span class="co">#&gt; Withdrew: 6000 via ABSA - Transaction ID: SYS59CBFBEBCE</span></span>
 <span>                                        <span class="co"># Not known we can specify this by attaching</span></span>
 <span>                                        <span class="co"># which are the specific savings</span></span>
 <span><span class="va">debt</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">4000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span>      <span class="co"># withdraw to pay savings the specifics</span></span>
-<span><span class="co">#&gt; Withdrew: 4000 via ABSA - Transaction ID: SYSFCC02EBB8C</span></span></code></pre></div>
+<span><span class="co">#&gt; Withdrew: 4000 via ABSA - Transaction ID: SYS45D5B8212E</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="after-spending-utilization-analysis">📉 After Spending: Utilization Analysis<a class="anchor" aria-label="anchor" href="#after-spending-utilization-analysis"></a>
