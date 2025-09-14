@@ -6,4 +6,3 @@ install.packages(c("plumber","mongolite","httr","jsonlite","jose","sodium","tidy
 remotes::install_github("statisticsguru1/personal-finance-manager@v1.2.0", 
                         subdir = "finman", 
                         upgrade = "never")
-
