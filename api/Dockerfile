@@ -13,7 +13,10 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /personal-finance-manager
 
 # Copy only the API folder
-COPY . ./api
+COPY api ./api
+
+# ✅ Debug step: list files to confirm they are copied correctly
+RUN echo "Listing files in /personal-finance-manager/api:" && ls -R ./api
 
 # Install R dependencies (CRAN + GitHub package)
 RUN Rscript api/requirements.R
