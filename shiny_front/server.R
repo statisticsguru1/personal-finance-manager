@@ -1,6 +1,3 @@
-currency<-"$"
-Sys.setenv(HOST_URL = "http://127.0.0.1:8000/")
-user_id<-"93d2f021-7b55-4ee7-b7d5-68a9e355a586"
 
 server <- function(input, output,session) {
 
@@ -12,46 +9,129 @@ server <- function(input, output,session) {
 
   #logging
   #track_usage(
-    #storage_mode = store_json()
-    #storage_mode = store_rds(".")
+  #storage_mode = store_json()
+  #storage_mode = store_rds(".")
   #)
-  host_url<-Sys.getenv("HOST_URL")
-  res2 <- httr::POST(
-    url = paste0(host_url,"/generate_access_token"),
-    query = list(
-      user_id = user_id,
+
+  user <- reactiveVal(
+    list(
+      user_id = "ceecfcc5-d4f5-4889-a4a8-fdc2776129e0",
+      currency = "$",
       role = "user",
-      type ="Testing",
-      exp = as.integer(Sys.time()) + 9000
+      token = NULL
     )
   )
 
-  parsed2 <- jsonlite::fromJSON(rawToChar(res2$content))
-  token<-parsed2$token
+  host_url<-Sys.getenv("HOST_URL")
 
 
-    # keep whole account tree in memory
+  observe({
+    # Run only once on session start
+    isolate({
+      res <- tryCatch({
+        call_api(
+          "/generate_access_token",
+          method = "POST",
+          body = list(
+            user_id = user()$user_id,
+            role = user()$role,
+            type = "session",
+            session_id = Sys.getpid()
+          )
+        )
+      }, error = function(e) {
+        showNotification(paste("Failed to call API:", e$message), type = "error")
+        return(NULL)
+      })
+
+      if (is.null(res)) return()
+
+      if (httr::status_code(res) != 200) {
+        showNotification("Token request failed", type = "error")
+        return()
+      }
+
+      parsed <- tryCatch(
+        jsonlite::fromJSON(rawToChar(res$content)),
+        error = function(e) {
+          showNotification("Failed to parse token response", type = "error")
+          return(NULL)
+        }
+      )
+
+      if (!is.null(parsed$token)) {
+        user(modifyList(user(), list(token = parsed$token)))
+      }
+    })
+  })
+
+
+
+  # keep whole account tree in memory
   main_account <- reactiveVal(NULL)
 
-  # initial fetch
+  # First immediate fetch
   observe({
-    main_account(get_main_account_from_api(token))
+    req(user()$token)  # wait until token is ready
+
+    res <- tryCatch({
+      call_api("/get_minimal_tree", token = user()$token)
+    }, error = function(e) {
+      showNotification(paste("Failed to fetch account tree:", e$message), type = "error")
+      return(NULL)
+    })
+
+    if (is.null(res) || httr::status_code(res) != 200) return()
+
+    parsed <- tryCatch(
+      jsonlite::fromJSON(rawToChar(res$content)),
+      error = function(e) {
+        showNotification("Failed to parse account tree response", type = "error")
+        return(NULL)
+      }
+    )
+
+    if (!is.null(parsed$minimal_tree)) {
+      main_account(parsed$minimal_tree)
+    }
   })
 
-  # background refresh every 2 min
+  # Background refresher
   observe({
     invalidateLater(10000, session)
-    main_account(get_main_account_from_api(token))
+    req(user()$token)
+
+    res <- tryCatch({
+      call_api("/get_minimal_tree", token = user()$token)
+    }, error = function(e) {
+      showNotification(paste("Failed to fetch account tree:", e$message), type = "error")
+      return(NULL)
+    })
+
+    if (is.null(res) || httr::status_code(res) != 200) return()
+
+    parsed <- tryCatch(
+      jsonlite::fromJSON(rawToChar(res$content)),
+      error = function(e) {
+        showNotification("Failed to parse account tree response", type = "error")
+        return(NULL)
+      }
+    )
+
+    if (!is.null(parsed$minimal_tree)) {
+      main_account(parsed$minimal_tree)
+    }
   })
 
-
-  currency<-reactiveVal(currency)
+  currency <- reactive({
+    user()$currency
+  })
 
   #### Dashboard content ===================================================================================================
   savings_goal <- reactive({
-      req(main_account())
-      main_account()$total_balance/(main_account()$total_balance+main_account()$total_due)
-    })
+    req(main_account())
+    main_account()$total_balance/(main_account()$total_balance+main_account()$total_due)
+  })
 
   observe({
     # saving goal value
@@ -65,7 +145,7 @@ server <- function(input, output,session) {
             ""
           } else{
             scales::percent(savings_goal(),accuracy=0.1)
-            }),
+          }),
         div(
           class = "progress-bar",
           div(
@@ -94,7 +174,7 @@ server <- function(input, output,session) {
     output$number_of_accounts<-renderUI({
       req(main_account())
       HTML(paste(h1(format(length(main_account()$child_accounts_list), big.mark = ",", scientific = FALSE), class = "card-body-value")))  # Relative font size (5% of viewport width)
-      })
+    })
 
     # Income allocation
     output$overall_alloc<-renderHighchart({
@@ -437,7 +517,7 @@ server <- function(input, output,session) {
       )
       account_names[length(accounts_data)] <- child$name
 
-       # grand children
+      # grand children
       acc_child[[length(acc_child)+1]]<-list(
         categories=names(child$child_accounts),
         balance =unlist(child$child_accounts%>%purrr::map(~.x$total_balance)),
@@ -836,7 +916,7 @@ server <- function(input, output,session) {
                   paste0("transfer_target_", account$account_uuid),
                   "Transfer To:",
                   choices = sapply(main_account()$child_accounts_list,function(x){x$name})
-                  ),
+                ),
                 actionButton(
                   paste0("transfer_btn_", account$account_uuid),
                   "Transfer",
@@ -899,7 +979,7 @@ server <- function(input, output,session) {
                   tooltip(
                     bs_icon("info-circle"),
                     paste(
-                    "A numeric value representing priority,
+                      "A numeric value representing priority,
                      high values gives this account high priority over
                     other accounts from the same parent"
                     ),
@@ -926,20 +1006,20 @@ server <- function(input, output,session) {
                 ),
                 numericInput(
                   paste0("allocation_edit_child",account$account_uuid),
-                             tagList(
-                               "Allocation",
-                               tooltip(
-                                 bs_icon("info-circle"),
-                                 paste(
-                                   "what percentage of",
-                                   account$name,
-                                   "do you wish to allocate this account,
+                  tagList(
+                    "Allocation",
+                    tooltip(
+                      bs_icon("info-circle"),
+                      paste(
+                        "what percentage of",
+                        account$name,
+                        "do you wish to allocate this account,
                                    this should be a value between 0-1.note
                                    total allocations for",
-                                   account$name,"should not exceed 1 "
-                                  ),
-                                 placement = "right")
-                              ),
+                        account$name,"should not exceed 1 "
+                      ),
+                      placement = "right")
+                  ),
                   value =account$allocation
                 ),
                 textInput(
@@ -954,7 +1034,7 @@ server <- function(input, output,session) {
                     tooltip(
                       bs_icon("info-circle"),
                       paste(
-                      "A numeric value representing priority, high values
+                        "A numeric value representing priority, high values
                       gives this account high priority over other accounts
                       from the same parent"
                       ),
@@ -962,7 +1042,7 @@ server <- function(input, output,session) {
                     )
                   ),
                   value=account$priority
-               )
+                )
               )
 
             }
@@ -1044,7 +1124,7 @@ server <- function(input, output,session) {
                     tooltip(
                       bs_icon("info-circle"),
                       paste(
-                      "how frequent do you pay this account monthly(30),
+                        "how frequent do you pay this account monthly(30),
                       Quarterly(90) etc,this only applies for fixed
                       payments like bills,loans and fixed savings"
                       ),
@@ -1206,8 +1286,8 @@ server <- function(input, output,session) {
         get_account_by_uuid(account,input$selected_tab),
         input$selected_tab,
         input[[paste0("deposit_transaction_", input$selected_tab)]]
-        )
-      ){ #check if is a duplicate
+      )
+    ){ #check if is a duplicate
       amount <- input[[paste0("deposit_amount_", input$selected_tab)]]
       transaction_number <- input[[paste0("deposit_transaction_", input$selected_tab)]]
       transaction_channel <- input[[paste0("deposit_transaction_channel_", input$selected_tab)]]

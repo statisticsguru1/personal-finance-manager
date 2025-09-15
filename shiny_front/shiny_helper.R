@@ -1,11 +1,23 @@
 # fetch the whole account tree
-get_main_account_from_api <- function(token) {
-  res <- GET(
-    url = paste0(host_url, "get_minimal_tree"),
-    add_headers(Authorization = paste("Bearer", token))
+call_api <- function(endpoint,
+                     method = "GET",
+                     body = NULL,
+                     params = NULL,
+                     token = NULL) {
+
+  headers <- c()
+  if (!is.null(token) && nzchar(token)) {
+    headers <- c(Authorization = paste("Bearer", token))
+  }
+
+  httr::VERB(
+    verb   = method,
+    url    = paste0(Sys.getenv("HOST_URL"), endpoint),
+    httr::add_headers(.headers = headers),
+    body   = body,
+    query  = params,
+    encode = "json"
   )
-  parsed<-fromJSON(rawToChar(res$content))
-  parsed$minimal_tree
 }
 
 # deposit
