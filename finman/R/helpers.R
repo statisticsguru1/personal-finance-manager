@@ -1660,7 +1660,7 @@ minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date(
     account_uuid = account$uuid,
     account_class = class(account)[1],
     balance = account$get_balance(),
-    transactions =account$get_transactions,
+    transactions =account$transactions,
     child_accounts_list = sapply(
       account$child_accounts,
       function(acc){

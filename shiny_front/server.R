@@ -1159,7 +1159,9 @@ server <- function(input, output,session) {
     # transaction table
     output[[paste0("transaction_table_", input$selected_tab)]] <- DT::renderDataTable({
       req(main_account())
-
+      investigate<<-get_account_by_uuid(main_account(), input$selected_tab)
+      investigate1<<-main_account()
+      print(input$selected_tab)
       datatable(
         get_account_by_uuid(main_account(), input$selected_tab)$transactions%>%
           select(-c(amount_due, overall_balance)) %>%
