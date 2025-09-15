@@ -164,7 +164,7 @@ account will automatically extend the due period and reactivate
 itself:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rent</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">10000</span>, channel <span class="op">=</span> <span class="st">"Bank"</span>,transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">8</span><span class="op">)</span> <span class="co"># funded days before due</span></span>
-<span><span class="co">#&gt; Deposited: 5000 via Bank - Transaction ID: SYS3164A34F59 </span></span>
+<span><span class="co">#&gt; Deposited: 5000 via Bank - Transaction ID: SYSAAA4A8B526 </span></span>
 <span><span class="co">#&gt; Rent has become inactive .</span></span>
 <span><span class="co">#&gt; Extra amount of 5000 moved to Needs </span></span>
 <span><span class="co">#&gt; Rent fully funded for 1 period(s)</span></span>
@@ -177,7 +177,7 @@ itself:</p>
 <code class="sourceCode R"><span><span class="va">rent</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">1000</span>, channel <span class="op">=</span> <span class="st">"Bank"</span>,transaction_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Due date extended. Number of periods unpaid: 2 </span></span>
 <span><span class="co">#&gt; Rent reactivated. Outstanding balance due: 5000 </span></span>
-<span><span class="co">#&gt; Deposited: 1000 via Bank - Transaction ID: SYSE98B40EFEC</span></span>
+<span><span class="co">#&gt; Deposited: 1000 via Bank - Transaction ID: SYS197D04DE56</span></span>
 <span><span class="va">rent</span><span class="op">$</span><span class="fu">get_account_status</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rent is active</span></span>
 <span><span class="co">#&gt; [1] "active"</span></span>
@@ -199,18 +199,18 @@ proportionally.</li>
 <code class="sourceCode R"><span><span class="va">rent</span><span class="op">$</span><span class="fu">change_status</span><span class="op">(</span><span class="st">"active"</span><span class="op">)</span>  <span class="co"># ensure rent is active</span></span>
 <span><span class="co">#&gt; Rent has become active .</span></span>
 <span><span class="va">main</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">20000</span>, channel <span class="op">=</span> <span class="st">"Equity Bank"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Withdrew: 20000 via Allocation to child accounts - Transaction ID: SYSA8E394D070 </span></span>
-<span><span class="co">#&gt; Withdrew: 10000 via Allocation to child accounts - Transaction ID: SYS9415B9C6CD </span></span>
+<span><span class="co">#&gt; Withdrew: 20000 via Allocation to child accounts - Transaction ID: SYSA263B25BAC </span></span>
+<span><span class="co">#&gt; Withdrew: 10000 via Allocation to child accounts - Transaction ID: SYSD12EFA7FDA </span></span>
 <span><span class="co">#&gt; Due date extended. Number of periods unpaid: 3 </span></span>
 <span><span class="co">#&gt; Rent reactivated. Outstanding balance due: 9000 </span></span>
-<span><span class="co">#&gt; Deposited: 9000 via Allocation from Needs - Transaction ID: SYS2C912DF0B9 </span></span>
+<span><span class="co">#&gt; Deposited: 9000 via Allocation from Needs - Transaction ID: SYSD1687023DE </span></span>
 <span><span class="co">#&gt; Rent has become inactive .</span></span>
 <span><span class="co">#&gt; Extra amount of 1000 moved to Needs </span></span>
 <span><span class="co">#&gt; Rent fully funded for 3 period(s)</span></span>
-<span><span class="co">#&gt; Deposited: 10000 via Allocation from Main - Transaction ID: SYS2C912DF0B9 </span></span>
-<span><span class="co">#&gt; Deposited: 6000 via Allocation from Main - Transaction ID: SYS2C912DF0B9 </span></span>
-<span><span class="co">#&gt; Deposited: 4000 via Allocation from Main - Transaction ID: SYS2C912DF0B9 </span></span>
-<span><span class="co">#&gt; Deposited: 20000 via Equity Bank - Transaction ID: SYS2C912DF0B9</span></span>
+<span><span class="co">#&gt; Deposited: 10000 via Allocation from Main - Transaction ID: SYSD1687023DE </span></span>
+<span><span class="co">#&gt; Deposited: 6000 via Allocation from Main - Transaction ID: SYSD1687023DE </span></span>
+<span><span class="co">#&gt; Deposited: 4000 via Allocation from Main - Transaction ID: SYSD1687023DE </span></span>
+<span><span class="co">#&gt; Deposited: 20000 via Equity Bank - Transaction ID: SYSD1687023DE</span></span>
 <span></span>
 <span><span class="va">rent</span><span class="op">$</span><span class="fu">get_balance</span><span class="op">(</span><span class="op">)</span>      <span class="co"># Rent gets funds</span></span>
 <span><span class="co">#&gt; Current Balance: 15000</span></span>
@@ -239,7 +239,7 @@ allocated to the child with the highest priority.</p>
 <span></span>
 <span><span class="co"># deposit money</span></span>
 <span><span class="va">main</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">10000</span>, channel <span class="op">=</span> <span class="st">"Equity Bank"</span>,transaction_number <span class="op">=</span> <span class="st">"Trans1"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Withdrew: 10000 via Allocation to child accounts - Transaction ID: SYSB5AFFF4C47</span></span>
+<span><span class="co">#&gt; Withdrew: 10000 via Allocation to child accounts - Transaction ID: SYSA1B7CF2B21</span></span>
 <span><span class="co">#&gt; No active child accounts available.</span></span>
 <span><span class="co">#&gt; Deposited: 5000 via Allocation from Main - Transaction ID: Trans1 </span></span>
 <span><span class="co">#&gt; Deposited: 3000 via Allocation from Main - Transaction ID: Trans1 </span></span>
@@ -252,11 +252,11 @@ allocated to the child with the highest priority.</p>
 <span><span class="va">savingstime</span><span class="op">=</span><span class="va">savings</span><span class="op">$</span><span class="va">transactions</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">TransactionID</span><span class="op">==</span><span class="st">"Trans1"</span><span class="op">)</span></span>
 <span><span class="va">debttime</span><span class="op">=</span><span class="va">debt</span><span class="op">$</span><span class="va">transactions</span><span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">TransactionID</span><span class="op">==</span><span class="st">"Trans1"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"needs: %s"</span>,<span class="va">needstime</span><span class="op">$</span><span class="va">Date</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "needs: 2025-09-15 07:08:22.082016"</span></span>
+<span><span class="co">#&gt; [1] "needs: 2025-09-15 15:31:29.145317"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"savings: %s"</span>,<span class="va">savingstime</span><span class="op">$</span><span class="va">Date</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "savings: 2025-09-15 07:08:22.083384"</span></span>
+<span><span class="co">#&gt; [1] "savings: 2025-09-15 15:31:29.146928"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"debt: %s"</span>,<span class="va">debttime</span><span class="op">$</span><span class="va">Date</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "debt: 2025-09-15 07:08:22.084201"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "debt: 2025-09-15 15:31:29.147814"</span></span></code></pre></div>
 <blockquote>
 <p>💡 If an account receives more than it needs, the extra is refunded
 to the parent and possibly redistributed.</p>
@@ -278,7 +278,7 @@ micro-redistribution.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">main</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">0.09</span>, channel <span class="op">=</span> <span class="st">"ABSA"</span>,transaction_number <span class="op">=</span> <span class="st">"Test: Small Allocation"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Amount too small to distribute. Depositing into the highest-priority child.</span></span>
-<span><span class="co">#&gt; Withdrew: 0.09 via Allocation to Needs - Transaction ID: SYSA9E3B555EA</span></span>
+<span><span class="co">#&gt; Withdrew: 0.09 via Allocation to Needs - Transaction ID: SYSB9B79A1449</span></span>
 <span><span class="co">#&gt; No active child accounts available.</span></span>
 <span><span class="co">#&gt; Deposited: 0.09 via Allocation from Main - Transaction ID: Test: Small Allocation </span></span>
 <span><span class="co">#&gt; Deposited: 0.09 via ABSA - Transaction ID: Test: Small Allocation</span></span></code></pre></div>
