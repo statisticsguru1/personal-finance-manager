@@ -1660,7 +1660,7 @@ minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date(
     account_uuid = account$uuid,
     account_class = class(account)[1],
     balance = account$get_balance(),
-    transactions =account$transactions,
+    transactions = account$get_transactions(),
     child_accounts_list = sapply(
       account$child_accounts,
       function(acc){
@@ -1675,12 +1675,44 @@ minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date(
     total_due = account$compute_total_due(),
     #construct name based on provided n
     compute_total_due_within_n_days = account$compute_total_due_within_n_days(n),
-    spending = account$spending(daterange=daterange),
-    total_income =account$total_income(daterange=daterange),
-    allocated_amount = account$allocated_amount(daterange=daterange),
-    income_utilization = account$income_utilization(daterange=daterange),
-    walking_amount_due = account$walking_amount(daterange=daterange),
-    walking_balance = account$walking_amount(amt_type = "Balance", daterange=daterange)
+    spending = account$spending(
+      daterange=daterange
+      ),
+    previous_spending = account$spending(
+      daterange=daterange-(daterange[2]-daterange[1])
+      ),
+    total_income =account$total_income(
+      daterange=daterange
+      ),
+    previous_total_income =account$total_income(
+      daterange=daterange-(daterange[2]-daterange[1])
+      ),
+    allocated_amount = account$allocated_amount(
+      daterange=daterange
+      ),
+    previous_allocated_amount = account$allocated_amount(
+      daterange=daterange-(daterange[2]-daterange[1])
+      ),
+    income_utilization = account$income_utilization(
+      daterange=daterange
+      ),
+    previous_income_utilization = account$income_utilization(
+      daterange=daterange-(daterange[2]-daterange[1])
+      ),
+    walking_amount_due = account$walking_amount(
+      daterange=daterange
+      ),
+    previous_walking_amount_due = account$walking_amount(
+      daterange=daterange-(daterange[2]-daterange[1])
+      ),
+    walking_balance = account$walking_amount(
+      amt_type = "Balance",
+      daterange=daterange-(daterange[2]-daterange[1])
+      ),
+    previous_walking_balance = account$walking_amount(
+      amt_type = "Balance",
+      daterange=daterange-(daterange[2]-daterange[1])
+      )
   )
 
   #add tier 2 details

@@ -227,6 +227,8 @@ ui <- page_navbar(
     )
   ),
 
+
+
 ## Accounts page=======================================================================
 
 nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"),
@@ -247,6 +249,106 @@ nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"),
 
             # navbar content
             uiOutput("nav_content")
+          )
+),
+## Reports page=======================================================================
+nav_panel(span(icon("chart-column"), "Reports",class = "custom-tab"),
+          layout_sidebar(
+            sidebar=sidebar(
+              title = tags$div(
+                class = "custom-sidebar-title",
+                icon("filter"),
+                "Filters"
+              ),
+              width="300px",
+              class = "custom-sidebar",
+              dateRangeInput("custom_range", "Select Date Range", start = Sys.Date() - 60, end = Sys.Date()),
+              downloadButton("download_report", "Download Report")
+            ),
+
+            layout_column_wrap(
+              width = 1,
+              fill = TRUE,
+              heights_equal = "row",
+              layout_column_wrap(
+                width = 1/4,
+                fill = TRUE,
+                heights_equal = "row",
+                # Value Boxes
+                card(
+                  fill=T,
+                  class = "vb-value-box",
+                  div(class = "vb-value-box-header",
+                      span(class = "vb-icon-container vb-icon-blue",
+                           icon("wallet")),
+                      "Total Income"),
+                  div(textOutput("total_income"), class = "vb-value-box-value"),
+                  div(uiOutput("income_change"), class = "vb-value-box-change")
+                ),
+
+                card(fill=T,
+                     class = "vb-value-box",
+                     div(class = "vb-value-box-header",
+                         span(class = "vb-icon-container vb-icon-red",
+                              icon("credit-card")),
+                         "Total Spending"),
+                     div(textOutput("total_spending"), class = "vb-value-box-value"),
+                     div(uiOutput("spending_change"), class = "vb-value-box-change")
+                ),
+
+                card(
+                  fill=T,
+                  class = "vb-value-box",
+                  div(class = "vb-value-box-header",
+                      span(class = "vb-icon-container vb-icon-green",
+                           icon("chart-simple")),
+                      "% Utilization"),
+                  div(textOutput("utilization"), class = "vb-value-box-value"),
+                  div(uiOutput("utilization_change"), class = "vb-value-box-change")
+                ),
+
+                card(
+                  fill=T,
+                  class = "vb-value-box",
+                  div(class = "vb-value-box-header",
+                      span(class = "vb-icon-container vb-icon-purple",
+                           icon("chart-line")),
+                      "Debt Ratio"),
+                  div(textOutput("debt_ratio"), class = "vb-value-box-value"),
+                  div(uiOutput("debt_change"), class = "vb-value-box-change")
+                )
+              ),
+              layout_column_wrap(
+                fill=TRUE,
+                width=1/2,
+                heights_equal = "row",
+                card(
+                  fill=T,
+                  card_header("Income vs. Spending Trend"),
+                  highchartOutput("income_vs_spending")
+                ),
+                card(
+                  fill=T,
+                  card_header("Money Utilization"),
+                  highchartOutput("utilized")
+                )),
+
+              layout_column_wrap(
+                fill=TRUE,
+                width=1/2,
+                heights_equal = "row",
+                card(
+                  fill=T,
+                  card_header("Distribution of spending"),
+                  highchartOutput("spending_drill")
+                ),
+                card(
+                  fill=T,
+                  card_header("Trend in Debt reduction"),
+                  highchartOutput("debt")
+                )
+              )
+            )
           )
 ),
 
