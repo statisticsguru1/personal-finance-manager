@@ -1,30 +1,54 @@
 
 server <- function(input, output,session) {
 
-  observeEvent(input$dark_mode,{
-    if(input$dark_mode=="dark"){
-      showNotification("Welcome to dark mode!!!")
-    }
-  })
+  # observeEvent(input$dark_mode,{
+  #   if(input$dark_mode=="dark"){
+  #     showNotification("Welcome to dark mode!!!")
+  #   }
+  # })
 
   #logging
-  #track_usage(
-  #storage_mode = store_json()
-  #storage_mode = store_rds(".")
-  #)
+  track_usage(
+  # storage_mode = store_json(),
+  storage_mode = store_rds(".")
+  )
 
   user <- reactiveVal(
     list(
       user_id = "ceecfcc5-d4f5-4889-a4a8-fdc2776129e0",
       currency = "$",
       role = "user",
+      First_name = "Festus",
+      Middle_name ="Mutinda",
+      Last_name = "Nzuma",
+      user_email = "mutindafestus27@gmail.com",
       token = NULL
     )
   )
 
-  host_url<-Sys.getenv("HOST_URL")
+ output$greetings<-renderUI({
+   req(user())
+   generate_greeting(user()$First_name)
+ }
+ )
 
 
+ output$user_email<-renderText({
+   req(user())
+   paste(user()$user_email)
+ }
+ )
+
+ output$fullnames<-renderText({
+   req(user())
+   paste(user()$First_name,user()$Last_name)
+ }
+ )
+
+
+
+
+ host_url<-Sys.getenv("HOST_URL")
   observe({
     # Run only once on session start
     isolate({
@@ -98,7 +122,7 @@ server <- function(input, output,session) {
 
   # Background refresher
   observe({
-    invalidateLater(10000, session)
+    invalidateLater(4*60*1000, session)
     req(user()$token)
 
     res <- tryCatch({
@@ -714,23 +738,27 @@ server <- function(input, output,session) {
         class = "details-grid",
         tags$div(
           class = "detail-item",
+          tags$i(class = "fas fa-id-badge"),
           tags$strong("Account ID:"),
           tags$span(account$account_uuid)
         ),
         tags$div(
           class = "detail-item",
+          tags$i(class = "fas fa-signature"),
           tags$strong("Name:"),
           tags$span(account$name)
         ),
         if (!is.null(account$account_type)) {
         tags$div(
           class = "detail-item",
+          tags$i(class = "fas fa-layer-group"),
           tags$strong("Type:"),
           tags$span(account$account_type)
         )
           },
         tags$div(
           class = "detail-item",
+          tags$i(class = "fas fa-wallet"),
           tags$strong("Balance:"),
           tags$span(
             class = "balance",
@@ -739,6 +767,7 @@ server <- function(input, output,session) {
         ),
         tags$div(
           class = "detail-item",
+          tags$i(class = "fas fa-piggy-bank"),
           tags$strong("Balance in Children:"),
           tags$span(
             paste0(
@@ -750,6 +779,11 @@ server <- function(input, output,session) {
         if (!is.null(account$account_status)) {
           tags$div(
             class = "detail-item",
+            tags$i(
+              class = if (
+                tolower(account$account_status) == "active"
+                ) "fas fa-circle-check" else "fas fa-circle-xmark"
+              ),
             tags$strong("Status:"),
             tags$span(
               class = if (tolower(account$account_status) == "active") "badge-success" else "badge-danger",
@@ -760,13 +794,15 @@ server <- function(input, output,session) {
         if (!is.null(account$allocation)) {
           tags$div(
             class = "detail-item",
+            tags$i(class = "fas fa-chart-pie"),
             tags$strong("Allocation:"),
             tags$span(paste(scales::percent(account$allocation, accuracy = 0.01)))
           )
         },
-        if (!is.null(account$parent)) {
+        if (!is.null(account$parent_name)) {
           tags$div(
             class = "detail-item",
+            tags$i(class = "fas fa-sitemap"),
             tags$strong("Parent Account:"),
             tags$a(
               href = paste0("/account/",account$parent_uuid),
@@ -783,7 +819,6 @@ server <- function(input, output,session) {
     output[[paste0("actions_section",input$selected_tab)]]<-renderUI({
       req(main_account())
       account <- get_account_by_uuid(main_account(),input$selected_tab)
-      aaas<<-account
       tagList(
         layout_column_wrap(
           width=1/3,
@@ -1387,7 +1422,8 @@ server <- function(input, output,session) {
         "/get_minimal_tree",
         params=list(
           start_date=input$custom_range[1],
-          end_date=input$custom_range[2]
+          end_date=input$custom_range[2],
+          ts_data = T
           ),
         token = user()$token
         )
@@ -1410,7 +1446,40 @@ server <- function(input, output,session) {
       main_account_reports(parsed$minimal_tree)
     }
   })
+  observe({
+    invalidateLater(6*60*1000, session)
+    req(user()$token)  # wait until token is ready
+    req(input$custom_range)
+    res <- tryCatch({
+      call_api(
+        "/get_minimal_tree",
+        params=list(
+          start_date=input$custom_range[1],
+          end_date=input$custom_range[2],
+          ts_data = T
+        ),
+        token = user()$token
+      )
+    }, error = function(e) {
+      showNotification(paste("Failed to fetch account tree:", e$message), type = "error")
+      return(NULL)
+    })
 
+    if (is.null(res) || httr::status_code(res) != 200) return()
+
+    parsed <- tryCatch(
+      jsonlite::fromJSON(rawToChar(res$content)),
+      error = function(e) {
+        showNotification("Failed to parse account tree response", type = "error")
+        return(NULL)
+      }
+    )
+
+    if (!is.null(parsed$minimal_tree)) {
+      main_account_reports(parsed$minimal_tree)
+    }
+  })
+  # Total income
   output$total_income <- renderText({
     paste0(currency(),format(main_account_reports()$total_income,
                              big.mark = ",",
@@ -1418,12 +1487,13 @@ server <- function(input, output,session) {
   })
 
   output$income_change <- renderUI({
-    current_income<-main_account()$main_account_reports()$total_income
-    previous_income<-main_account()$total_income(as.POSIXct(input$date)-days(30))
+    current_income<-main_account_reports()$total_income
+    previous_income<-main_account_reports()$previous_total_income
 
     if (previous_income == 0) {
       change <- if (current_income > 0) 100 else 0
-    } else {
+    } else
+      {
       change <- ((current_income - previous_income) / previous_income) * 100
     }
 
@@ -1432,18 +1502,20 @@ server <- function(input, output,session) {
     span(icon(arrow_icon), paste0(abs(change), "% vs last month"), class = color_class)
   })
 
+  # spending
   output$total_spending <- renderText({
-    paste0(currency(),format(main_account()$spending(input$date),
+    paste0(currency(),format(main_account_reports()$spending,
                              big.mark = ",",
                              scientific = FALSE))
   })
   output$spending_change <- renderUI({
-    current_spending<-main_account()$spending(input$date)
-    previous_spending<-main_account()$spending(input$date-30)
+    current_spending<-main_account_reports()$spending
+    previous_spending<-main_account_reports()$previous_spending
 
     if (previous_spending == 0) {
       change <- if (current_spending > 0) 100 else 0
-    } else {
+    } else
+      {
       change <- ((current_spending - previous_spending) / previous_spending) * 100
     }
     color_class <- ifelse(change >= 0, "vb-text-green", "vb-text-red")
@@ -1451,17 +1523,19 @@ server <- function(input, output,session) {
     span(icon(arrow_icon), paste0(abs(change), "% vs last month"), class = color_class)
   })
 
+  # income utilization
   output$utilization <- renderText({
-    paste0(round(100*main_account()$income_utilization(input$date),2),"%")
+    paste0(round(100*main_account_reports()$income_utilization,2),"%")
   })
 
   output$utilization_change <- renderUI({
-    current_utilization <- main_account()$income_utilization(input$date)
-    previous_utilization <- main_account()$income_utilization(input$date - 30)
+    current_utilization <- main_account_reports()$income_utilization
+    previous_utilization <- main_account_reports()$previous_income_utilization
 
     if (previous_utilization == 0) {
       change <- if (current_utilization > 0) 100 else 0
-    } else {
+    } else
+      {
       change <- ((current_utilization - previous_utilization) / previous_utilization) * 100
     }
 
@@ -1493,25 +1567,28 @@ server <- function(input, output,session) {
     span(icon(arrow_icon), paste0(abs(round(change, 2)), "% vs last month"), class = color_class)
   })
 
+  # debt ratio
+
   output$debt_ratio <- renderText({
-    debt_amount<-main_account()$walking_amount(daterange = input$date)
-    balance_amount<-main_account()$walking_amount(amt_type = "Balance",daterange = input$date)
+    debt_amount<-main_account_reports()$walking_amount_due
+    balance_amount<-main_account_reports()$walking_balance
     paste0(round(100*debt_amount/((debt_amount+balance_amount)+.Machine$double.eps),2),"%")
   })
 
 
   output$debt_change <- renderUI({
-    current_debt_amount<-main_account()$walking_amount(daterange = input$date)
-    current_balance_amount<-main_account()$walking_amount(amt_type = "Balance",daterange = input$date)
+    current_debt_amount<-main_account_reports()$walking_amount_due
+    current_balance_amount<-main_account_reports()$walking_balance
     current_debt_ratio<-current_debt_amount/((current_debt_amount+current_balance_amount)+.Machine$double.eps)
 
-    previous_debt_amount<-main_account()$walking_amount(daterange = input$date-30)
-    previous_balance_amount<-main_account()$walking_amount(amt_type = "Balance",daterange = input$date-30)
+    previous_debt_amount<-main_account_reports()$previous_walking_amount_due
+    previous_balance_amount<-main_account_reports()$previous_walking_balance
     previous_debt_ratio<-current_debt_amount/((current_debt_amount+current_balance_amount)+.Machine$double.eps)
 
     if (previous_debt_ratio== 0) {
       change <- if (current_debt_ratio > 0) 100 else 0
-    } else {
+    } else
+      {
       change <- ((current_debt_ratio- previous_debt_ratio) / previous_debt_ratio) * 100
     }
 
@@ -1520,27 +1597,10 @@ server <- function(input, output,session) {
     span(icon(arrow_icon), paste0(abs(change), "% vs last month"), class = color_class)
   })
 
-  income_spending<-reactive({
-    date<-input$date[1]
-    df<-data.frame(
-      Date=as.Date(POSIXct()),
-      Income=numeric(),
-      Spending=numeric(),
-      stringsAsFactors = F
-    )
-
-    while(date<=input$date[2]){
-      df<-rbind(
-        df,
-        data.frame(
-          Date=date,
-          Income=main_account()$total_income(c(date,date)),
-          Spending= main_account()$spending(c(date,date)),
-          stringsAsFactors = F
-        )
-      )
-      date<-date+1
-    }
+  income_spending <- reactive({
+    req(main_account_reports())
+    repos<<-main_account_reports()
+    df <- main_account_reports()$time_series%>%select(Date, Income, Spending)
 
     first_nonzero_row <- which(df$Income != 0 | df$Spending != 0)
 
@@ -1551,6 +1611,7 @@ server <- function(input, output,session) {
     }
     df
   })
+
 
   output$income_vs_spending <- renderHighchart({
     df<-income_spending()
@@ -1572,27 +1633,9 @@ server <- function(input, output,session) {
 
   })
 
-  utilization<-reactive({
-    date <- input$date[1]
-    df <- data.frame(
-      Date = as.Date(character()),
-      Allocated = numeric(),
-      Spend = numeric(),
-      stringsAsFactors = FALSE
-    )
-
-    while (date <= input$date[2]) {
-      df <- rbind(
-        df,
-        data.frame(
-          Date = date,
-          Allocated = main_account()$allocated_amount(c(date, date)),
-          Spend = main_account()$spending(c(date, date)),
-          stringsAsFactors = FALSE
-        )
-      )
-      date <- date + 1
-    }
+  utilization <- reactive({
+    req(main_account_reports())
+    df <- main_account_reports()$time_series %>% select(Date, Allocated, Spend=Spending)
 
     first_nonzero_row <- which(df$Allocated != 0 | df$Spend != 0)
 
@@ -1642,16 +1685,16 @@ server <- function(input, output,session) {
       ))
 
   })
-
+  # spending
   output$spending_drill<-renderHighchart({
-    prepare_drilldown_data <- function(account, drilldown_series = list(),daterange) {
+    prepare_drilldown_data <- function(account, drilldown_series = list()) {
       children <- account$child_accounts
 
       # Base case: If no children, return only the account data
       if (length(children) == 0) {
         return(list(
           name = account$name,
-          y = account$spending(daterange)
+          y = account$spending
         ))
       }
 
@@ -1659,7 +1702,7 @@ server <- function(input, output,session) {
       data_points <- list()
 
       for (child in children) {
-        child_data <- prepare_drilldown_data(child, drilldown_series,daterange)
+        child_data <- prepare_drilldown_data(child, drilldown_series)
 
         # Store drilldown data separately
         if (!is.null(child_data$drilldown)) {
@@ -1670,7 +1713,7 @@ server <- function(input, output,session) {
         data_points <- append(data_points, list(
           list(
             name = child$name,
-            y = child$spending(daterange),
+            y = child$spending,
             drilldown = if (length(child$child_accounts) > 0) child$name else NULL
           )
         ))
@@ -1679,7 +1722,7 @@ server <- function(input, output,session) {
       # Return structured data
       return(list(
         name = account$name,
-        y = account$spending(daterange),
+        y = account$spending,
         drilldown = list(
           id = account$name,
           data = data_points
@@ -1689,7 +1732,7 @@ server <- function(input, output,session) {
     }
 
     # Generate account data with properly structured drilldowns
-    account_data <- prepare_drilldown_data(main_account(),daterange=input$date)
+    account_data <- prepare_drilldown_data(main_account_reports())
 
     # Extract top-level data (main account level)
     top_level_data <- lapply(account_data$drilldown$data, function(x) {
@@ -1719,25 +1762,9 @@ server <- function(input, output,session) {
 
   })
 
-  debt_trend_data<-reactive({
-    date <- input$date[1]
-    df <- data.frame(
-      Date = as.Date(character()),
-      overall_debt = numeric(),
-      stringsAsFactors = FALSE
-    )
-
-    while (date <= input$date[2]) {
-      df <- rbind(
-        df,
-        data.frame(
-          Date = date,
-          overall_debt= main_account()$walking_amount(daterange=c(date, date)),
-          stringsAsFactors = FALSE
-        )
-      )
-      date <- date + 1
-    }
+  debt_trend_data <- reactive({
+    req(main_account_reports())
+    df <- main_account_reports()$time_series %>% select(Date, Overall_Debt)
 
     if (any(df$overall_debt != 0)) {
       df <- df%>%
@@ -1760,4 +1787,7 @@ server <- function(input, output,session) {
 
 
 }
+
+
+
 

@@ -4803,9 +4803,11 @@ delete <- function(req, res, uuid = NULL) {
 #*   Default: 1000 years ago.
 #* @param end_date:str End date for statistics (YYYY-MM-DD).
 #*   Default: Today
+#* @param ts_data:logical whether to generate timeseries data.
+#*   Default: FALSE
 #* @json
 get_minimal_tree <- function(req, res, uuid = NULL, n = 30,
-                             start_date = NULL, end_date = NULL) {
+                             start_date = NULL, end_date = NULL,ts_data=F) {
   user_id <- req$user_id
   role <- req$role
   start_time <- Sys.time()
@@ -4893,7 +4895,7 @@ get_minimal_tree <- function(req, res, uuid = NULL, n = 30,
         }
 
         # Call minimal_tree
-        result_data <- minimal_tree(account, n = as.numeric(n), daterange = daterange)
+        result_data <- minimal_tree(account, n = as.numeric(n), daterange = daterange,ts_data=ts_data)
 
         if(is.null(uuid)){
           uuid<- tree$uuid

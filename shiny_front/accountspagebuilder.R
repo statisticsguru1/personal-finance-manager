@@ -46,28 +46,59 @@ nav_tab_nested <- function(..., ids = NULL, tabsetid = "tabSet1", is_parent = FA
 }
 
 # Define the custom function for nested content
+# nav_content_nested <- function(..., ids = NULL, tabsetid = "tabSet1") {
+#   dots <- list(...)
+#
+#   if (is.null(ids)) ids <- paste0("bsTab-", seq_along(dots))
+#
+#   shiny::div(
+#     lapply(seq_along(dots), function(i) {
+#       id <- dots[[i]]$attribs$id
+#       if (is.null(id)) id <- ids[[i]]
+#
+#       idc <- strsplit(id, "-")[[1]]
+#       if (idc[length(idc)] != "content") id <- paste0(id, "-content")
+#
+#       shiny::div(
+#         class = paste0(tabsetid, "-content"),
+#         style = if (i == 1) "display: block;" else "display: none;",
+#         id = id,
+#         dots[[i]]
+#       )
+#     })
+#   )
+# }
+
+
+
 nav_content_nested <- function(..., ids = NULL, tabsetid = "tabSet1") {
   dots <- list(...)
-
   if (is.null(ids)) ids <- paste0("bsTab-", seq_along(dots))
+
+  # Find which IDs are children of the first item (based on naming)
+  first_id <- dots[[1]]$attribs$id %||% ids[[1]]
+  first_parent_prefix <- sub("-content$", "", first_id)
 
   shiny::div(
     lapply(seq_along(dots), function(i) {
-      id <- dots[[i]]$attribs$id
-      if (is.null(id)) id <- ids[[i]]
+      id <- dots[[i]]$attribs$id %||% ids[[i]]
+      if (!grepl("-content$", id)) id <- paste0(id, "-content")
 
-      idc <- strsplit(id, "-")[[1]]
-      if (idc[length(idc)] != "content") id <- paste0(id, "-content")
+      # Check if this is the first parent or its direct children
+      is_first_or_child <- startsWith(
+        id,
+        paste0(first_parent_prefix, "-")) || id == paste0(first_parent_prefix, "-content")
 
       shiny::div(
         class = paste0(tabsetid, "-content"),
-        style = if (i == 1) "display: block;" else "display: none;",
+        style = if (i == 1 || is_first_or_child) "display: block;" else "display: none;",
         id = id,
         dots[[i]]
       )
     })
   )
 }
+
 
 # this input binding actually doesnt interact with users
 # its just a stupid way to make sure input bindings are discovered
@@ -311,7 +342,10 @@ default_content_generator <- function(account) {
       class = "section account-details card",
       fill=T,
       card_header(
-        tags$h3("Account Details"),
+        tags$h3(
+          tags$i(class = "fas fa-chart-simple icon-header"),
+          "Account Details"
+          ),
         tags$hr(class = 'tags-hr'),
         class = "card-title"
       ),

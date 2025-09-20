@@ -12,33 +12,22 @@ library(colorspace)
 library(future)
 library(furrr)
 library(promises)
+library(finman)
 
 options(knitr.kable.NA = '')
 
 source("accountspagebuilder.R")
 source("shiny_helper.R")
-# source("testfiles.R")
-#
-# if (file.exists("main_account.RData")) {
-#   load("main_account.RData")
-# } else {
-#   main_account <- MainAccount$new("Main")
-# }
-
-
-#load("main_account.RData")
-
-Name<-"Festus Nzuma"
-myname<- "Festus"    #first name from log in info
 
 ui <- page_navbar(
-  #navbar_options(underline = F),
   id="appId",
   title = span(
+    class = "navbar-brand",
     tags$img(src = "Image 13.png",
              style = "width: 30px; height: 30px; margin-right: 8px;"),
-    span("Finman",class = "navbar-brand")
-  ),
+    "Finman"
+  )
+  ,
   theme = bs_theme(version = 5,bg="white",fg="black",preset = "bootstrap"),
   #padding="25px",
   tags$head(
@@ -65,7 +54,7 @@ ui <- page_navbar(
           #img(src = "https://avatar.iran.liara.run/public/5", alt = "User Avatar"),
           img(src = "IMG_20180523_160151.jpg", alt = "User Avatar"),
           div(
-            generate_greeting(myname),
+            uiOutput("greetings"),
             div("Plan Your Finances, Secure Your Future.", class = "tagline")
           )
         ),
@@ -229,7 +218,7 @@ ui <- page_navbar(
 
 
 
-## Accounts page=======================================================================
+## Accounts page =======================================================================
 
 nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"),
 
@@ -237,6 +226,7 @@ nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"),
             style = "background-color:#F6F6F6;",
             sidebar=sidebar(
               width = "310px",
+              class = "custom-sidebar",
               title = tags$div(
                 class = "custom-sidebar-title",
                 icon("briefcase"),
@@ -251,7 +241,7 @@ nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"),
             uiOutput("nav_content")
           )
 ),
-## Reports page=======================================================================
+## Reports page =======================================================================
 nav_panel(span(icon("chart-column"), "Reports",class = "custom-tab"),
           layout_sidebar(
             sidebar=sidebar(
@@ -352,5 +342,95 @@ nav_panel(span(icon("chart-column"), "Reports",class = "custom-tab"),
           )
 ),
 
+nav_panel(span(icon("user"), "Profile",class = "custom-tab"), h1("profile Content")),
+nav_panel(span(icon("users"), "About us",class = "custom-tab"), h1("about Content")),
+nav_spacer(),
+#nav_item(
+#  shinySearchbar::searchbar("buscador", contextId = "appId",cycler=F, width = "200px",counter = F,placeholder = "search")
+#),
+nav_item(
+  tags$div(
+    class = "notification-wrapper",
+    actionLink(
+      "notifications",
+      NULL,
+      icon("bell", class = "custom-bell"),
+      class = "notification-icon"
+    ),
+    uiOutput("notification_count_badge")
+  )
+),
+
+nav_menu(
+  # Avatar + user info block (header)
+  title = tags$div(
+    class = "nav-link-title",
+    tags$img(
+      src = "IMG_20180523_160151.jpg"),
+    tags$div(
+      tags$span(
+        textOutput("fullnames"),
+        class = "nav-menu-name"
+      ),
+      tags$span(
+        textOutput("user_email"),
+        class = "nav-menu-email"
+      )
+    )
+  ),
+  align = "right",
+
+  # Dashboard
+  nav_item(
+    tags$a(
+      icon("tachometer-alt"), "Dashboard",
+      href = "#",
+      class = "nav-link-item"
+    )
+  ),
+
+  # Profile
+  nav_item(
+    tags$a(
+      icon("user"), "Profile",
+      href = "#",
+      class = "nav-link-item"
+    )
+  ),
+
+  # Settings
+  nav_item(
+    tags$a(
+      icon("cog"), "Settings",
+      href = "#",
+      class = "nav-link-item"
+    )
+  ),
+
+  # Billing
+  nav_item(
+    tags$a(
+      icon("credit-card"), "Billing",
+      href = "#",
+      class = "nav-link-item"
+    )
+  ),
+
+  # Sign out
+  nav_item(
+    tags$a(
+      icon("sign-out-alt"), "Sign Out",
+      href = "#",
+      class = "nav-link-item"
+    )
+  ),
 )
+
+#,
+# nav_item(
+#   input_dark_mode(id="dark_mode",mode="light"),
+# )
+)
+
+
 

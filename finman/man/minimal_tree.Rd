@@ -4,7 +4,12 @@
 \alias{minimal_tree}
 \title{Get a Minimal Version of the Account Tree}
 \usage{
-minimal_tree(account, n = 30, daterange = c(Sys.Date() - 365000, Sys.Date()))
+minimal_tree(
+  account,
+  n = 30,
+  daterange = c(Sys.Date() - 365000, Sys.Date()),
+  ts_data = F
+)
 }
 \arguments{
 \item{account}{An R6 account object from the \code{finman} package.}
@@ -16,6 +21,12 @@ the amount due. Default is 30.}
 date range for statistics (spending, total due, etc.).
 Default is from 1,000 years ago to today
 (\code{c(Sys.Date() - 365000, Sys.Date())}).}
+
+\item{ts_data}{Logical. If \code{TRUE}, also compute a full
+time-series table of daily statistics (income, spending,
+allocations, debt) for the specified date range.
+Default is \code{FALSE}, which skips building the table
+for faster performance.}
 }
 \value{
 A list containing:
@@ -34,6 +45,9 @@ A list containing:
           \code{income_utilization}, \code{walking_amount_due},
           \code{walking_balance} – Computed statistics for the specified
           date range.
+    \item \code{time_series} – (Only present if \code{ts_data = TRUE})
+          A data frame with columns \code{Date}, \code{Income},
+          \code{Spending}, \code{Allocated}, and \code{Overall_Debt}.
     \item \code{parent_uuid}, \code{allocation}, \code{account_status},
           \code{priority} – Additional details for \code{ChildAccount} objects.
     \item \code{due_date}, \code{fixed_amount}, \code{account_type},
@@ -80,8 +94,8 @@ main_account$child_accounts$`Needs`$add_child_account(
 main_account$deposit(10000, "TXN001", "Mpesa")
 main_account$find_account("Rent")$withdraw(200, "TXN005", "Cash")
 
-# Get minimal account tree
-tree <- minimal_tree(main_account)
+# Get minimal account tree with time series data
+tree <- minimal_tree(main_account, ts_data = TRUE)
 }
 
 }

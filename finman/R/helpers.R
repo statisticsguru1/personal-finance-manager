@@ -1593,6 +1593,11 @@ safe_parse_date <- function(x, tz = "UTC") {
 #'   date range for statistics (spending, total due, etc.).
 #'   Default is from 1,000 years ago to today
 #'   (\code{c(Sys.Date() - 365000, Sys.Date())}).
+#' @param ts_data Logical. If \code{TRUE}, also compute a full
+#'   time-series table of daily statistics (income, spending,
+#'   allocations, debt) for the specified date range.
+#'   Default is \code{FALSE}, which skips building the table
+#'   for faster performance.
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -1610,6 +1615,9 @@ safe_parse_date <- function(x, tz = "UTC") {
 #'           \code{income_utilization}, \code{walking_amount_due},
 #'           \code{walking_balance} – Computed statistics for the specified
 #'           date range.
+#'     \item \code{time_series} – (Only present if \code{ts_data = TRUE})
+#'           A data frame with columns \code{Date}, \code{Income},
+#'           \code{Spending}, \code{Allocated}, and \code{Overall_Debt}.
 #'     \item \code{parent_uuid}, \code{allocation}, \code{account_status},
 #'           \code{priority} – Additional details for \code{ChildAccount} objects.
 #'     \item \code{due_date}, \code{fixed_amount}, \code{account_type},
@@ -1649,12 +1657,28 @@ safe_parse_date <- function(x, tz = "UTC") {
 #' main_account$deposit(10000, "TXN001", "Mpesa")
 #' main_account$find_account("Rent")$withdraw(200, "TXN005", "Cash")
 #'
-#' # Get minimal account tree
-#' tree <- minimal_tree(main_account)
+#' # Get minimal account tree with time series data
+#' tree <- minimal_tree(main_account, ts_data = TRUE)
 #' }
 #'
 #' @export
-minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date())){
+minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date()),ts_data=F){
+
+  if(ts_data){
+  date_seq <- seq(daterange[1], daterange[2], by = "day")
+  # Construct single time series table (iterating only once)
+  time_series_df <- do.call(rbind, lapply(date_seq, function(d) {
+    data.frame(
+      Date = d,
+      Income = account$total_income(c(d, d)),
+      Spending = account$spending(c(d, d)),
+      Allocated = account$allocated_amount(c(d, d)),
+      Overall_Debt = account$walking_amount(daterange = c(d, d)),
+      stringsAsFactors = FALSE
+    )
+  }))
+  }
+
   details<- list(
     name = account$name,
     account_uuid = account$uuid,
@@ -1732,6 +1756,7 @@ minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date(
     details$account_freq = account$get_account_freq()
     details$account_periods = account$get_account_periods()
   }
+
   if(length(account$child_accounts)==0 || is.null(account$child_accounts)){
     details$child_accounts<-list()
   } else{
@@ -1740,6 +1765,10 @@ minimal_tree<-function(account,n=30,daterange = c(Sys.Date() - 365000, Sys.Date(
       minimal_tree,
       simplify = F
     )
+  }
+
+  if(ts_data){
+    details$time_series<- time_series_df
   }
 
   return(invisible(details))
