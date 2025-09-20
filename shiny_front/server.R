@@ -7,11 +7,11 @@ server <- function(input, output,session) {
   #   }
   # })
 
-  #logging
-  track_usage(
-  # storage_mode = store_json(),
-  storage_mode = store_rds(".")
-  )
+  # #logging
+  # track_usage(
+  # # storage_mode = store_json(),
+  # storage_mode = store_rds(".")
+  # )
 
   user <- reactiveVal(
     list(
