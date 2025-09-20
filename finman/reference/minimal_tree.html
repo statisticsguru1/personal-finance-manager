@@ -58,7 +58,12 @@ batch requests.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">minimal_tree</span><span class="op">(</span><span class="va">account</span>, n <span class="op">=</span> <span class="fl">30</span>, daterange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">365000</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">minimal_tree</span><span class="op">(</span></span>
+<span>  <span class="va">account</span>,</span>
+<span>  n <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>  daterange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">365000</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  ts_data <span class="op">=</span> <span class="cn">F</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -80,6 +85,14 @@ date range for statistics (spending, total due, etc.).
 Default is from 1,000 years ago to today
 (<code>c(Sys.Date() - 365000, Sys.Date())</code>).</p></dd>
 
+
+<dt id="arg-ts-data">ts_data<a class="anchor" aria-label="anchor" href="#arg-ts-data"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, also compute a full
+time-series table of daily statistics (income, spending,
+allocations, debt) for the specified date range.
+Default is <code>FALSE</code>, which skips building the table
+for faster performance.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -97,6 +110,9 @@ Default is from 1,000 years ago to today
           <code>income_utilization</code>, <code>walking_amount_due</code>,
           <code>walking_balance</code> – Computed statistics for the specified
           date range.</p></li>
+<li><p><code>time_series</code> – (Only present if <code>ts_data = TRUE</code>)
+          A data frame with columns <code>Date</code>, <code>Income</code>,
+          <code>Spending</code>, <code>Allocated</code>, and <code>Overall_Debt</code>.</p></li>
 <li><p><code>parent_uuid</code>, <code>allocation</code>, <code>account_status</code>,
           <code>priority</code> – Additional details for <code>ChildAccount</code> objects.</p></li>
 <li><p><code>due_date</code>, <code>fixed_amount</code>, <code>account_type</code>,
@@ -137,8 +153,8 @@ Default is from 1,000 years ago to today
 <span class="r-in"><span><span class="va">main_account</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">10000</span>, <span class="st">"TXN001"</span>, <span class="st">"Mpesa"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">main_account</span><span class="op">$</span><span class="fu">find_account</span><span class="op">(</span><span class="st">"Rent"</span><span class="op">)</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">200</span>, <span class="st">"TXN005"</span>, <span class="st">"Cash"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Get minimal account tree</span></span></span>
-<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">minimal_tree</span><span class="op">(</span><span class="va">main_account</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Get minimal account tree with time series data</span></span></span>
+<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">minimal_tree</span><span class="op">(</span><span class="va">main_account</span>, ts_data <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
