@@ -45,61 +45,6 @@ nav_tab_nested <- function(..., ids = NULL, tabsetid = "tabSet1", is_parent = FA
   )
 }
 
-# Define the custom function for nested content
-# nav_content_nested <- function(..., ids = NULL, tabsetid = "tabSet1") {
-#   dots <- list(...)
-#
-#   if (is.null(ids)) ids <- paste0("bsTab-", seq_along(dots))
-#
-#   shiny::div(
-#     lapply(seq_along(dots), function(i) {
-#       id <- dots[[i]]$attribs$id
-#       if (is.null(id)) id <- ids[[i]]
-#
-#       idc <- strsplit(id, "-")[[1]]
-#       if (idc[length(idc)] != "content") id <- paste0(id, "-content")
-#
-#       shiny::div(
-#         class = paste0(tabsetid, "-content"),
-#         style = if (i == 1) "display: block;" else "display: none;",
-#         id = id,
-#         dots[[i]]
-#       )
-#     })
-#   )
-# }
-
-
-
-nav_content_nested <- function(..., ids = NULL, tabsetid = "tabSet1") {
-  dots <- list(...)
-  if (is.null(ids)) ids <- paste0("bsTab-", seq_along(dots))
-
-  # Find which IDs are children of the first item (based on naming)
-  first_id <- dots[[1]]$attribs$id %||% ids[[1]]
-  first_parent_prefix <- sub("-content$", "", first_id)
-
-  shiny::div(
-    lapply(seq_along(dots), function(i) {
-      id <- dots[[i]]$attribs$id %||% ids[[i]]
-      if (!grepl("-content$", id)) id <- paste0(id, "-content")
-
-      # Check if this is the first parent or its direct children
-      is_first_or_child <- startsWith(
-        id,
-        paste0(first_parent_prefix, "-")) || id == paste0(first_parent_prefix, "-content")
-
-      shiny::div(
-        class = paste0(tabsetid, "-content"),
-        style = if (i == 1 || is_first_or_child) "display: block;" else "display: none;",
-        id = id,
-        dots[[i]]
-      )
-    })
-  )
-}
-
-
 # this input binding actually doesnt interact with users
 # its just a stupid way to make sure input bindings are discovered
 # on server side
@@ -144,23 +89,14 @@ build_sidebar <- function(account) {
   return(sidebar_item)
 }
 
-# Function to dynamically construct content pages for all accounts
-generate_nav_content <- function(main_account, content_generator) {
 
-  all_accounts <- get_all_accounts(main_account)
-
-  # Generate content divs for each account
-  content_divs <- lapply(all_accounts, function(account) {
-    account_data <- get_account_by_uuid(main_account,account$account_uuid)
-    div(
-      id = paste0(account_data$account_uuid, "-content"), # Dynamic ID
-      content_generator(account_data)            # Dynamically generated content
-    )
-  })
-
-
-  do.call(nav_content_nested, content_divs)
+generate_nav_content <- function(content_generator, ...) {
+  div(
+    id = "account_content",
+    content_generator(...)  # whatever generator you pass in
+  )
 }
+
 
 generate_child_accounts_section <- function(account,currency="$") {
   # Ensure account$child_accounts is not NULL or empty
@@ -334,8 +270,7 @@ generate_child_accounts_section <- function(account,currency="$") {
 }
 
 
-
-default_content_generator <- function(account) {
+default_content_generator <- function() {
   tagList(
     # Account Details Section
     card(
@@ -349,19 +284,22 @@ default_content_generator <- function(account) {
         tags$hr(class = 'tags-hr'),
         class = "card-title"
       ),
-      uiOutput(paste0("account_summary_section",account$account_uuid))
+      uiOutput("account_summary_section")
     ),
 
     # Actions Section
     card(
-      class = "section actions",
+      class = "section action-details card",
       fill=T,
       card_header(
-        tags$h3("Actions"),
+        tags$h3(
+          tags$i(class = "fas fa-list icon-header1"),
+          "Actions"
+        ),
         tags$hr(class = 'tags-hr'),
         class = "card-title"
       ),
-      uiOutput(paste0("actions_section",account$account_uuid))
+      uiOutput("actions_section")
     ),
 
     # Transactions Section
@@ -377,13 +315,13 @@ default_content_generator <- function(account) {
         layout_column_wrap(
           fill = TRUE,
           heights_equal = "row",
-          DT::dataTableOutput(paste0("transaction_table_", account$account_uuid))
+          DT::dataTableOutput("transaction_table_")
         )
       )
     ),
 
     # Child Accounts Section
-    uiOutput(paste0("children_section_",account$account_uuid)),
+    uiOutput("children_section_"),
 
     # Visualizations Section
     card(
@@ -396,8 +334,8 @@ default_content_generator <- function(account) {
       layout_column_wrap(
         fill = T,
         width = 1/2,
-        highchartOutput(paste0("balance_to_debt_", account$account_uuid)),
-        highchartOutput(paste0("transaction_trend_chart_",account$account_uuid))
+        highchartOutput("balance_to_debt_"),
+        highchartOutput("transaction_trend_chart_")
       )
     )
   )

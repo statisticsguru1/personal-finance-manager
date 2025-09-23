@@ -32,6 +32,10 @@ ui <- page_navbar(
   #padding="25px",
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
+    tags$link(
+      rel = "stylesheet",
+      href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    ),
     tags$script(src = 'jsfuns.js')
   ),
   gap="4px",

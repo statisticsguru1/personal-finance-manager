@@ -213,55 +213,7 @@ a:has(.custom-tab):hover {
 }
 
 
-/* =====================================================
-   customizing cards
-   ===================================================== */
 
-/*recent transactions card heading*/
-.custom-card-header112 {
-  color: black;
-  font-size:16px;
-  font-weight: bold;
-}
-
-
-/*actions card*/
-.action-card {
-  background-color: #F9FAFB !important;
-  padding: 15px;
-  border-radius: 10px;
-  border-color:#F3F4F6 !important;
-  box-shadow: none !important;
-
-}
-.action-title {
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background-color: #F9FAFB;
-  border-bottom-color: #F9FAFB;
-}
-.action-icon-container {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px; /* Adjust size */
-  height: 36px;
-  border-radius: 50%; /* Circular shape */
-
-}
-.action-icon {
-  font-size: 18px;
-}
-
-.more-actions-card {
-  padding: 20px;
-  border-radius: 10px;
-  background-color:  #F9FAFB !important;
-  border-color:#F3F4F6 !important;
-  box-shadow: none !important;
-}
 
 
 .page-content {
@@ -277,6 +229,17 @@ a:has(.custom-tab):hover {
     color: black !important;  /* Ensures the wallet icon is black */
 }
 
+.nav-pills > li.active > a,
+.nav-pills > li.active > a:focus,
+.nav-pills > li.active > a:hover {
+  background-color: #87CEEB !important;
+  color: white !important;   /* optional for better contrast */
+}
+
+/* Optional: inactive pills hover */
+.nav-pills > li > a:hover {
+  background-color: #d0f0ff !important;
+}
 
 /* Sidebar Styling */
 .custom-sidebar {
@@ -299,7 +262,7 @@ a:has(.custom-tab):hover {
 
 /* Icon Styling (if needed) */
 .custom-sidebar-title .fa-briefcase {
-  color: #278ECF;
+  color: #87CEEB;
   font-size: 22px;
 }
 
@@ -310,6 +273,11 @@ a:has(.custom-tab):hover {
 .icon-header{
   font-size: 2vw;
   color: #99FF99;
+}
+
+.icon-header1{
+  font-size: 2vw;
+  color: #278ECF;
 }
 /* General styling for account details card */
 .account-details {
@@ -335,8 +303,6 @@ a:has(.custom-tab):hover {
   align-items: center;
   gap: 8px;
 }
-
-
 
 .details-grid {
   display: grid;
@@ -424,6 +390,161 @@ a:has(.custom-tab):hover {
   text-decoration: underline;
 }
 
+
+/* =====================================================
+   accounts page sections
+   ===================================================== */
+
+   /* =====================================================
+   customizing cards
+   ===================================================== */
+
+/*recent transactions card heading*/
+.custom-card-header112 {
+  color: black;
+  font-size:16px;
+  font-weight: bold;
+}
+
+
+.action-details {
+  background-color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.action-details:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.action-details h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+/*actions card*/
+.action-card {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 1rem;
+}
+
+.action-title {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #F9FAFB;
+  border-bottom-color: #F9FAFB;
+}
+
+
+.btn-danger {
+  background-color: red;
+  color: white;
+}
+
+.btn-normal {
+  background-color: #87CEEB;
+  color: white;
+}
+
+.btn-green {
+  background-color: #99FF99;
+  color: white;
+}
+
+.btn-black{
+  background-color: black;
+  color: white;
+}
+.action-icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; /* Adjust size */
+  height: 36px;
+  border-radius: 50%; /* Circular shape */
+
+}
+.action-icon {
+  font-size: 18px;
+}
+
+.more-actions-title{
+  background-color: white;
+  font-size:16px;
+  border-bottom: none;
+}
+
+
+.more-actions-card {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  margin-top: 1.5rem;
+  background: white;
+}
+.more-actions-btn {
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  background-color: white;
+}
+
+.more-actions-delete {
+  color: red;
+}
+
+.section {
+  background-color: white;
+}
+
+.section h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+
+
+
+
+
+
+
+
+.child-account-card {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+
+
+.flex-card{
+  display: flex;
+  justify-content: space-between;
+}
+
+.hidden-cards{
+  border: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
 
 
 
@@ -799,48 +920,6 @@ table.dataTable tr:nth-child(even) {
   }
 }
 
-/*accounts page */
-.section {
-  background-color: white;
-}
-
-.section h3 {
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.child-account-card {
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-.btn-danger {
-  background-color: red;
-  color: white;
-}
-
-.btn-normal {
-  background-color: #87CEEB;
-  color: white;
-}
-
-.flex-card{
-  display: flex;
-  justify-content: space-between;
-}
-
-.hidden-cards{
-  border: none !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
 
 
 //*hero section

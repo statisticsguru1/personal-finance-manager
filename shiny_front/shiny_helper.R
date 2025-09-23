@@ -113,3 +113,48 @@ is_duplicate_tran<-function(node,uuid,transaction_number) {
   }
   transaction_number %in% get_account_by_uuid(node,uuid)$transactions$TransactionID
 }
+
+# deposit modal  dialog
+data_deposit <- function(failed = FALSE,selected_uuid, main_account,user_input = list()) {
+
+  account_details<-get_account_by_uuid(main_account,selected_uuid)
+    modalDialog(
+      title = div(
+        sprintf("💰 Deposit Funds to %s account", account_details$name),
+        style="font-weight:bold; font-size:1.3rem;"
+        ),
+      easyClose = TRUE,
+      size = "l",
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton("submit_deposit", "Submit Deposit", class = "btn btn-primary")
+      ),
+      div(class = "modal-body",
+          helpText("Enter the details for your deposit. Mandatory fields are marked with an asterisk (*)."),
+          helpText(sprintf("the account is now %s",account_details$name)),
+          helpText(sprintf("the account iid now %s",account_details$account_uuid)),
+          helpText(sprintf("recorded account %s",selected_uuid)),
+          numericInput("dep_amount", "Amount *", value = NULL),
+          if (failed & is.null(user_input$amount)) div(
+            style = "color: red; margin-top:-0.5rem; font-size:0.9rem;",
+            "Deposit amount is required."
+          ),
+          textInput("dep_txn", "Transaction Number", placeholder="e.g TAP8I3JK2G"),
+          textInput("dep_channel", "Transaction Channel *", placeholder="e.g ABC BANK"),
+          if (failed & is.null(user_input$channel)) div(
+            style = "color: red; margin-top:-0.5rem; font-size:0.9rem;",
+            "Transaction channel is required."
+          ),
+          dateInput("dep_date", "Date", value = Sys.Date()),
+          if (failed && !is.null(user_input$transaction_date) &&
+              user_input$transaction_date > Sys.Date()) div(
+            style = "color: red; margin-top:-0.5rem; font-size:0.9rem;",
+            "Transaction date cannot be in the future."
+          ),
+          hr(),
+          tags$p("⚠️ Ensure transaction details are correct before submitting. Incorrect entries may delay processing.",
+                 style = "color:#f87171; font-size:0.9rem;")
+      )
+    )
+}
+

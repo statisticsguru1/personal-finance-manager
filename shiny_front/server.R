@@ -718,22 +718,20 @@ server <- function(input, output,session) {
     selectedaccountInput("selected_tab",value=main_account()$account_uuid)
   })
 
-  output$nav_content<-renderUI({
-    req(main_account())
-    generate_nav_content(main_account(), default_content_generator)
+  output$nav_content <- renderUI({
+    req(main_account(), input$selected_tab)
+    account_data <- get_account_by_uuid(main_account(), input$selected_tab)
+    generate_nav_content(default_content_generator)
   })
-
 
 
   observeEvent(input$selected_tab, {
     req(input$selected_tab)
 
     # details section
-    output[[paste0("account_summary_section", input$selected_tab)]] <- renderUI({
+    output$account_summary_section<- renderUI({
       currency_symbol <- currency()  # Get dynamic currency symbol
-
       account <- get_account_by_uuid(main_account(),input$selected_tab)
-
       tags$div(
         class = "details-grid",
         tags$div(
@@ -816,7 +814,7 @@ server <- function(input, output,session) {
 
 
     # actions section
-    output[[paste0("actions_section",input$selected_tab)]]<-renderUI({
+    output$actions_section<-renderUI({
       req(main_account())
       account <- get_account_by_uuid(main_account(),input$selected_tab)
       tagList(
@@ -828,124 +826,48 @@ server <- function(input, output,session) {
           card(
             class = "action-card",
             bg=NULL,
-            card_header(
-              span(
-                span(
-                  icon("arrow-circle-down", class = "action-icon"),
-                  class = "action-icon-container",
-                  style = "background-color: #F1FFF1; color: #99FF9;" # Green example
-                ),
-                "Deposit"
+            h5("Deposit"),
+            tags$i(
+              class = "bi bi-arrow-down-circle-fill",
+                   style="font-size:2rem;color:#87CEEB;"
               ),
-              class = "action-title"
-            ),
-            card_body(
-              layout_column_wrap(
-                width=1,
-                fill=T,
-                heights_equal = "row",
-                gap="10px",
-                numericInput(
-                  paste0("deposit_amount_", account$account_uuid),
-                  "Deposit Amount:",
-                  value = NA,
-                  min = 0
-                ),
-                textInput(
-                  paste0("deposit_transaction_",account$account_uuid),
-                  "Transaction number",
-                  value="",
-                  placeholder="e.g TAP8I3JK2G"
-                ),
-                textInput(
-                  paste0("deposit_transaction_channel_",account$account_uuid),
-                  "Transaction Channel",
-                  value="",
-                  placeholder="e.g ABC BANK"
-                ),
-                actionButton(
-                  paste0("deposit_btn_",account$account_uuid),
-                  "Deposit",
-                  class = "btn-normal"
-                )
+
+            actionButton(
+              "deposit_launcher_",
+              "Deposit",
+              class = "btn-normal"
               )
-            )
+
           ),
           card(
             class = "action-card",
-            card_header(
-              span(
-                span(
-                  icon("arrow-circle-up", class = "action-icon"),
-                  class = "action-icon-container",
-                  style = "background-color:#FFFCF3; color: #ffeaa7;"
-                ),
-                "Withdrawal"
-              ),
-              class = "action-title"
+            bg=NULL,
+            h5("Withdraw"),
+            tags$i(
+              class ="bi bi-arrow-up-circle-fill",
+              style="font-size:2rem;color:#99FF99;"
             ),
-            card_body(
-              layout_column_wrap(
-                width=1,
-                fill=T,
-                heights_equal = "row",
-                gap="1px",
-                numericInput(
-                  paste0("withdraw_amount_", account$account_uuid),
-                  sprintf(
-                    "Withdraw Amount/Pay %s",
-                    ifelse(
-                      grepl("main",account$name, ignore.case = TRUE),
-                      "dues",
-                      account$name
-                    )
-                  ), value = NA, min = 0),
-                actionButton(
-                  paste0("withdraw_btn_", account$account_uuid),
-                  "Withdraw",
-                  class = "btn-normal"
-                )
-              )
+
+            actionButton(
+              "withdrawal_launcher_",
+              "Withdraw",
+              class = "btn-green"
             )
+
           ),
           card(
             class = "action-card",
-            card_header(
-              span(
-                span(
-                  icon("paper-plane", class = "action-icon"),
-                  class = "action-icon-container",
-                  style = "background-color:#EEF8FC; color: #87CEEB;"
-                ),
-                "Transfer"
-              ),
-              class = "action-title"
+            bg=NULL,
+            h5("Transfer"),
+            tags$i(
+              class ="bi bi-arrow-left-right",
+              style="font-size:2rem;color:black;"
             ),
-            card_body(
-              layout_column_wrap(
-                width=1,
-                fill=T,
-                gap="3px",
-                heights_equal = "row",
-                numericInput(
-                  paste0("transfer_amount_", account$account_uuid),
-                  "Transfer Amount:", value = 0,
-                  min = 0
-                ),
-                selectInput(
-                  paste0("transfer_target_", account$account_uuid),
-                  "Transfer To:",
-                  choices = sapply(
-                    get_all_accounts(main_account()),
-                    function(x){setNames(x$account_uuid,x$name)}
-                    )
-                ),
-                actionButton(
-                  paste0("transfer_btn_", account$account_uuid),
-                  "Transfer",
-                  class = "btn-normal"
-                )
-              )
+
+            actionButton(
+             "transfer_launcher_",
+              "Transfer",
+              class = "btn-black"
             )
           )
         ),
@@ -953,236 +875,55 @@ server <- function(input, output,session) {
         card(
           fill=T,
           class = "more-actions-card",
+
+
           card_header(
-            span(
-              span(
-                icon("bars", class = "action-icon"),
-                class = "action-icon-container",
-                style = "background-color: rgba(108, 117, 255, 0.15); color: #6c75ff;" # Blue (Transfer)
-              ),
-              tags$strong("More Actions")
-            ),
-            class = "action-title"
+            span(tags$i(class="fa fa-tasks"),"More Actions"),
+            class = "more-actions-title"
           ),
-          selectInput(
-            paste0("more_actions_", account$account_uuid),
-            "more actions",
-            choices=c("Add account","Edit account","Close Account")
-          ),
-          conditionalPanel(
-            condition = sprintf("input['%s'] =='Add account'",paste0("more_actions_",account$account_uuid)),
-            layout_column_wrap(
-              width=1/3,
-              gap="25px",
-              textInput(
-                paste0("account_name_add",account$account_uuid),
-                "Account name",
-                value=""
-              ),
-              numericInput(
-                paste0("allocation_add",account$account_uuid),
-                tagList("Allocation",
-                        tooltip(
-                          bs_icon("info-circle"),
-                          paste(
-                            "what percentage of",
-                            account$name,
-                            "do you wish to allocate this account,
-                             this should be a value between 0-1.note total allocations for",
-                            account$name,"should not exceed 1 "
-                          ),
-                          placement = "right"
-                        )
-                ),
-                value = round((1-account$total_allocation),2)),
-              numericInput(
-                paste0("priority_add",account$account_uuid),
-                tagList(
-                  "Priority",
-                  tooltip(
-                    bs_icon("info-circle"),
-                    paste(
-                      "A numeric value representing priority,
-                     high values gives this account high priority over
-                    other accounts from the same parent"
-                    ),
-                    placement = "right"
-                  )
-                ),value=0
-              ),
-            )
-          ),
-          conditionalPanel(
-            condition = sprintf("input['%s'] =='Edit account'",paste0("more_actions_",account$account_uuid)),
-
-            if(account$account_class== "MainAccount"){
-
-            }
-            else if(account$account_class== "ChildAccount"){
-              layout_column_wrap(
-                width=1/4,
-                gap="25px",
-                textInput(
-                  paste0("account_name_edit_child",account$account_uuid),
-                  "Account name",
-                  value=account$name
-                ),
-                numericInput(
-                  paste0("allocation_edit_child",account$account_uuid),
-                  tagList(
-                    "Allocation",
-                    tooltip(
-                      bs_icon("info-circle"),
-                      paste(
-                        "what percentage of",
-                        account$parent_name,
-                        "do you wish to allocate",account$name,",
-                                   this should be a value between 0-1.note
-                                   total allocations for",
-                        account$parent_name,"should not exceed 1 "
-                      ),
-                      placement = "right")
-                  ),
-                  value =account$allocation
-                ),
-                textInput(
-                  paste0("account_status_edit_child",account$account_uuid),
-                  "Status",
-                  value=account$account_status
-                ),
-                numericInput(
-                  paste0("priority_edit_child",account$account_uuid),
-                  tagList(
-                    "Priority",
-                    tooltip(
-                      bs_icon("info-circle"),
-                      paste(
-                        "A numeric value representing priority, high values
-                      gives this account high priority over other accounts
-                      from the same parent"
-                      ),
-                      placement = "right"
-                    )
-                  ),
-                  value=account$priority
-                )
-              )
-
-            }
-            else if(account$account_class== "GrandchildAccount"){
-              layout_column_wrap(
-                width=1/4,
-                gap="25px",
-                textInput(
-                  paste0("account_name_edit_grandchild",account$account_uuid),
-                  "Account name",
-                  value=account$name
-                ),
-                numericInput(
-                  paste0("allocation_edit_grandchild",account$account_uuid),
-                  tagList(
-                    "Allocation",
-                    tooltip(
-                      bs_icon("info-circle"),
-                      paste(
-                        "what percentage of",
-                        account$parent_name,
-                        "do you wish to allocate",account$name,",
-                                   this should be a value between 0-1.note
-                                   total allocations for",
-                        account$parent_name,"should not exceed 1 "
-                      ),
-                      placement = "right"
-                    )
-                  ),
-                  value =account$allocation
-                ),
-                textInput(
-                  paste0("account_status_edit_grandchild",account$account_uuid),
-                  "Status",
-                  value=account$account_status
-                ),
-                numericInput(
-                  paste0("priority_edit_grandchild",account$account_uuid),
-                  tagList(
-                    "Priority",
-                    tooltip(
-                      bs_icon("info-circle"),
-                      paste(
-                        "A numeric value representing priority, high values gives
-                        this account high priority over other accounts from the
-                        same parent"
-                      ),
-                      placement = "right"
-                    )
-                  ),
-                  value=account$priority
-                ),
-                dateInput(
-                  paste0("due_date_edit_grandchild",account$account_uuid),
-                  "Due date",
-                  value = safe_parse_date(account$due_date),
-                  min = safe_parse_date(account$due_date)-lubridate::years(100),
-                  max = safe_parse_date(account$due_date)+lubridate::years(1000)
-                ),
-                numericInput(
-                  paste0("fixed_amount_edit_grandchild",account$account_uuid),
-                  tagList(
-                    "Fixed amount",
-                    tooltip(
-                      bs_icon("info-circle"),
-                      paste("The fixed amount for the account eg monthly bills have a monthly payment amount"),
-                      placement = "right"
-                    )
-                  ),
-                  value=account$fixed_amount),
-                selectInput(
-                  paste0("account_type_edit_grandchild",account$account_uuid),
-                  "Account type",
-                  choice=c("Bill", "Debt", "Expense", "FixedSaving", "NonFixedSaving"),
-                  selected=account$account_type
-                ),
-                numericInput(
-                  paste0("period_edit_grandchild",account$account_uuid),
-                  tagList(
-                    "Period",
-                    tooltip(
-                      bs_icon("info-circle"),
-                      paste(
-                        "how frequent do you pay this account monthly(30),
-                      Quarterly(90) etc,this only applies for fixed
-                      payments like bills,loans and fixed savings"
-                      ),
-                      placement = "right"
-                    )
-                  ),
-                  value=account$account_periods
-                )
-              )
-            }
-            else {
-
-            },
-          ),
-          conditionalPanel(
-            condition = sprintf(
-              "input['%s'] =='Close Account'",
-              paste0("more_actions_",account$account_uuid)
-            ),
-            # some modals if the account has money you need to move it.
-          ),
-          br(),
+          card_body(
+          layout_column_wrap(
+          width = 1/3,
+          heights_equal = "row",
           actionButton(
-            paste0("save", account$account_uuid),
-            "Save",
-            class = "btn-danger",width="100px"
+            paste0("edit_launcher_",account$account_uuid),
+            span(tags$i(class="bi bi-pencil"), " Edit Account"),
+            class = "more-actions-btn"
+          ),
+          actionButton(
+            paste0("addaccount_launcher_",account$account_uuid),
+            span(tags$i(class="bi bi-plus"), " Add Account"),
+            class = "more-actions-btn"
+          ),
+          actionButton(
+            paste0("closeaccount_launcher_",account$account_uuid),
+            span(tags$i(class="bi bi-trash more-actions-delete"), " Close Account"),
+            class = "more-actions-btn"
           )
+          )
+        )
         )
       )
     })
 
+    observeEvent(input$selected_tab, {
+      req(main_account())
+      btn_id <- paste0("deposit_launcher_", input$selected_tab)
+
+      observeEvent(input[[btn_id]], {
+
+        print(btn_id)
+        showModal(
+          data_deposit(
+            selected_uuid = input$selected_tab,
+            main_account  = main_account()
+          )
+        )
+      }, ignoreInit = TRUE)
+    })
+
     # transaction table
-    output[[paste0("transaction_table_", input$selected_tab)]] <- DT::renderDataTable({
+    output$transaction_table_ <- DT::renderDataTable({
       req(main_account())
 
       trans<-get_account_by_uuid(main_account(), input$selected_tab)$transactions
@@ -1219,7 +960,7 @@ server <- function(input, output,session) {
 
 
     # children
-    output[[paste0("children_section_",input$selected_tab)]]<-renderUI({
+    output$children_section_ <-renderUI({
       req(main_account())
       # Child Accounts Section
       account<-get_account_by_uuid(main_account(), input$selected_tab)
@@ -1227,7 +968,7 @@ server <- function(input, output,session) {
     })
 
     # Pie chart for Balance vs Amount Due
-    output[[paste0("balance_to_debt_", input$selected_tab)]] <- renderHighchart({
+    output$balance_to_debt_ <- renderHighchart({
       req(main_account())
       currency_symbol <- currency()  # Get dynamic currency symbol
       account<-get_account_by_uuid(main_account(), input$selected_tab)
@@ -1264,7 +1005,7 @@ server <- function(input, output,session) {
     })
 
 
-    output[[paste0("transaction_trend_chart_", input$selected_tab)]] <- renderHighchart({
+    output$transaction_trend_chart_ <- renderHighchart({
       req(main_account())
       currency_symbol <- currency()  # Get dynamic currency symbol
 
