@@ -32,6 +32,27 @@ function opentab(tabsetid, tabid) {
 
 }
 
+
+$(document).on('shown.bs.modal', '#shiny-modal', function () {
+  const body = $(this).find('.processing-modal');
+  if (body.length) {
+    const ctx = body.data('context') || null;
+    Shiny.setInputValue('processing_modal_ready', {
+      timestamp: Date.now(),
+      context: ctx
+    }, {priority: 'event'});
+  }
+});
+
+
+Shiny.addCustomMessageHandler('toggleLoader', function(msg) {
+  var overlay = document.getElementById('loading-overlay');
+  if (!overlay) return;
+  overlay.style.display = msg.show ? 'flex' : 'none';
+});
+
+
+
 //*register this input
 var selectedaccountInput = new Shiny.InputBinding();
 
@@ -82,4 +103,6 @@ function notifyServerselected_tab(tabid) {
 Shiny.addCustomMessageHandler('reload', function(message) {
     location.reload();
   });
+
+
 

@@ -1,59 +1,40 @@
+server <- function(input, output, session) {
 
-server <- function(input, output,session) {
-
-  # observeEvent(input$dark_mode,{
-  #   if(input$dark_mode=="dark"){
-  #     showNotification("Welcome to dark mode!!!")
-  #   }
-  # })
-
-  # #logging
-  # track_usage(
-  # # storage_mode = store_json(),
-  # storage_mode = store_rds(".")
-  # )
-
+  # --- USER STATE -------------------------------------------------------------
   user <- reactiveVal(
     list(
-      user_id = "ceecfcc5-d4f5-4889-a4a8-fdc2776129e0",
+      #user_id = "ceecfcc5-d4f5-4889-a4a8-fdc2776129e0", # test user with no transactions
+      user_id = "68c7f559-013e-4c95-84fe-22ff8b5050e2",  # test user with transactions
       currency = "$",
       role = "user",
       First_name = "Festus",
-      Middle_name ="Mutinda",
+      Middle_name = "Mutinda",
       Last_name = "Nzuma",
       user_email = "mutindafestus27@gmail.com",
       token = NULL
     )
   )
 
- output$greetings<-renderUI({
-   req(user())
-   generate_greeting(user()$First_name)
- }
- )
+  main_account <- reactiveVal(NULL)
+  loading <- reactiveVal(FALSE)
 
+  # --- LOADING OVERLAY HANDLER ------------------------------------------------
+  loading <- reactiveVal(FALSE)
 
- output$user_email<-renderText({
-   req(user())
-   paste(user()$user_email)
- }
- )
-
- output$fullnames<-renderText({
-   req(user())
-   paste(user()$First_name,user()$Last_name)
- }
- )
-
-
-
-
- host_url<-Sys.getenv("HOST_URL")
   observe({
-    # Run only once on session start
+    session$sendCustomMessage("toggleLoader", list(show = isTRUE(loading())))
+  })
+
+
+
+  # --- TOKEN REQUEST ----------------------------------------------------------
+  host_url <- Sys.getenv("HOST_URL")
+  observe({
     isolate({
-      res <- tryCatch({
-        call_api(
+      loading(TRUE)  # show overlay immediately
+      session$sendCustomMessage("toggleLoader", list(show = TRUE))
+      tryCatch({
+        res <- call_api(
           "/generate_access_token",
           method = "POST",
           body = list(
@@ -63,64 +44,75 @@ server <- function(input, output,session) {
             session_id = Sys.getpid()
           )
         )
+
+        if (is.null(res) || httr::status_code(res) != 200) {
+          stop("Token request failed")
+        }
+
+        parsed <- jsonlite::fromJSON(rawToChar(res$content))
+        if (is.null(parsed$token)) {
+          stop("Token missing in response")
+        }
+
+        user(modifyList(user(), list(token = parsed$token)))
+
       }, error = function(e) {
         showNotification(paste("Failed to call API:", e$message), type = "error")
-        return(NULL)
+      }, finally = {
+        # ✅ hide overlay regardless of success or failure
+        session$sendCustomMessage("toggleLoader", list(show = F))
+        loading(FALSE)
+
       })
-
-      if (is.null(res)) return()
-
-      if (httr::status_code(res) != 200) {
-        showNotification("Token request failed", type = "error")
-        return()
-      }
-
-      parsed <- tryCatch(
-        jsonlite::fromJSON(rawToChar(res$content)),
-        error = function(e) {
-          showNotification("Failed to parse token response", type = "error")
-          return(NULL)
-        }
-      )
-
-      if (!is.null(parsed$token)) {
-        user(modifyList(user(), list(token = parsed$token)))
-      }
     })
   })
 
+  # --- GREETING OUTPUTS -------------------------------------------------------
+  output$greetings <- renderUI({
+    req(user())
+    generate_greeting(user()$First_name)
+  })
 
+  output$user_email <- renderText({
+    req(user())
+    paste(user()$user_email)
+  })
 
-  # keep whole account tree in memory
-  main_account <- reactiveVal(NULL)
+  output$fullnames <- renderText({
+    req(user())
+    paste(user()$First_name, user()$Last_name)
+  })
 
-  # First immediate fetch
+  # --- MINIMAL TREE FETCH -----------------------------------------------------
   observe({
-    req(user()$token)  # wait until token is ready
+    req(user()$token)
 
-    res <- tryCatch({
-      call_api("/get_minimal_tree", token = user()$token)
+    loading(TRUE)  # show overlay while fetching tree
+    session$sendCustomMessage("toggleLoader", list(show = TRUE))
+    tryCatch({
+      res <- call_api("/get_minimal_tree", token = user()$token)
+
+      if (is.null(res) || httr::status_code(res) != 200) {
+        stop("Minimal tree request failed")
+      }
+
+      parsed <- jsonlite::fromJSON(rawToChar(res$content))
+      if (is.null(parsed$minimal_tree)) {
+        stop("Minimal tree missing in response")
+      }
+
+      main_account(parsed$minimal_tree)
+
     }, error = function(e) {
       showNotification(paste("Failed to fetch account tree:", e$message), type = "error")
-      return(NULL)
+    }, finally = {
+      # ✅ always hide overlay, even if fetch failed
+      session$sendCustomMessage("toggleLoader", list(show = F))
+      loading(FALSE)
     })
-
-    if (is.null(res) || httr::status_code(res) != 200) return()
-
-    parsed <- tryCatch(
-      jsonlite::fromJSON(rawToChar(res$content)),
-      error = function(e) {
-        showNotification("Failed to parse account tree response", type = "error")
-        return(NULL)
-      }
-    )
-
-    if (!is.null(parsed$minimal_tree)) {
-      main_account(parsed$minimal_tree)
-    }
   })
 
-  # Background refresher
+  # --- Background refresher ----------------------------------------------------
   observe({
     invalidateLater(4*60*1000, session)
     req(user()$token)
@@ -724,430 +716,733 @@ server <- function(input, output,session) {
     generate_nav_content(default_content_generator)
   })
 
-
-  observeEvent(input$selected_tab, {
-    req(input$selected_tab)
-
-    # details section
-    output$account_summary_section<- renderUI({
-      currency_symbol <- currency()  # Get dynamic currency symbol
-      account <- get_account_by_uuid(main_account(),input$selected_tab)
+  # details section
+  output$account_summary_section<- renderUI({
+    req(currency(),main_account(),input$selected_tab)
+    currency_symbol <- currency()  # Get dynamic currency symbol
+    account <- get_account_by_uuid(main_account(),input$selected_tab)
+    tags$div(
+      class = "details-grid",
       tags$div(
-        class = "details-grid",
-        tags$div(
-          class = "detail-item",
-          tags$i(class = "fas fa-id-badge"),
-          tags$strong("Account ID:"),
-          tags$span(account$account_uuid)
-        ),
-        tags$div(
-          class = "detail-item",
-          tags$i(class = "fas fa-signature"),
-          tags$strong("Name:"),
-          tags$span(account$name)
-        ),
-        if (!is.null(account$account_type)) {
+        class = "detail-item",
+        tags$i(class = "fas fa-id-badge"),
+        tags$strong("Account ID:"),
+        tags$span(account$account_uuid)
+      ),
+      tags$div(
+        class = "detail-item",
+        tags$i(class = "fas fa-signature"),
+        tags$strong("Name:"),
+        tags$span(account$name)
+      ),
+      if (!is.null(account$account_type)) {
         tags$div(
           class = "detail-item",
           tags$i(class = "fas fa-layer-group"),
           tags$strong("Type:"),
           tags$span(account$account_type)
         )
-          },
+      },
+      tags$div(
+        class = "detail-item",
+        tags$i(class = "fas fa-wallet"),
+        tags$strong("Balance:"),
+        tags$span(
+          class = "balance",
+          paste0(currency_symbol, format(round(account$balance, 2), big.mark = ","))
+        )
+      ),
+      tags$div(
+        class = "detail-item",
+        tags$i(class = "fas fa-piggy-bank"),
+        tags$strong("Balance in Children:"),
+        tags$span(
+          paste0(
+            currency_symbol,
+            format(round(account$total_balance, 2), big.mark = ",")
+          )
+        )
+      ),
+      if (!is.null(account$account_status)) {
         tags$div(
           class = "detail-item",
-          tags$i(class = "fas fa-wallet"),
-          tags$strong("Balance:"),
+          tags$i(
+            class = if (
+              tolower(account$account_status) == "active"
+            ) "fas fa-circle-check" else "fas fa-circle-xmark"
+          ),
+          tags$strong("Status:"),
           tags$span(
-            class = "balance",
-            paste0(currency_symbol, format(round(account$balance, 2), big.mark = ","))
+            class = if (tolower(account$account_status) == "active") "badge-success" else "badge-danger",
+            account$account_status
           )
-        ),
+        )
+      },
+      if (!is.null(account$allocation)) {
         tags$div(
           class = "detail-item",
-          tags$i(class = "fas fa-piggy-bank"),
-          tags$strong("Balance in Children:"),
-          tags$span(
-            paste0(
-              currency_symbol,
-              format(round(account$total_balance, 2), big.mark = ",")
-            )
+          tags$i(class = "fas fa-chart-pie"),
+          tags$strong("Allocation:"),
+          tags$span(paste(scales::percent(account$allocation, accuracy = 0.01)))
+        )
+      },
+      if (!is.null(account$parent_name)) {
+        tags$div(
+          class = "detail-item",
+          tags$i(class = "fas fa-sitemap"),
+          tags$strong("Parent Account:"),
+          tags$a(
+            href = paste0("/account/",account$parent_uuid),
+            account$parent_name,
+            class = "parent-link"
           )
-        ),
-        if (!is.null(account$account_status)) {
-          tags$div(
-            class = "detail-item",
-            tags$i(
-              class = if (
-                tolower(account$account_status) == "active"
-                ) "fas fa-circle-check" else "fas fa-circle-xmark"
-              ),
-            tags$strong("Status:"),
-            tags$span(
-              class = if (tolower(account$account_status) == "active") "badge-success" else "badge-danger",
-              account$account_status
-            )
-          )
-        },
-        if (!is.null(account$allocation)) {
-          tags$div(
-            class = "detail-item",
-            tags$i(class = "fas fa-chart-pie"),
-            tags$strong("Allocation:"),
-            tags$span(paste(scales::percent(account$allocation, accuracy = 0.01)))
-          )
-        },
-        if (!is.null(account$parent_name)) {
-          tags$div(
-            class = "detail-item",
-            tags$i(class = "fas fa-sitemap"),
-            tags$strong("Parent Account:"),
-            tags$a(
-              href = paste0("/account/",account$parent_uuid),
-              account$parent_name,
-              class = "parent-link"
-            )
-          )
-        }
-      )
-    })
+        )
+      }
+    )
+  })
 
-
-    # actions section
-    output$actions_section<-renderUI({
-      req(main_account())
-      account <- get_account_by_uuid(main_account(),input$selected_tab)
-      tagList(
-        layout_column_wrap(
-          width=1/3,
-          heights_equal = "row",
-          gap="3px",
-          fill = T,
-          card(
-            class = "action-card",
-            bg=NULL,
-            h5("Deposit"),
-            tags$i(
-              class = "bi bi-arrow-down-circle-fill",
-                   style="font-size:2rem;color:#87CEEB;"
-              ),
-
-            actionButton(
-              "deposit_launcher_",
-              "Deposit",
-              class = "btn-normal"
-              )
-
-          ),
-          card(
-            class = "action-card",
-            bg=NULL,
-            h5("Withdraw"),
-            tags$i(
-              class ="bi bi-arrow-up-circle-fill",
-              style="font-size:2rem;color:#99FF99;"
-            ),
-
-            actionButton(
-              "withdrawal_launcher_",
-              "Withdraw",
-              class = "btn-green"
-            )
-
-          ),
-          card(
-            class = "action-card",
-            bg=NULL,
-            h5("Transfer"),
-            tags$i(
-              class ="bi bi-arrow-left-right",
-              style="font-size:2rem;color:black;"
-            ),
-
-            actionButton(
-             "transfer_launcher_",
-              "Transfer",
-              class = "btn-black"
-            )
-          )
-        ),
-        #tags$hr(class = 'tags-hr'),
+  # actions section
+  output$actions_section<-renderUI({
+    req(main_account())
+    account <- get_account_by_uuid(main_account(),input$selected_tab)
+    tagList(
+      layout_column_wrap(
+        width=1/4,
+        heights_equal = "row",
+        gap="3px",
+        fill = T,
         card(
-          fill=T,
-          class = "more-actions-card",
-
-
-          card_header(
-            span(tags$i(class="fa fa-tasks"),"More Actions"),
-            class = "more-actions-title"
+          class = "action-card",
+          bg=NULL,
+          h5("Deposit"),
+          tags$i(
+            class = "bi bi-arrow-down-circle-fill",
+            style="font-size:2rem;color:#87CEEB;"
           ),
-          card_body(
+
+          actionButton(
+            "deposit_launcher_",
+            "Deposit",
+            class = "btn-normal"
+          )
+
+        ),
+        card(
+          class = "action-card",
+          bg=NULL,
+          h5("Withdraw"),
+          tags$i(
+            class ="bi bi-arrow-up-circle-fill",
+            style="font-size:2rem;color:#99FF99;"
+          ),
+
+          actionButton(
+            "withdrawal_launcher_",
+            "Withdraw",
+            class = "btn-green"
+          )
+
+        ),
+        card(
+          class = "action-card",
+          bg=NULL,
+          h5("Transfer"),
+          tags$i(
+            class ="bi bi-arrow-left-right",
+            style="font-size:2rem;color:black;"
+          ),
+
+          actionButton(
+            "transfer_launcher_",
+            "Transfer",
+            class = "btn-black"
+          )
+        ),
+        card(
+          class = "action-card",
+          bg=NULL,
+          h5("Allocate Children"),
+          tags$i(
+            class ="fas fa-sitemap",
+            style="font-size:2rem;color:#ffeaa7;"
+          ),
+
+          actionButton(
+            "allocation_launcher_",
+            "Allocate",
+            class = "btn-yellow"
+          )
+        )
+      ),
+      #tags$hr(class = 'tags-hr'),
+      card(
+        fill=T,
+        class = "more-actions-card",
+
+
+        card_header(
+          span(tags$i(class="fa fa-tasks"),"More Actions"),
+          class = "more-actions-title"
+        ),
+        card_body(
           layout_column_wrap(
-          width = 1/3,
-          heights_equal = "row",
-          actionButton(
-            paste0("edit_launcher_",account$account_uuid),
-            span(tags$i(class="bi bi-pencil"), " Edit Account"),
-            class = "more-actions-btn"
-          ),
-          actionButton(
-            paste0("addaccount_launcher_",account$account_uuid),
-            span(tags$i(class="bi bi-plus"), " Add Account"),
-            class = "more-actions-btn"
-          ),
-          actionButton(
-            paste0("closeaccount_launcher_",account$account_uuid),
-            span(tags$i(class="bi bi-trash more-actions-delete"), " Close Account"),
-            class = "more-actions-btn"
-          )
-          )
-        )
-        )
-      )
-    })
-
-    observeEvent(input$selected_tab, {
-      req(main_account())
-      btn_id <- paste0("deposit_launcher_", input$selected_tab)
-
-      observeEvent(input[[btn_id]], {
-
-        print(btn_id)
-        showModal(
-          data_deposit(
-            selected_uuid = input$selected_tab,
-            main_account  = main_account()
-          )
-        )
-      }, ignoreInit = TRUE)
-    })
-
-    # transaction table
-    output$transaction_table_ <- DT::renderDataTable({
-      req(main_account())
-
-      trans<-get_account_by_uuid(main_account(), input$selected_tab)$transactions
-      if(length(trans)==0){
-        trans<-data.frame(
-          Type = character(),
-          By = character(),
-          TransactionID = character(),
-          Channel = character(),
-          Amount = numeric(),
-          Balance = numeric(),
-          amount_due = numeric(),
-          overall_balance = numeric(),
-          Date = as.POSIXct(character()),
-          stringsAsFactors = FALSE
-        )
-      }
-
-      datatable(
-        trans%>%
-          select(-c(amount_due, overall_balance)) %>%
-          mutate(across(where(is.numeric), \(x) round(x, 2))) %>%
-          mutate(
-            Amount = format(Amount, big.mark = ",", scientific = FALSE),
-            Balance = format(Balance, big.mark = ",", scientific = FALSE)
-          ),
-        options = list(
-          scrollY = "auto",  # Allows the table height to adjust dynamically
-          scrollX = TRUE, # Optional: ensures horizontal scrolling if needed
-          pageLength = 6
-        )
-      )
-    })
-
-
-    # children
-    output$children_section_ <-renderUI({
-      req(main_account())
-      # Child Accounts Section
-      account<-get_account_by_uuid(main_account(), input$selected_tab)
-      generate_child_accounts_section(account,currency())
-    })
-
-    # Pie chart for Balance vs Amount Due
-    output$balance_to_debt_ <- renderHighchart({
-      req(main_account())
-      currency_symbol <- currency()  # Get dynamic currency symbol
-      account<-get_account_by_uuid(main_account(), input$selected_tab)
-
-      highchart() %>%
-        hc_chart(type = "pie") %>%
-        hc_title(text = "Income vs. Obligations") %>%
-        hc_add_series(
-          data = list(
-            list(
-              name = "Balance",
-              y = account$total_balance,
-              formatted = paste0(currency_symbol, format(round(account$total_balance, 2), big.mark = ","))
+            width = 1/3,
+            heights_equal = "row",
+            actionButton(
+              paste0("edit_launcher_",account$account_uuid),
+              span(tags$i(class="bi bi-pencil"), " Edit Account"),
+              class = "more-actions-btn"
             ),
-            list(
-              name = "Liabilities",
-              y = account$total_due,
-              formatted = paste0(currency_symbol, format(round(account$total_due, 2), big.mark = ","))
-            )
-          )
-        ) %>%
-        hc_plotOptions(
-          pie = list(
-            dataLabels = list(
-              enabled = TRUE,  # Enable data labels
-              format = '{point.name}: {point.formatted}',  # Show formatted value with currency
-              style = list(
-                color = 'contrast',  # Contrast with the background color
-                fontSize = '10px'  # Set font size for better visibility
-              )
+            actionButton(
+              paste0("addaccount_launcher_",account$account_uuid),
+              span(tags$i(class="bi bi-plus"), " Add Account"),
+              class = "more-actions-btn"
+            ),
+            actionButton(
+              paste0("closeaccount_launcher_",account$account_uuid),
+              span(tags$i(class="bi bi-trash more-actions-delete"), " Close Account"),
+              class = "more-actions-btn"
             )
           )
         )
-    })
+      )
+    )
+  })
 
 
-    output$transaction_trend_chart_ <- renderHighchart({
-      req(main_account())
-      currency_symbol <- currency()  # Get dynamic currency symbol
+  # transaction table
+  output$transaction_table_ <- DT::renderDataTable({
+    req(main_account(),input$selected_tab)
 
-      trans<-get_account_by_uuid(main_account(), input$selected_tab)$transactions
-      if(length(trans)==0){
-        trans<-data.frame(
-          Type = character(),
-          By = character(),
-          TransactionID = character(),
-          Channel = character(),
-          Amount = numeric(),
-          Balance = numeric(),
-          amount_due = numeric(),
-          overall_balance = numeric(),
-          Date = as.POSIXct(character()),
-          stringsAsFactors = FALSE
+    trans<-get_account_by_uuid(main_account(), input$selected_tab)$transactions
+    if(length(trans)==0){
+      trans<-data.frame(
+        Type = character(),
+        By = character(),
+        TransactionID = character(),
+        Channel = character(),
+        Amount = numeric(),
+        Balance = numeric(),
+        amount_due = numeric(),
+        overall_balance = numeric(),
+        Date = as.POSIXct(character()),
+        stringsAsFactors = FALSE
+      )
+    }
+
+    datatable(
+      trans%>%
+        select(-c(amount_due, overall_balance)) %>%
+        mutate(across(where(is.numeric), \(x) round(x, 2))) %>%
+        mutate(
+          Amount = format(Amount, big.mark = ",", scientific = FALSE),
+          Balance = format(Balance, big.mark = ",", scientific = FALSE)
+        ),
+      options = list(
+        scrollY = "auto",  # Allows the table height to adjust dynamically
+        scrollX = TRUE, # Optional: ensures horizontal scrolling if needed
+        pageLength = 6
+      )
+    )
+  })
+
+  # children
+  output$children_section_ <-renderUI({
+    req(main_account(),input$selected_tab,currency())
+    # Child Accounts Section
+    account<-get_account_by_uuid(main_account(), input$selected_tab)
+    generate_child_accounts_section(account,currency())
+  })
+
+  # Pie chart for Balance vs Amount Due
+  output$balance_to_debt_ <- renderHighchart({
+    req(main_account(),input$selected_tab)
+    currency_symbol <- currency()  # Get dynamic currency symbol
+    account<-get_account_by_uuid(main_account(), input$selected_tab)
+
+    highchart() %>%
+      hc_chart(type = "pie") %>%
+      hc_title(text = "Income vs. Obligations") %>%
+      hc_add_series(
+        data = list(
+          list(
+            name = "Balance",
+            y = account$total_balance,
+            formatted = paste0(currency_symbol, format(round(account$total_balance, 2), big.mark = ","))
+          ),
+          list(
+            name = "Liabilities",
+            y = account$total_due,
+            formatted = paste0(currency_symbol, format(round(account$total_due, 2), big.mark = ","))
+          )
         )
-      }
-
-      plot_data <- trans%>%
-        group_by(Date) %>%
-        summarise(
-          Total_Balance = max(overall_balance),
-          Total_Amount = sum(amount_due)
-        ) %>%
-        ungroup() %>%
-        mutate(Date = as.character(Date))  # Ensure proper date handling
-
-      highchart() %>%
-        hc_chart(type = "line") %>%
-        hc_title(text = "Transaction Trends Over Time") %>%
-        hc_xAxis(categories = plot_data$Date, title = list(text = "Date")) %>%
-        hc_yAxis(title = list(text = paste0("Amount (", currency_symbol, ")"))) %>%
-        hc_add_series(
-          name = "Total Balance",
-          data = plot_data$Total_Balance,
-          tooltip = list(
-            pointFormat = paste0("<b>Total Balance</b>: ", currency_symbol, "{point.y:,.2f}<br/>")
-          )
-        ) %>%
-        hc_add_series(
-          name = "Total Amount Due",
-          data = plot_data$Total_Amount,
-          tooltip = list(
-            pointFormat = paste0("<b>Total Amount Due</b>: ", currency_symbol, "{point.y:,.2f}<br/>")
-          )
-        ) %>%
-        hc_tooltip(shared = TRUE) %>%
-        hc_plotOptions(
-          line = list(
-            dataLabels = list(
-              enabled = TRUE,
-              format = paste0(currency_symbol, "{y:,.2f}")  # Show formatted currency values
-            ),
-            enableMouseTracking = TRUE
+      ) %>%
+      hc_plotOptions(
+        pie = list(
+          dataLabels = list(
+            enabled = TRUE,  # Enable data labels
+            format = '{point.name}: {point.formatted}',  # Show formatted value with currency
+            style = list(
+              color = 'contrast',  # Contrast with the background color
+              fontSize = '10px'  # Set font size for better visibility
+            )
           )
         )
-    })
+      )
+  })
 
 
+  output$transaction_trend_chart_ <- renderHighchart({
+    req(main_account(),input$selected_tab)
+    currency_symbol <- currency()  # Get dynamic currency symbol
+
+    trans<-get_account_by_uuid(main_account(), input$selected_tab)$transactions
+    if(length(trans)==0){
+      trans<-data.frame(
+        Type = character(),
+        By = character(),
+        TransactionID = character(),
+        Channel = character(),
+        Amount = numeric(),
+        Balance = numeric(),
+        amount_due = numeric(),
+        overall_balance = numeric(),
+        Date = as.POSIXct(character()),
+        stringsAsFactors = FALSE
+      )
+    }
+
+    plot_data <- trans%>%
+      group_by(Date) %>%
+      summarise(
+        Total_Balance = max(overall_balance),
+        Total_Amount = sum(amount_due)
+      ) %>%
+      ungroup() %>%
+      mutate(Date = as.character(Date))  # Ensure proper date handling
+
+    highchart() %>%
+      hc_chart(type = "line") %>%
+      hc_title(text = "Transaction Trends Over Time") %>%
+      hc_xAxis(categories = plot_data$Date, title = list(text = "Date")) %>%
+      hc_yAxis(title = list(text = paste0("Amount (", currency_symbol, ")"))) %>%
+      hc_add_series(
+        name = "Total Balance",
+        data = plot_data$Total_Balance,
+        tooltip = list(
+          pointFormat = paste0("<b>Total Balance</b>: ", currency_symbol, "{point.y:,.2f}<br/>")
+        )
+      ) %>%
+      hc_add_series(
+        name = "Total Amount Due",
+        data = plot_data$Total_Amount,
+        tooltip = list(
+          pointFormat = paste0("<b>Total Amount Due</b>: ", currency_symbol, "{point.y:,.2f}<br/>")
+        )
+      ) %>%
+      hc_tooltip(shared = TRUE) %>%
+      hc_plotOptions(
+        line = list(
+          dataLabels = list(
+            enabled = TRUE,
+            format = paste0(currency_symbol, "{y:,.2f}")  # Show formatted currency values
+          ),
+          enableMouseTracking = TRUE
+        )
+      )
+  })
+
+  observeEvent(input$deposit_launcher_,{
+    req(main_account())
+    acc <- get_account_by_uuid(main_account(), input$selected_tab)
+    showModal(
+      data_deposit(acc)
+    )
   })
 
 
   # processing actions
 
-  #observe deposit
-  observeEvent(input[[paste0("deposit_btn_", input$selected_tab)]], {
-    req(
-      input[[paste0("deposit_amount_", input$selected_tab)]],
-      input[[paste0("deposit_transaction_", input$selected_tab)]],
-      input[[paste0("deposit_transaction_", input$selected_tab)]]!="",
-      input[[paste0("deposit_transaction_channel_", input$selected_tab)]],
-      input[[paste0("deposit_transaction_", input$selected_tab)]]!=""
+  # Observe deposit submit
+  observeEvent(input$submit_deposit, {
+    req(main_account(), input$selected_tab)
+
+    user_input <- list(
+      uuid               = input$selected_tab,
+      amount             = input$dep_amount,
+      channel            = if (input$dep_channel == "") NULL else input$dep_channel,
+      transaction_number = if (input$dep_txn == "") NULL else input$dep_txn,
+      transaction_date   = input$dep_date
     )
 
-    if(
-      !is_duplicate_tran(
-        get_account_by_uuid(account,input$selected_tab),
-        input$selected_tab,
-        input[[paste0("deposit_transaction_", input$selected_tab)]]
-      )
-    ){ #check if is a duplicate
-      amount <- input[[paste0("deposit_amount_", input$selected_tab)]]
-      transaction_number <- input[[paste0("deposit_transaction_", input$selected_tab)]]
-      transaction_channel <- input[[paste0("deposit_transaction_channel_", input$selected_tab)]]
+    # ---- Validation ----
+    valid <- TRUE
+    if (is.null(user_input$amount) || user_input$amount <= 0) valid <- FALSE
+    if (is.null(user_input$channel)) valid <- FALSE
+    if (!is.null(user_input$transaction_date) && user_input$transaction_date > Sys.Date()) valid <- FALSE
 
-      # Execute deposit
-      tryCatch({
-        res <- post_deposit(input$selected_tab,amount,channel)
-
-        main_account()$find_account_by_uuid(input$selected_tab)$deposit(
-          amount = amount,
-          transaction_number = ifelse(transaction_number == "", NULL, transaction_number),
-          channel = transaction_channel,
-          date = Sys.Date()
-        )
-
-        main_account(main_account())
-        showNotification("Deposit successfully processed!", type = "message")
-        # Clear form inputs after successful deposit
-        updateTextInput(session, paste0("deposit_transaction_", input$selected_tab), value = "")
-        updateNumericInput(session, paste0("deposit_amount_", input$selected_tab), value = NA,min=0)
-        updateTextInput(session, paste0("deposit_transaction_channel_", input$selected_tab),value = "")
-
-        # save the updated main account #persistence
-
-        save(main_account, file = "main_account.RData")
-      }, error = function(e) {
-        showNotification(paste("Error:", e$message), type = "error")
-      })
+    if (!valid) {
+      acc <- get_account_by_uuid(main_account(), input$selected_tab)
+      showModal(data_deposit(acc, failed = TRUE, user_input = user_input))
+      return()
     }
 
-  })
+    # ---- Switch to processing modal ----
+    removeModal()
 
-  observeEvent(input[[paste0("withdraw_btn_",input$selected_tab)]], {
-    req(
-      input[[paste0("withdraw_amount_",input$selected_tab)]]
+    showModal(
+      processing_modal(context = "deposit", message = "Processing your deposit, please wait...")
     )
 
-    isolate({
-      amount <- input[[paste0("withdraw_amount_", input$selected_tab)]]
-      tryCatch({
-        main_account()$find_account_by_uuid(input$selected_tab)$withdraw(
-          amount = amount,
-          transaction_number = NULL,
-          channel = "User",
-          date = Sys.Date()
+    # ---- API Call ----
+    observeEvent(input$processing_modal_ready, {
+      # Ensure this event is for THIS context
+      if (is.null(input$processing_modal_ready$context) ||
+          input$processing_modal_ready$context != "deposit") return()
+
+      res <- tryCatch({
+        call_api(
+          "/deposit",
+          method = "POST",
+          body = user_input,
+          token=user()$token
         )
-
-        main_account(main_account())
-
-        showNotification("Withdrawal successfully processed!", type = "message")
-        # Clear form inputs after successful deposit
-        updateNumericInput(session, paste0("withdraw_amount_", input$selected_tab), value = 0,min=0)
-        # save the updated main account #persistence
-
-        save(main_account, file = "main_account.RData")
       }, error = function(e) {
-        showNotification(paste("Error:", e$message), type = "error")
+        removeModal()
+        showModal(status_modal("success", message = "Could not reach the server. Please try again."))
+        return(NULL)
       })
-    })
 
+      if (is.null(res)) return()
+
+      # ---- Handle response ----
+      removeModal() # close spinner
+
+      if (httr::status_code(res) == 200) {
+        showModal(status_modal("success", message = "Your deposit was processed successfully!"))
+        refresh_main_account(user()$token, main_account)
+      } else {
+        msg <- switch(
+          as.character(httr::status_code(res)),
+          "400" = "Some details were invalid. Please check and try again.",
+          "401" = "You are not authorized. Please log in again.",
+          "403" = "Access forbidden. Unauthorized access or account not found.",
+          "404" = "Access forbidden. Unauthorized access or account not found.",
+          "429" = "Too many attempts. Please wait and try again later.",
+          "500" = "Server error. Try again later.",
+          "503" = "Service temporarily unavailable.",
+          "❌ Deposit could not be processed. Please try again."
+        )
+        showModal(status_modal("error", message = msg))
+      }
+    }, ignoreInit = TRUE, once = TRUE)
+  })
+
+
+
+  observeEvent(input$withdrawal_launcher_,{
+    req(main_account(),currency())
+    acc <- get_account_by_uuid(main_account(), input$selected_tab)
+    showModal(
+      data_withdrawal(acc,currency())
+    )
+  })
+
+  # ---- Withdrawal Processing ----
+  observeEvent(input$submit_withdrawal, {
+    req(main_account(), input$selected_tab,currency())
+
+    user_input <- list(
+      uuid               = input$selected_tab,
+      amount             = input$wd_amount,
+      channel            = if (input$wd_channel == "") NULL else input$wd_channel,
+      transaction_number = if (input$wd_txn == "") NULL else input$wd_txn,
+      transaction_date   = input$wd_date
+    )
+
+    # ---- Validation ----
+    acc <- get_account_by_uuid(main_account(), input$selected_tab)
+    valid <- TRUE
+
+    if (is.null(user_input$amount) || user_input$amount <= 0) valid <- FALSE
+    if (!is.null(user_input$amount) && user_input$amount > acc$balance) valid <- FALSE
+    if (is.null(user_input$channel)) valid <- FALSE
+    if (!is.null(user_input$transaction_date) && user_input$transaction_date > Sys.Date()) valid <- FALSE
+    if (!is.null(user_input$transaction_number) &&
+        is_duplicate_tran(acc, acc$account_uuid, user_input$transaction_number)) {
+      valid <- FALSE
+    }
+
+    if (!valid) {
+      showModal(data_withdrawal(acc,currency(), failed = TRUE, user_input = user_input))
+      return()
+    }
+
+    # ---- Switch to processing modal ----
+    removeModal()
+
+    showModal(
+      processing_modal(context = "withdrawal", message = "Processing your withdrawal, please wait...")
+    )
+
+    # ---- API Call ----
+    observeEvent(input$processing_modal_ready, {
+      # Ensure this event is for THIS context
+      if (is.null(input$processing_modal_ready$context) ||
+          input$processing_modal_ready$context != "withdrawal") return()
+
+      res <- tryCatch({
+        call_api(
+          "/withdraw",
+          method = "POST",
+          body = user_input,
+          token = user()$token
+        )
+      }, error = function(e) {
+        removeModal()
+        showModal(status_modal("error", message = "Could not reach the server. Please try again."))
+        return(NULL)
+      })
+
+      if (is.null(res)) return()
+
+      # ---- Handle response ----
+      removeModal() # close spinner
+
+      if (httr::status_code(res) == 200) {
+        showModal(status_modal("success", message = "Your withdrawal was processed successfully!"))
+        refresh_main_account(user()$token, main_account)
+      } else {
+        msg <- switch(
+          as.character(httr::status_code(res)),
+          "400" = "Some details were invalid. Please check and try again.",
+          "401" = "You are not authorized. Please log in again.",
+          "403" = "Access forbidden. Unauthorized access or account not found.",
+          "404" = "Access forbidden. Unauthorized access or account not found.",
+          "429" = "Too many attempts. Please wait and try again later.",
+          "500" = "Server error. Try again later.",
+          "503" = "Service temporarily unavailable.",
+          "❌ Withdrawal could not be processed. Please try again."
+        )
+        showModal(status_modal("error", message = msg))
+      }
+    }, ignoreInit = TRUE, once = TRUE)
+  })
+
+
+
+  # ---- Transfer Processing
+  observeEvent(input$transfer_launcher_,{
+    req(main_account(), input$selected_tab)
+    showModal(
+      data_transfer(main_account(),input$selected_tab,currency())
+    )
+  })
+
+  # display details of transferaccount
+  observe({
+    req(input$trf_to, main_account())
+
+    to_account <- get_account_by_uuid(main_account(), input$trf_to)
+
+    output$to_account_details <- renderUI({
+      div(
+        strong("Name: "),span(to_account$name, style = "color: gray; font-size: 0.9rem;"), br(),
+        strong("UUID: "), span(to_account$account_uuid, style = "color: gray; font-size: 0.9rem;"), br(),
+        strong("Current Balance: "),span(sprintf("%s %.2f", "$", to_account$balance), style = "color: gray; font-size: 0.9rem;")
+
+      )
+    })
+  })
+
+
+  # ---- Transfer Processing ----
+  observeEvent(input$submit_transfer, {
+    req(main_account(), input$selected_tab, currency())
+
+    user_input <- list(
+      from_uuid = input$selected_tab,
+      to_uuid   = input$trf_to,
+      amount    = input$trf_amount
+    )
+
+    # ---- Validation ----
+    acc <- get_account_by_uuid(main_account(), input$selected_tab)
+    valid <- TRUE
+
+    # amount validations
+    if (is.null(user_input$amount) || user_input$amount <= 0) valid <- FALSE
+    if (!is.null(user_input$amount) && user_input$amount > acc$balance) valid <- FALSE
+
+    # destination required
+    if (is.null(user_input$to_uuid) || user_input$to_uuid == "") valid <- FALSE
+
+    if (!valid) {
+      showModal(
+        data_transfer(
+          main_account(),
+          input$selected_tab,
+          currency(),
+          failed = TRUE,
+          user_input = user_input
+        )
+      )
+      return()
+    }
+
+    # ---- Switch to processing modal ----
+    removeModal()
+    showModal(
+      processing_modal(
+        context = "transfer",
+        message = "Processing your transfer, please wait..."
+      )
+    )
+
+    # ---- API Call ----
+    observeEvent(input$processing_modal_ready, {
+      if (is.null(input$processing_modal_ready$context) ||
+          input$processing_modal_ready$context != "transfer") return()
+
+      res <- tryCatch({
+        call_api(
+          "/move_balance",
+          method = "POST",
+          body = user_input,
+          token = user()$token
+        )
+      }, error = function(e) {
+        removeModal()
+        showModal(status_modal("error",
+                               message = "Could not reach the server. Please try again."
+        ))
+        return(NULL)
+      })
+
+      if (is.null(res)) return()
+
+      # ---- Handle response ----
+      removeModal() # close spinner
+
+      if (httr::status_code(res) == 200) {
+        showModal(status_modal("success",
+                               message = "✅ Your transfer was processed successfully!"
+        ))
+        refresh_main_account(user()$token, main_account)
+      } else {
+        msg <- switch(
+          as.character(httr::status_code(res)),
+          "400" = "Some details were invalid. Please check and try again.",
+          "401" = "You are not authorized. Please log in again.",
+          "403" = "Access forbidden. Unauthorized access or account not found.",
+          "404" = "Destination account not found.",
+          "429" = "Too many attempts. Please wait and try again later.",
+          "500" = "Server error. Try again later.",
+          "503" = "Service temporarily unavailable.",
+          "❌ Transfer could not be processed. Please try again."
+        )
+        showModal(status_modal("error", message = msg))
+      }
+    }, ignoreInit = TRUE, once = TRUE)
+  })
+
+
+  observeEvent(input$allocation_launcher_,{
+    req(main_account(),input$selected_tab)
+    acc <- get_account_by_uuid(main_account(), input$selected_tab)
+    showModal(
+      data_distribute(acc,currency())
+    )
+  })
+
+
+  # ---- Distribution Processing ----
+  observeEvent(input$submit_distribute, {
+    req(main_account(), input$selected_tab, currency())
+
+    user_input <- list(
+      uuid         = input$selected_tab,
+      amount       = if(!is.null(input$dist_amount) && !is.na(input$dist_amount) && input$dist_amount > 0) input$dist_amount else NULL,
+      transaction  = if (!is.null(input$dist_txn) && input$dist_txn != "") input$dist_txn else NULL,
+      initiated_by = "User"   # always set to User
+    )
+
+    # ---- Validation ----
+    acc <- get_account_by_uuid(main_account(), input$selected_tab)
+    valid <- TRUE
+    if (is.null(user_input$amount) || is.na(user_input$amount)){
+      valid <- FALSE
+    } else if (!is.null(user_input$amount) && !is.na(user_input$amount) && user_input$amount <= 0){
+      valid <- FALSE
+    }
+
+
+    if (!valid) {
+      showModal(
+        data_distribute(
+          acc,
+          currency(),
+          failed = TRUE,
+          user_input = user_input
+        )
+      )
+      return()
+    }
+
+    # ---- Switch to processing modal ----
+    removeModal()
+    showModal(
+      processing_modal(
+        context = "distribute",
+        message = "Processing distribution, please wait..."
+      )
+    )
+
+    # ---- API Call ----
+    observeEvent(input$processing_modal_ready, {
+      if (is.null(input$processing_modal_ready$context) ||
+          input$processing_modal_ready$context != "distribute") return()
+
+      res <- tryCatch({
+        call_api(
+          "/distribute",
+          method = "POST",
+          body = user_input,
+          token = user()$token
+        )
+      }, error = function(e) {
+        removeModal()
+        showModal(
+          status_modal("error", message = "Could not reach the server. Please try again.")
+        )
+        return(NULL)
+      })
+
+      if (is.null(res)) return()
+
+      # ---- Handle response ----
+      removeModal()
+
+      if (httr::status_code(res) == 200) {
+        showModal(
+          status_modal("success", message = "Distribution completed successfully!")
+        )
+        refresh_main_account(user()$token, main_account)
+      } else {
+        msg <- switch(
+          as.character(httr::status_code(res)),
+          "400" = "Some details were invalid. Please check and try again.",
+          "401" = "You are not authorized. Please log in again.",
+          "403" = "Access forbidden. Unauthorized access or account not found.",
+          "404" = "Account not found.",
+          "429" = "Too many attempts. Please wait and try again later.",
+          "500" = "Server error. Try again later.",
+          "503" = "Service temporarily unavailable.",
+          "❌ Distribution could not be processed. Please try again."
+        )
+        showModal(status_modal("error", message = msg))
+      }
+    }, ignoreInit = TRUE, once = TRUE)
   })
 
   # Reports ===========================================================================
@@ -1165,9 +1460,9 @@ server <- function(input, output,session) {
           start_date=input$custom_range[1],
           end_date=input$custom_range[2],
           ts_data = T
-          ),
+        ),
         token = user()$token
-        )
+      )
     }, error = function(e) {
       showNotification(paste("Failed to fetch account tree:", e$message), type = "error")
       return(NULL)
@@ -1187,6 +1482,7 @@ server <- function(input, output,session) {
       main_account_reports(parsed$minimal_tree)
     }
   })
+
   observe({
     invalidateLater(6*60*1000, session)
     req(user()$token)  # wait until token is ready
@@ -1234,7 +1530,7 @@ server <- function(input, output,session) {
     if (previous_income == 0) {
       change <- if (current_income > 0) 100 else 0
     } else
-      {
+    {
       change <- ((current_income - previous_income) / previous_income) * 100
     }
 
@@ -1256,7 +1552,7 @@ server <- function(input, output,session) {
     if (previous_spending == 0) {
       change <- if (current_spending > 0) 100 else 0
     } else
-      {
+    {
       change <- ((current_spending - previous_spending) / previous_spending) * 100
     }
     color_class <- ifelse(change >= 0, "vb-text-green", "vb-text-red")
@@ -1276,7 +1572,7 @@ server <- function(input, output,session) {
     if (previous_utilization == 0) {
       change <- if (current_utilization > 0) 100 else 0
     } else
-      {
+    {
       change <- ((current_utilization - previous_utilization) / previous_utilization) * 100
     }
 
@@ -1329,7 +1625,7 @@ server <- function(input, output,session) {
     if (previous_debt_ratio== 0) {
       change <- if (current_debt_ratio > 0) 100 else 0
     } else
-      {
+    {
       change <- ((current_debt_ratio- previous_debt_ratio) / previous_debt_ratio) * 100
     }
 

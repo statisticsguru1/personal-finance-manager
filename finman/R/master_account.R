@@ -609,11 +609,8 @@ MainAccount <- R6Class(
     get_transactions = function() {
       if (nrow(self$transactions) == 0) {
         cat("No transactions found.\n")
-      } else {
-        cat("\nTransaction History:\n")
-        print(self$transactions)
       }
-      self$transactions
+      invisible(self$transactions)
     },
 
     #----------------- List child accounts--------------------------------------

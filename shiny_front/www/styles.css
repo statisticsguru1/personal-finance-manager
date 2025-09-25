@@ -1,3 +1,41 @@
+
+/* =====================================================
+   blocking the screen when the App starts
+   ===================================================== */
+
+#loading-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;          /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.95);
+  z-index: 99999;
+  flex-direction: column;
+}
+
+
+/* spinner: either keep this or style .spinner-border */
+#loading-spinner {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #87CEEB;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+
+
+
+
+
+
 /* =====================================================
    General page formattings
    ===================================================== */
@@ -211,10 +249,6 @@ a:has(.custom-tab):hover {
   font-size: 11px;
   font-weight: bold;
 }
-
-
-
-
 
 .page-content {
   padding: 20px;
@@ -467,6 +501,13 @@ a:has(.custom-tab):hover {
   background-color: black;
   color: white;
 }
+
+.btn-yellow{
+  background-color: #ffeaa7 !important;
+  color: white;
+}
+
+
 .action-icon-container {
   display: inline-flex;
   align-items: center;
@@ -513,10 +554,122 @@ a:has(.custom-tab):hover {
   color: #333;
 }
 
+/* === Modal Theme === */
+
+/* Title style (used in all modals) */
+.modal-title,
+.deposit-modal-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #87CEEB; /* slate-800 */
+  margin: 0;
+  padding-bottom: 0.5rem;
+}
+
+/* Body spacing */
+.modal-body {
+  padding: 1rem 1.25rem;
+}
+
+/* Footer buttons */
+.modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.75rem;
+}
+
+.modal-footer .btn {
+  border-radius: 0.5rem;
+  padding: 0.4rem 1rem;
+  font-weight: 500;
+}
+
+/* Primary button (submit) */
+.modal-footer .btn-primary {
+  background-color: #87CEEB !important; /* blue-600 */
+  border-color: #87CEEB !important;
+  color: #fff !important;
+}
+
+.modal-footer .btn-primary:hover {
+  background-color: #d0f0ff  !important; /* blue-700 */
+  border-color: #d0f0ff  !important;
+}
+
+/* Cancel button */
+.modal-footer .btn-default,
+.modal-footer .btn-secondary {
+  background-color: #f3f4f6; /* gray-100 */
+  border: 1px solid #d1d5db;
+  color: #374151; /* gray-700 */
+}
+
+.modal-footer .btn-default:hover,
+.modal-footer .btn-secondary:hover {
+  background-color: #e5e7eb;
+}
 
 
+label.required::after {
+  content: " *";
+  color: #dc2626; /* red-600 */
+}
 
+.modal-body label {
+  font-weight: bold;
+  color: #1e293b;
+}
 
+.asterisk {
+  color: #dc2626; /* red-600 */
+  font-weight: 700;
+}
+
+/* Inline validation error */
+.form-error {
+  color: #dc2626;
+  margin-top: -0.35rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/*status modal*/
+/* Scoped only to status modals */
+/* Icon colors */
+.status-modal .status-icon {
+  margin-bottom: 15px;
+}
+
+.status-modal.success .status-icon {
+  color: #99FF99; /* green success */
+}
+
+.status-modal.error .status-icon {
+  color: #E74C3C; /* red error */
+}
+
+/* Base button styling */
+.status-modal .modal-footer .status-btn {
+  border: none !important;
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-weight: 500;
+  color: #fff !important;
+}
+
+/* Success button */
+.status-modal.success .modal-footer .status-btn {
+  background-color: #99FF99 !important;
+}
+
+/* Error button */
+.status-modal.error .modal-footer .status-btn {
+  background-color: #E74C3C !important;
+}
+
+/* Hover effect */
+.status-modal .modal-footer .status-btn:hover {
+  opacity: 0.9;
+}
 
 
 
@@ -547,6 +700,11 @@ a:has(.custom-tab):hover {
 }
 
 
+.processing-modal .modal-dialog {
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+}
 
 
 

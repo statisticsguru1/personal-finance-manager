@@ -19,7 +19,28 @@ options(knitr.kable.NA = '')
 source("accountspagebuilder.R")
 source("shiny_helper.R")
 
-ui <- page_navbar(
+ui <- tagList(
+  # Overlay at top-level (outside of page_navbar)
+  div(
+    id = "loading-overlay",
+    style = "position: fixed;
+             top: 0; left: 0;
+             right: 0; bottom: 0;
+             display: none; /* start hidden */
+             justify-content: center;
+             align-items: center;
+             background: rgba(255, 255, 255, 0.95);
+             z-index: 9999;
+             flex-direction: column;",
+    tags$div(id = "loading-spinner", role = "status"),
+    tags$p("Loading your account...")
+  ),
+
+
+
+  # Your main navbar app
+
+  page_navbar(
   id="appId",
   title = span(
     class = "navbar-brand",
@@ -41,7 +62,7 @@ ui <- page_navbar(
   gap="4px",
   bg="white",
 
-## Dashboard page =======================================================================
+  ## Dashboard page =======================================================================
   nav_panel(
     span(icon("home"), "Dashboard",class = "custom-tab"),
     style = "padding: 25px;",
@@ -137,83 +158,83 @@ ui <- page_navbar(
 
       # Distribution of amnt due and balance
       layout_column_wrap(
-            width = 1/2,
-            heights_equal = "row",
-            fill = TRUE,
-            gap = "3px",
+        width = 1/2,
+        heights_equal = "row",
+        fill = TRUE,
+        gap = "3px",
 
-            card(
-              fill=T,
-              full_screen = T,
-              card_header(div(),
-                          popover(
-                            bs_icon("info-circle"),
-                            uiOutput("info_message"),
-                            title = "Detailed Information",
-                            placement = "top"
-                            ),
-                          class = "custom-card-header1"),
-              card_body(
-                layout_column_wrap(
-                  width = 1,
-                  heights_equal = "row",
-                  fill = TRUE,
-                  gap = "1px",
+        card(
+          fill=T,
+          full_screen = T,
+          card_header(div(),
+                      popover(
+                        bs_icon("info-circle"),
+                        uiOutput("info_message"),
+                        title = "Detailed Information",
+                        placement = "top"
+                      ),
+                      class = "custom-card-header1"),
+          card_body(
+            layout_column_wrap(
+              width = 1,
+              heights_equal = "row",
+              fill = TRUE,
+              gap = "1px",
 
-                layout_column_wrap(
-                  width = 1/2,
-                  heights_equal = "row",
-                  fill = TRUE,
-                  gap = "2px",
-                  highchartOutput("overall_pie_chart"),
-                  highchartOutput("overall_alloc")
-                ),
-                tags$hr(class="tags-hr"),
-                p("Recent Transactions",class="custom-card-header112"),
-                uiOutput("transtable")
-              )
-              )
-            ),
-
-
-            card(
-              card_header(
-                div(),
-                popover(
-                  bs_icon("info-circle"),
-                  uiOutput("info_message1"),
-                  title = "Detailed Information",
-                  placement = "top"
-                ),
-                class = "custom-card-header1"
+              layout_column_wrap(
+                width = 1/2,
+                heights_equal = "row",
+                fill = TRUE,
+                gap = "2px",
+                highchartOutput("overall_pie_chart"),
+                highchartOutput("overall_alloc")
               ),
-              card_body(
-                layout_column_wrap(
-                  width = 1,
-                  heights_equal = "row",
-                  fill = TRUE,
-                  gap = "1px",
-                layout_column_wrap(
-                  width = 1/2,
-                  heights_equal = "row",
-                  fill = TRUE,
-                  gap = "2px",
-                  highchartOutput("tier2_allocation_chart"),
-                  highchartOutput("tier2_allocation_chart2")),
-                  tags$hr(class="tags-hr"),
-                card(
-                  fill = TRUE,
-                  class = "alerts-card",
-                  card_header("Alerts & Reminders", class = "alerts-header"),
-                  card_body(
-                    div(class = "alerts-body", uiOutput("alerts_reminders"))
-                  )
-                )
+              tags$hr(class="tags-hr"),
+              p("Recent Transactions",class="custom-card-header112"),
+              uiOutput("transtable")
+            )
+          )
+        ),
 
-              )
-            )
-            )
+
+        card(
+          card_header(
+            div(),
+            popover(
+              bs_icon("info-circle"),
+              uiOutput("info_message1"),
+              title = "Detailed Information",
+              placement = "top"
+            ),
+            class = "custom-card-header1"
           ),
+          card_body(
+            layout_column_wrap(
+              width = 1,
+              heights_equal = "row",
+              fill = TRUE,
+              gap = "1px",
+              layout_column_wrap(
+                width = 1/2,
+                heights_equal = "row",
+                fill = TRUE,
+                gap = "2px",
+                highchartOutput("tier2_allocation_chart"),
+                highchartOutput("tier2_allocation_chart2")),
+              tags$hr(class="tags-hr"),
+              card(
+                fill = TRUE,
+                class = "alerts-card",
+                card_header("Alerts & Reminders", class = "alerts-header"),
+                card_body(
+                  div(class = "alerts-body", uiOutput("alerts_reminders"))
+                )
+              )
+
+            )
+          )
+        )
+      ),
 
       # Tier-2 Account Breakdown (Needs, Goals, Debt)
       #uiOutput("dynamic_cards"),
@@ -222,218 +243,219 @@ ui <- page_navbar(
 
 
 
-## Accounts page =======================================================================
+  ## Accounts page =======================================================================
 
-nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"),
+  nav_panel(span(icon("wallet"), "Accounts",class = "custom-tab"),
 
-          layout_sidebar(
-            style = "background-color:#F6F6F6;",
-            sidebar=sidebar(
-              width = "310px",
-              class = "custom-sidebar",
-              title = tags$div(
-                class = "custom-sidebar-title",
-                icon("briefcase"),
-                "Accounts"
+            layout_sidebar(
+              style = "background-color:#F6F6F6;",
+              sidebar=sidebar(
+                width = "310px",
+                class = "custom-sidebar",
+                title = tags$div(
+                  class = "custom-sidebar-title",
+                  icon("briefcase"),
+                  "Accounts"
+                ),
+                uiOutput("build_sidebar"),
+                uiOutput("dummy")
+
               ),
-              uiOutput("build_sidebar"),
-              uiOutput("dummy")
 
-            ),
-
-            # navbar content
-            uiOutput("nav_content")
-          )
-),
-## Reports page =======================================================================
-nav_panel(span(icon("chart-column"), "Reports",class = "custom-tab"),
-          layout_sidebar(
-            sidebar=sidebar(
-              title = tags$div(
-                class = "custom-sidebar-title",
-                icon("filter"),
-                "Filters"
+              # navbar content
+              uiOutput("nav_content")
+            )
+  ),
+  ## Reports page =======================================================================
+  nav_panel(span(icon("chart-column"), "Reports",class = "custom-tab"),
+            layout_sidebar(
+              sidebar=sidebar(
+                title = tags$div(
+                  class = "custom-sidebar-title",
+                  icon("filter"),
+                  "Filters"
+                ),
+                width="300px",
+                class = "custom-sidebar",
+                dateRangeInput("custom_range", "Select Date Range", start = Sys.Date() - 30, end = Sys.Date()),
+                downloadButton("download_report", "Download Report")
               ),
-              width="300px",
-              class = "custom-sidebar",
-              dateRangeInput("custom_range", "Select Date Range", start = Sys.Date() - 60, end = Sys.Date()),
-              downloadButton("download_report", "Download Report")
-            ),
 
-            layout_column_wrap(
-              width = 1,
-              fill = TRUE,
-              heights_equal = "row",
               layout_column_wrap(
-                width = 1/4,
+                width = 1,
                 fill = TRUE,
                 heights_equal = "row",
-                # Value Boxes
-                card(
-                  fill=T,
-                  class = "vb-value-box",
-                  div(class = "vb-value-box-header",
-                      span(class = "vb-icon-container vb-icon-blue",
-                           icon("wallet")),
-                      "Total Income"),
-                  div(textOutput("total_income"), class = "vb-value-box-value"),
-                  div(uiOutput("income_change"), class = "vb-value-box-change")
-                ),
+                layout_column_wrap(
+                  width = 1/4,
+                  fill = TRUE,
+                  heights_equal = "row",
+                  # Value Boxes
+                  card(
+                    fill=T,
+                    class = "vb-value-box",
+                    div(class = "vb-value-box-header",
+                        span(class = "vb-icon-container vb-icon-blue",
+                             icon("wallet")),
+                        "Total Income"),
+                    div(textOutput("total_income"), class = "vb-value-box-value"),
+                    div(uiOutput("income_change"), class = "vb-value-box-change")
+                  ),
 
-                card(fill=T,
-                     class = "vb-value-box",
-                     div(class = "vb-value-box-header",
-                         span(class = "vb-icon-container vb-icon-red",
-                              icon("credit-card")),
-                         "Total Spending"),
-                     div(textOutput("total_spending"), class = "vb-value-box-value"),
-                     div(uiOutput("spending_change"), class = "vb-value-box-change")
-                ),
+                  card(fill=T,
+                       class = "vb-value-box",
+                       div(class = "vb-value-box-header",
+                           span(class = "vb-icon-container vb-icon-red",
+                                icon("credit-card")),
+                           "Total Spending"),
+                       div(textOutput("total_spending"), class = "vb-value-box-value"),
+                       div(uiOutput("spending_change"), class = "vb-value-box-change")
+                  ),
 
-                card(
-                  fill=T,
-                  class = "vb-value-box",
-                  div(class = "vb-value-box-header",
-                      span(class = "vb-icon-container vb-icon-green",
-                           icon("chart-simple")),
-                      "% Utilization"),
-                  div(textOutput("utilization"), class = "vb-value-box-value"),
-                  div(uiOutput("utilization_change"), class = "vb-value-box-change")
-                ),
+                  card(
+                    fill=T,
+                    class = "vb-value-box",
+                    div(class = "vb-value-box-header",
+                        span(class = "vb-icon-container vb-icon-green",
+                             icon("chart-simple")),
+                        "% Utilization"),
+                    div(textOutput("utilization"), class = "vb-value-box-value"),
+                    div(uiOutput("utilization_change"), class = "vb-value-box-change")
+                  ),
 
-                card(
-                  fill=T,
-                  class = "vb-value-box",
-                  div(class = "vb-value-box-header",
-                      span(class = "vb-icon-container vb-icon-purple",
-                           icon("chart-line")),
-                      "Debt Ratio"),
-                  div(textOutput("debt_ratio"), class = "vb-value-box-value"),
-                  div(uiOutput("debt_change"), class = "vb-value-box-change")
-                )
-              ),
-              layout_column_wrap(
-                fill=TRUE,
-                width=1/2,
-                heights_equal = "row",
-                card(
-                  fill=T,
-                  card_header("Income vs. Spending Trend"),
-                  highchartOutput("income_vs_spending")
+                  card(
+                    fill=T,
+                    class = "vb-value-box",
+                    div(class = "vb-value-box-header",
+                        span(class = "vb-icon-container vb-icon-purple",
+                             icon("chart-line")),
+                        "Debt Ratio"),
+                    div(textOutput("debt_ratio"), class = "vb-value-box-value"),
+                    div(uiOutput("debt_change"), class = "vb-value-box-change")
+                  )
                 ),
-                card(
-                  fill=T,
-                  card_header("Money Utilization"),
-                  highchartOutput("utilized")
-                )),
+                layout_column_wrap(
+                  fill=TRUE,
+                  width=1/2,
+                  heights_equal = "row",
+                  card(
+                    fill=T,
+                    card_header("Income vs. Spending Trend"),
+                    highchartOutput("income_vs_spending")
+                  ),
+                  card(
+                    fill=T,
+                    card_header("Money Utilization"),
+                    highchartOutput("utilized")
+                  )),
 
-              layout_column_wrap(
-                fill=TRUE,
-                width=1/2,
-                heights_equal = "row",
-                card(
-                  fill=T,
-                  card_header("Distribution of spending"),
-                  highchartOutput("spending_drill")
-                ),
-                card(
-                  fill=T,
-                  card_header("Trend in Debt reduction"),
-                  highchartOutput("debt")
+                layout_column_wrap(
+                  fill=TRUE,
+                  width=1/2,
+                  heights_equal = "row",
+                  card(
+                    fill=T,
+                    card_header("Distribution of spending"),
+                    highchartOutput("spending_drill")
+                  ),
+                  card(
+                    fill=T,
+                    card_header("Trend in Debt reduction"),
+                    highchartOutput("debt")
+                  )
                 )
               )
             )
-          )
-),
+  ),
 
-nav_panel(span(icon("user"), "Profile",class = "custom-tab"), h1("profile Content")),
-nav_panel(span(icon("users"), "About us",class = "custom-tab"), h1("about Content")),
-nav_spacer(),
-#nav_item(
-#  shinySearchbar::searchbar("buscador", contextId = "appId",cycler=F, width = "200px",counter = F,placeholder = "search")
-#),
-nav_item(
-  tags$div(
-    class = "notification-wrapper",
-    actionLink(
-      "notifications",
-      NULL,
-      icon("bell", class = "custom-bell"),
-      class = "notification-icon"
-    ),
-    uiOutput("notification_count_badge")
-  )
-),
-
-nav_menu(
-  # Avatar + user info block (header)
-  title = tags$div(
-    class = "nav-link-title",
-    tags$img(
-      src = "IMG_20180523_160151.jpg"),
+  nav_panel(span(icon("user"), "Profile",class = "custom-tab"), h1("profile Content")),
+  nav_panel(span(icon("users"), "About us",class = "custom-tab"), h1("about Content")),
+  nav_spacer(),
+  #nav_item(
+  #  shinySearchbar::searchbar("buscador", contextId = "appId",cycler=F, width = "200px",counter = F,placeholder = "search")
+  #),
+  nav_item(
     tags$div(
-      tags$span(
-        textOutput("fullnames"),
-        class = "nav-menu-name"
+      class = "notification-wrapper",
+      actionLink(
+        "notifications",
+        NULL,
+        icon("bell", class = "custom-bell"),
+        class = "notification-icon"
       ),
-      tags$span(
-        textOutput("user_email"),
-        class = "nav-menu-email"
+      uiOutput("notification_count_badge")
+    )
+  ),
+
+  nav_menu(
+    # Avatar + user info block (header)
+    title = tags$div(
+      class = "nav-link-title",
+      tags$img(
+        src = "IMG_20180523_160151.jpg"),
+      tags$div(
+        tags$span(
+          textOutput("fullnames"),
+          class = "nav-menu-name"
+        ),
+        tags$span(
+          textOutput("user_email"),
+          class = "nav-menu-email"
+        )
       )
-    )
-  ),
-  align = "right",
+    ),
+    align = "right",
 
-  # Dashboard
-  nav_item(
-    tags$a(
-      icon("tachometer-alt"), "Dashboard",
-      href = "#",
-      class = "nav-link-item"
-    )
-  ),
+    # Dashboard
+    nav_item(
+      tags$a(
+        icon("tachometer-alt"), "Dashboard",
+        href = "#",
+        class = "nav-link-item"
+      )
+    ),
 
-  # Profile
-  nav_item(
-    tags$a(
-      icon("user"), "Profile",
-      href = "#",
-      class = "nav-link-item"
-    )
-  ),
+    # Profile
+    nav_item(
+      tags$a(
+        icon("user"), "Profile",
+        href = "#",
+        class = "nav-link-item"
+      )
+    ),
 
-  # Settings
-  nav_item(
-    tags$a(
-      icon("cog"), "Settings",
-      href = "#",
-      class = "nav-link-item"
-    )
-  ),
+    # Settings
+    nav_item(
+      tags$a(
+        icon("cog"), "Settings",
+        href = "#",
+        class = "nav-link-item"
+      )
+    ),
 
-  # Billing
-  nav_item(
-    tags$a(
-      icon("credit-card"), "Billing",
-      href = "#",
-      class = "nav-link-item"
-    )
-  ),
+    # Billing
+    nav_item(
+      tags$a(
+        icon("credit-card"), "Billing",
+        href = "#",
+        class = "nav-link-item"
+      )
+    ),
 
-  # Sign out
-  nav_item(
-    tags$a(
-      icon("sign-out-alt"), "Sign Out",
-      href = "#",
-      class = "nav-link-item"
-    )
-  ),
+    # Sign out
+    nav_item(
+      tags$a(
+        icon("sign-out-alt"), "Sign Out",
+        href = "#",
+        class = "nav-link-item"
+      )
+    ),
+  )
+
+  #,
+  # nav_item(
+  #   input_dark_mode(id="dark_mode",mode="light"),
+  # )
 )
-
-#,
-# nav_item(
-#   input_dark_mode(id="dark_mode",mode="light"),
-# )
 )
 
 
