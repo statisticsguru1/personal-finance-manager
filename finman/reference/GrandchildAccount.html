@@ -859,7 +859,7 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span>  due_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">30</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rent</span><span class="op">$</span><span class="fu">get_due_date</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2025-10-23"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2025-10-25"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
 <span class="r-in"><span><span class="co">## Method `GrandchildAccount$set_due_date`</span></span></span>
@@ -867,7 +867,7 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">bill</span> <span class="op">&lt;-</span> <span class="va">GrandchildAccount</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Electricity"</span>, fixed_amount <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">bill</span><span class="op">$</span><span class="fu">set_due_date</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fl">15</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Due date for Electricity set to 20369 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Due date for Electricity set to 20371 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
 <span class="r-in"><span><span class="co">## Method `GrandchildAccount$get_fixed_amount`</span></span></span>
@@ -934,11 +934,11 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span><span class="va">bill</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">75000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Due date extended. Number of periods unpaid: 2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent reactivated. Outstanding balance due: 150000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: SYSC0D66D6D94 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: SYSEC232E00B7 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example with surplus being returned to parent:</span></span></span>
 <span class="r-in"><span><span class="va">bill</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">80000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: SYS9259EE0844 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: SYS09D9D0AA82 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent has become inactive .</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Extra amount of 5000 moved to Emergency Fund </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent fully funded for 2 period(s)</span>
@@ -958,12 +958,12 @@ the actual due date logic unless adjustments are consistently maintained.</p>
 <span class="r-in"><span><span class="va">rent</span> <span class="op">&lt;-</span> <span class="va">GrandchildAccount</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"Rent"</span>, fixed_amount <span class="op">=</span> <span class="fl">75000</span>,</span></span>
 <span class="r-in"><span>account_type <span class="op">=</span> <span class="st">"Bill"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rent</span><span class="op">$</span><span class="fu">deposit</span><span class="op">(</span><span class="fl">75000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: SYS321C9A8AFA </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deposited: 75000 via ABSA - Transaction ID: SYSBC349A7689 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent has become inactive .</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rent fully funded for 1 period(s)</span>
 <span class="r-in"><span><span class="co"># Now equivalent to 0.53 of the rent period remaining.</span></span></span>
 <span class="r-in"><span><span class="va">rent</span><span class="op">$</span><span class="fu">withdraw</span><span class="op">(</span><span class="fl">35000</span>,channel<span class="op">=</span><span class="st">"ABSA"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 35000 via ABSA - Transaction ID: SYS397000257E </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Withdrew: 35000 via ABSA - Transaction ID: SYS5F3C322077 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## ------------------------------------------------</span></span></span>
